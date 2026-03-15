@@ -1,21 +1,157 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { guideData, GuideItem } from './data/guideContent'
 import './index.css'
+
+// Image component moved outside to avoid hook issues
+const ImageWithFallback = ({ src, title }: { src: string, title: string }) => {
+  const [extensionIdx, setExtensionIdx] = useState(0);
+  const extensions = ['', '.png', '.jpg', '.jpeg']; 
+  
+  const basePath = src.replace(/\.(png|jpg|jpeg)$/i, '');
+  const currentSrc = extensionIdx === 0 ? src : `${basePath}${extensions[extensionIdx]}`;
+
+  return (
+    <div style={{ border: '1px solid #ddd', padding: '10px', backgroundColor: '#f9f9f9', marginBottom: '10px' }}>
+      <img 
+        src={currentSrc} 
+        alt={title} 
+        style={{ maxWidth: '100%', display: 'block', margin: '0 auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+        onError={() => {
+          if (extensionIdx < extensions.length - 1) {
+            setExtensionIdx(extensionIdx + 1);
+          } else {
+            console.error(`Falha ao carregar imagem em todas as extensões: ${basePath}`);
+          }
+        }}
+      />
+      {extensionIdx === extensions.length - 1 && (
+        <p style={{ color: 'red', padding: '10px', fontSize: '0.8em' }}>
+          Erro ao carregar: {basePath} (tentado .png, .jpg, .jpeg)
+        </p>
+      )}
+    </div>
+  );
+};
+
+const formatText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
+const ChecklistRenderer = ({ content }: { content: string[] }) => (
+  <div className="checklist" style={{ maxWidth: '900px' }}>
+    {content.map((check, idx) => {
+      const isMemoryItem = check.startsWith('**') && check.endsWith('**');
+      const isSpecialLine = check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---');
+      
+      if (isSpecialLine) {
+        return (
+          <div key={idx} style={{ 
+            textAlign: 'center', 
+            padding: '15px', 
+            color: check.startsWith('WARNING') ? 'var(--accent-color)' : '#666',
+            fontSize: '1em',
+            fontStyle: 'italic',
+            borderBottom: '1px solid #eee'
+          }}>
+            {formatText(check)}
+          </div>
+        );
+      }
+
+      return (
+        <label key={idx} className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`}>
+          <input type="checkbox" style={{ 
+            marginTop: '4px',
+            marginRight: '15px', 
+            width: '22px', 
+            height: '22px',
+            cursor: 'pointer'
+          }} />
+          <span>
+            {formatText(check)}
+          </span>
+        </label>
+      );
+    })}
+  </div>
+);
+
+const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: any }) => (
+  <div key={keyPrefix} style={{ overflowX: 'auto', margin: '15px 0' }}>
+    {tableData.title && <h4 style={{ margin: '10px 0', color: '#555' }}>{tableData.title}</h4>}
+    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px', fontSize: '0.9em' }}>
+      {tableData.headers && tableData.headers.length > 0 && (
+        <thead>
+          <tr>
+            {tableData.headers.map((h: string, i: number) => (
+              <th key={i} style={{ padding: '12px', backgroundColor: 'var(--primary-color)', color: 'white', border: '1px solid #ddd', textAlign: 'left' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+      )}
+      <tbody>
+        {tableData.rows.map((row: any[], rI: number) => (
+          <tr key={rI}>
+            {row.map((cell, cI) => {
+              const isObject = typeof cell === 'object' && cell !== null;
+              const bgColor = isObject ? cell.bg : 'transparent';
+              const textColor = isObject ? (cell.color || 'inherit') : 'inherit';
+              const value = isObject ? cell.text : cell;
+              const colSpan = isObject ? cell.colSpan : 1;
+              
+              return (
+                <td key={cI} 
+                  colSpan={colSpan}
+                  style={{ 
+                    padding: '12px 8px', 
+                    border: '1px solid #ccc',
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    fontWeight: isObject && cell.bold ? 'bold' : (cI === 0 ? 'bold' : 'normal'),
+                    textAlign: isObject && cell.center ? 'center' : 'left',
+                    minWidth: cI === 0 ? '150px' : 'auto',
+                    whiteSpace: 'pre-wrap'
+                  }}
+                >
+                  {value}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 function App() {
   const [activeSectionId, setActiveSectionId] = useState<string>('MISSION_PLANNING')
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      // Automatically show sidebar if returning from mobile to desktop
+      if (!mobile) setIsSidebarVisible(true);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const activeSection = guideData.find(s => s.id === activeSectionId) || guideData[0]
 
   const handleSectionChange = (id: string) => {
     setActiveSectionId(id)
-    // On mobile, hide sidebar after selection
-    if (window.innerWidth <= 768) {
-      setIsSidebarVisible(false)
-    }
-    // Scroll to top of content area when section changes
+    if (isMobile) setIsSidebarVisible(false)
     const contentArea = document.querySelector('.content-area')
     if (contentArea) contentArea.scrollTop = 0
   }
@@ -24,16 +160,63 @@ function App() {
     const element = contentRefs.current[itemId]
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      // On mobile, hide sidebar after clicking an item
-      if (window.innerWidth <= 768) {
-        setIsSidebarVisible(false)
-      }
+      if (isMobile) setIsSidebarVisible(false)
     }
+  }
+
+  const renderContent = (item: GuideItem) => {
+    if (item.type === 'text') {
+      return (
+        <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '1.1em' }}>
+          {formatText(item.content)}
+        </div>
+      )
+    }
+    
+    if (item.type === 'image') {
+      const images = Array.isArray(item.content) ? item.content : [item.content];
+      return (
+        <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {images.map((src, i) => (
+            <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
+          ))}
+          <p style={{ color: '#666', marginTop: '10px', fontStyle: 'italic' }}>Imagens do Guia: {item.title}</p>
+        </div>
+      )
+    }
+    
+    if (item.type === 'checklist') {
+      return <ChecklistRenderer content={item.content as string[]} />;
+    }
+
+    if (item.type === 'table') {
+      return <TableRenderer tableData={item.content} />;
+    }
+
+    if (item.type === 'mixed') {
+      const content = item.content as { checklist?: string[], table?: any, tables?: any[], image?: string | string[] };
+      const images = content.image ? (Array.isArray(content.image) ? content.image : [content.image]) : [];
+      
+      return (
+        <div>
+          {images.length > 0 && (
+            <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {images.map((src, i) => (
+                <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
+              ))}
+            </div>
+          )}
+          {content.checklist && <ChecklistRenderer content={content.checklist} />}
+          {content.table && <TableRenderer tableData={content.table} />}
+          {content.tables && content.tables.map((t: any, i: number) => <TableRenderer tableData={t} keyPrefix={i} />)}
+        </div>
+      );
+    }
+    return <div>Unknown content type</div>
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      {/* Top Navigation Bar */}
       <header className="top-nav" style={{ 
         backgroundColor: 'var(--primary-color)', 
         color: 'white', 
@@ -41,12 +224,10 @@ function App() {
         display: 'flex', 
         alignItems: 'center',
         gap: '10px',
-        overflowX: 'auto',
         flexShrink: 0,
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
         zIndex: 10
       }}>
-        {/* Sidebar Toggle Button */}
         <button 
           onClick={() => setIsSidebarVisible(!isSidebarVisible)}
           style={{
@@ -93,10 +274,7 @@ function App() {
         </div>
       </header>
 
-      {/* Main Body */}
       <div className="main-body" style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
-        
-        {/* Sidebar */}
         <aside className="sidebar" style={{ 
           width: isSidebarVisible ? '280px' : '0px', 
           backgroundColor: '#f8f9fa', 
@@ -110,10 +288,9 @@ function App() {
           gap: '5px',
           zIndex: 5,
           transition: 'width 0.3s ease, padding 0.3s ease',
-          // On mobile, the sidebar should overlay the content
-          position: window.innerWidth <= 768 ? 'absolute' : 'relative',
+          position: isMobile ? 'absolute' : 'relative',
           height: '100%',
-          boxShadow: (isSidebarVisible && window.innerWidth <= 768) ? '4px 0 10px rgba(0,0,0,0.1)' : 'none'
+          boxShadow: (isSidebarVisible && isMobile) ? '4px 0 10px rgba(0,0,0,0.1)' : 'none'
         }}>
           {isSidebarVisible && (
             <>
@@ -157,24 +334,19 @@ function App() {
           )}
         </aside>
 
-        {/* Content Area */}
         <main className="content-area" style={{ 
           flex: 1, 
-          padding: window.innerWidth <= 768 ? '0 15px 40px 15px' : '0 40px 40px 40px', 
+          padding: isMobile ? '0 15px 40px 15px' : '0 40px 40px 40px', 
           overflowY: 'auto',
           backgroundColor: 'white',
           scrollBehavior: 'smooth'
         }}>
-          {/* Overlay to close sidebar on mobile when clicking outside */}
-          {isSidebarVisible && window.innerWidth <= 768 && (
+          {isSidebarVisible && isMobile && (
             <div 
               onClick={() => setIsSidebarVisible(false)}
               style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
+                top: 0, left: 0, right: 0, bottom: 0,
                 backgroundColor: 'rgba(0,0,0,0.1)',
                 zIndex: 4
               }}
@@ -209,229 +381,6 @@ function App() {
       </div>
     </div>
   )
-}
-
-const ImageWithFallback = ({ src, title }: { src: string, title: string }) => {
-  const [extensionIdx, setExtensionIdx] = useState(0);
-  const extensions = ['', '.png', '.jpg', '.jpeg']; // Try as is, then with extensions if needed
-  
-  // Extract base path without extension if user provided one like 'image.png'
-  const basePath = src.replace(/\.(png|jpg|jpeg)$/i, '');
-  const currentSrc = extensionIdx === 0 ? src : `${basePath}${extensions[extensionIdx]}`;
-
-  return (
-    <div style={{ border: '1px solid #ddd', padding: '10px', backgroundColor: '#f9f9f9', marginBottom: '10px' }}>
-      <img 
-        src={currentSrc} 
-        alt={title} 
-        style={{ maxWidth: '100%', display: 'block', margin: '0 auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-        onError={() => {
-          if (extensionIdx < extensions.length - 1) {
-            setExtensionIdx(extensionIdx + 1);
-          } else {
-            // Final error display if all extensions fail
-            console.error(`Falha ao carregar imagem em todas as extensões: ${basePath}`);
-          }
-        }}
-      />
-      {extensionIdx === extensions.length - 1 && (
-        <p style={{ color: 'red', padding: '10px', fontSize: '0.8em' }}>
-          Erro ao carregar: {basePath} (tentado .png, .jpg, .jpeg)
-        </p>
-      )}
-    </div>
-  );
-};
-
-function renderContent(item: GuideItem) {
-  const formatText = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i}>{part.slice(2, -2)}</strong>;
-      }
-      return part;
-    });
-  };
-
-  const renderChecklist = (content: string[]) => (
-    <div className="checklist" style={{ maxWidth: '900px' }}>
-      {content.map((check, idx) => {
-        const isMemoryItem = check.startsWith('**') && check.endsWith('**');
-        const isSpecialLine = check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---');
-        
-        if (isSpecialLine) {
-          return (
-            <div key={idx} style={{ 
-              textAlign: 'center', 
-              padding: '15px', 
-              color: check.startsWith('WARNING') ? 'var(--accent-color)' : '#666',
-              fontSize: '1em',
-              fontStyle: 'italic',
-              borderBottom: '1px solid #eee'
-            }}>
-              {formatText(check)}
-            </div>
-          );
-        }
-
-        return (
-          <label key={idx} style={{ 
-            display: 'flex', 
-            alignItems: 'flex-start', 
-            padding: '12px', 
-            borderBottom: '1px solid #eee',
-            cursor: 'pointer',
-            transition: 'background-color 0.1s'
-          }}
-          className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`}
-          >
-            <input type="checkbox" style={{ 
-              marginTop: '4px',
-              marginRight: '15px', 
-              width: '22px', 
-              height: '22px',
-              cursor: 'pointer'
-            }} />
-            <span style={{ fontSize: '1.1em', fontFamily: 'monospace' }}>
-              {formatText(check)}
-            </span>
-          </label>
-        );
-      })}
-    </div>
-  );
-
-  const renderTable = (tableData: { headers?: string[], rows: any[][], title?: string }, key?: any) => (
-    <div key={key} style={{ overflowX: 'auto', margin: '15px 0' }}>
-      {tableData.title && <h4 style={{ margin: '10px 0', color: '#555' }}>{tableData.title}</h4>}
-      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px', fontSize: '0.9em' }}>
-        {tableData.headers && tableData.headers.length > 0 && (
-          <thead>
-            <tr>
-              {tableData.headers.map((h, i) => (
-                <th key={i} style={{ padding: '12px', backgroundColor: 'var(--primary-color)', color: 'white', border: '1px solid #ddd', textAlign: 'left' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-        )}
-        <tbody>
-          {tableData.rows.map((row, rI) => (
-            <tr key={rI}>
-              {row.map((cell, cI) => {
-                const isObject = typeof cell === 'object' && cell !== null;
-                const bgColor = isObject ? cell.bg : 'transparent';
-                const textColor = isObject ? (cell.color || 'inherit') : 'inherit';
-                const value = isObject ? cell.text : cell;
-                const colSpan = isObject ? cell.colSpan : 1;
-                
-                return (
-                  <td key={cI} 
-                    colSpan={colSpan}
-                    style={{ 
-                      padding: '12px 8px', 
-                      border: '1px solid #ccc',
-                      backgroundColor: bgColor,
-                      color: textColor,
-                      fontWeight: isObject && cell.bold ? 'bold' : (cI === 0 ? 'bold' : 'normal'),
-                      textAlign: isObject && cell.center ? 'center' : 'left',
-                      minWidth: cI === 0 ? '150px' : 'auto',
-                      whiteSpace: 'pre-wrap'
-                    }}
-                  >
-                    {value}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  if (item.type === 'text') {
-    return (
-      <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '1.1em' }}>
-        {formatText(item.content)}
-      </div>
-    )
-  }
-  
-  if (item.type === 'image') {
-    const images = Array.isArray(item.content) ? item.content : [item.content];
-    
-    const ImageWithFallback = ({ src, title }: { src: string, title: string }) => {
-      const [extensionIdx, setExtensionIdx] = useState(0);
-      const extensions = ['', '.png', '.jpg', '.jpeg']; // Try as is, then with extensions if needed
-      
-      // Extract base path without extension if user provided one like 'image.png'
-      const basePath = src.replace(/\.(png|jpg|jpeg)$/i, '');
-      const currentSrc = extensionIdx === 0 ? src : `${basePath}${extensions[extensionIdx]}`;
-
-      return (
-        <div style={{ border: '1px solid #ddd', padding: '10px', backgroundColor: '#f9f9f9', marginBottom: '10px' }}>
-          <img 
-            src={currentSrc} 
-            alt={title} 
-            style={{ maxWidth: '100%', display: 'block', margin: '0 auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-            onError={() => {
-              if (extensionIdx < extensions.length - 1) {
-                setExtensionIdx(extensionIdx + 1);
-              } else {
-                // Final error display if all extensions fail
-                console.error(`Falha ao carregar imagem em todas as extensões: ${basePath}`);
-              }
-            }}
-          />
-          {extensionIdx === extensions.length - 1 && (
-            <p style={{ color: 'red', padding: '10px', fontSize: '0.8em' }}>
-              Erro ao carregar: {basePath} (tentado .png, .jpg, .jpeg)
-            </p>
-          )}
-        </div>
-      );
-    };
-
-    return (
-      <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {images.map((src, i) => (
-          <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
-        ))}
-        <p style={{ color: '#666', marginTop: '10px', fontStyle: 'italic' }}>Imagens do Guia: {item.title}</p>
-      </div>
-    )
-  }
-  
-  if (item.type === 'checklist') {
-    return renderChecklist(item.content as string[]);
-  }
-
-  if (item.type === 'table') {
-    return renderTable(item.content as { headers?: string[], rows: any[][] });
-  }
-
-  if (item.type === 'mixed') {
-    const content = item.content as { checklist?: string[], table?: any, tables?: any[], image?: string | string[] };
-    const images = content.image ? (Array.isArray(content.image) ? content.image : [content.image]) : [];
-    
-    return (
-      <div>
-        {images.length > 0 && (
-          <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {images.map((src, i) => (
-              <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
-            ))}
-          </div>
-        )}
-        {content.checklist && renderChecklist(content.checklist)}
-        {content.table && renderTable(content.table)}
-        {content.tables && content.tables.map((t, i) => renderTable(t, i))}
-      </div>
-    );
-  }
-  
-  return <div>Unknown content type</div>
 }
 
 export default App
