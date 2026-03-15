@@ -3,7 +3,7 @@ import { guideData, GuideItem } from './data/guideContent'
 import './index.css'
 
 function App() {
-  const [activeSectionId, setActiveSectionId] = useState<string>('HOME')
+  const [activeSectionId, setActiveSectionId] = useState<string>('MISSION_PLANNING')
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
 

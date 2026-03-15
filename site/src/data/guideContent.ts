@@ -1,4 +1,4 @@
-export type SectionId = 'HOME' | 'MISSION_PLANNING' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'EMERGENCY_CHECKLIST';
+export type SectionId = 'MISSION_PLANNING' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'EMERGENCY_CHECKLIST';
 
 export interface GuideItem {
   id: string;
@@ -15,14 +15,6 @@ export interface GuideSection {
 }
 
 export const guideData: GuideSection[] = [
-  {
-    id: 'HOME',
-    label: 'HOME',
-    title: 'Inflight Guide OGS42',
-    items: [
-      { id: 'cover', title: 'Capa', type: 'text', content: 'Esquadra 991 - OGS42 (OGASSA)' }
-    ]
-  },
   {
     id: 'MISSION_PLANNING',
     label: 'MISSION PLANNING',

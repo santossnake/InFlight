@@ -69,12 +69,20 @@ th {
 }
 
 /* Checklist Styles */
-.checklist-item {
+.checklist {
   display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
+  flex-direction: column;
+}
+
+.checklist-label {
+  display: flex; 
+  align-items: flex-start; 
+  padding: 12px; 
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .memory-item {
@@ -82,8 +90,7 @@ th {
   border-left: 5px solid var(--primary-color) !important;
   font-weight: 900 !important;
   color: var(--primary-color) !important;
-  font-size: 1.15em !important; /* Reduced by ~1 point from previous 1.3em */
-  padding: 10px 12px !important;
+  padding: 12px !important;
   margin: 2px 0;
 }
 
@@ -91,12 +98,11 @@ th {
   background-color: #f5f5f5;
 }
 
-button {
-  cursor: pointer;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
+.checklist-label span {
+  font-size: 1.1em;
+  font-family: monospace;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 /* Mobile Responsiveness */
@@ -105,6 +111,26 @@ button {
     flex-direction: column;
   }
   
-  /* Sidebar becomes a secondary top bar or drawer on mobile */
-  /* For now, we'll keep it simple, maybe toggleable */
+  .content-area {
+    padding: 0 15px 40px 15px !important;
+  }
+
+  .checklist-label {
+    padding: 10px 8px;
+  }
+
+  .checklist-label span {
+    font-size: 1em; /* Slightly smaller for mobile to fit more content */
+  }
+
+  h2 {
+    font-size: 1.4em !important;
+  }
+  
+  /* Prevent table overflow issues on small screens */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
