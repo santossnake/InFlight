@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
-import { guideData, GuideItem, GuideSection } from './data/guideContent'
+import { guideData, GuideItem } from './data/guideContent'
 import './index.css'
 
 function App() {
   const [activeSectionId, setActiveSectionId] = useState<string>('HOME')
-  const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+  const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
 
   const activeSection = guideData.find(s => s.id === activeSectionId) || guideData[0]
 
