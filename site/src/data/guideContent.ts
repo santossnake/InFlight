@@ -1,4 +1,4 @@
-export type SectionId = 'MISSION_PLANNING' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'EMERGENCY_CHECKLIST';
+export type SectionId = 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
 
 export interface GuideItem {
   id: string;
@@ -548,6 +548,280 @@ export const guideData: GuideSection[] = [
               ['16', 'LINK TO LINK CONTROLLER']
             ]
           }
+        }
+      }
+    ]
+  },
+  {
+    id: 'EMERGENCY_CHECKLIST',
+    label: 'EMERGENCY CHECKLIST',
+    title: 'Emergency Checklist',
+    items: [
+      {
+        id: 'ec-engine-far',
+        title: '1. ENGINE FAILURE FAR FROM AERODROME',
+        type: 'checklist',
+        content: [
+          '**1. FTH ................................. AWAY FROM POPULATED AREAS**',
+          '**2. TIMEOUT ............................ X10**',
+          '3. PROPELLER .......................... CHECK ROTATION (OS)',
+          '--- If external pilot have handset range (~7NM) ---',
+          '4. STABILIZE MODE ..................... ENGAGE',
+          '5. THROTTLE ........................... IDLE (PRE)',
+          '6. GUIDED OR MISSION .................. ENGAGE',
+          '--- If external pilot do NOT have handset range ---',
+          '7. RADIUS ............................. 200M',
+          '8. CRASH SITE ......................... SEARCH (OS)',
+          '9. IFF ................................ 7700'
+        ]
+      },
+      {
+        id: 'ec-engine-near',
+        title: '2. ENGINE FAILURE NEAR THE AERODROME',
+        type: 'checklist',
+        content: [
+          '**1. FTH ................................. INTO THE AIRFIELD**',
+          '**2. TRANSITION .......................... EXECUTE**',
+          'NOTE: If unable to glide to the RWY execute engine failure far from aerodrome.'
+        ]
+      },
+      {
+        id: 'ec-fire-board',
+        title: '3. ON BOARD FIRE',
+        type: 'checklist',
+        content: [
+          '**1. RTB ................................. INITIATE**',
+          '**2. MAXIMUM SPEED ...................... SET**',
+          'WARNING: LOSS OF CONTROL MAY HAPPEN. AVOID POPULATED AREAS.',
+          '3. FIRE OR SMOKE ON AIRCRAFT ........... MONITOR (OS)',
+          '4. IFF ................................. 7700',
+          '5. TRANSITION .......................... EXECUTE',
+          '6. KILL ENGINE (GROUND) ................ SET AND CONFIRM (MC)',
+          '7. FIRE EXTINGUISHER .................. USE'
+        ]
+      },
+      {
+        id: 'ec-structural-no-c2',
+        title: '4. STRUCTURAL PROBLEM WITHOUT C2',
+        type: 'checklist',
+        content: [
+          '**1. TIMEOUT ............................ X10**',
+          '**2. RADIUS ............................. 200M**',
+          '3. CRASH SITE ......................... SEARCH (OS)',
+          '4. IFF ................................. 7700',
+          '5. KILL ENGINE ........................ SET AND CONFIRM (MC)'
+        ]
+      },
+      {
+        id: 'ec-structural-with-c2',
+        title: '5. STRUCTURAL PROBLEM WITH C2',
+        type: 'checklist',
+        content: [
+          '**1. RTB ................................. INITIATE**',
+          '2. AIRCRAFT STRUCTURE .................. CHECK (OS)',
+          '3. IFF ................................. 7700',
+          'CAUTION: Unstable behavior is expected. Maintain speed. Avoid populated areas.'
+        ]
+      },
+      {
+        id: 'ec-energy-failure',
+        title: '6. ONBOARD ENERGY FAILURE',
+        type: 'checklist',
+        content: [
+          '**1. RTB ................................. INITIATE**',
+          '**2. GIMBAL .............................. OFF**',
+          '**3. MAXIMUM SPEED ...................... SET**',
+          '4. IFF ................................. 7700',
+          'WARNING: IF BACKUP BATTERY < 22V CONSIDER CONTROLLED CRASH.'
+        ]
+      },
+      {
+        id: 'ec-erratic',
+        title: '7. ERRATIC BEHAVIOUR',
+        type: 'checklist',
+        content: [
+          '**1. MODE ................................ REFRESH**',
+          '**2. CHANNELS ............................ CHECK**',
+          '3. EMERGENCY MISSION .................. CONFIRM ACTIVE',
+          '4. RETURN TO PREVIOUS AREA ............ PERFORM',
+          '--- If normal behavior is regained ---',
+          '5. RTB ................................. INITIATE',
+          '--- If normal behavior NOT regained ---',
+          '6. RTL/EM .............................. ENGAGE',
+          '7. ADSB ................................ MONITOR (OS)',
+          '8. EXTERNAL PILOT ..................... OVERRIDE WHEN POSSIBLE'
+        ]
+      },
+      {
+        id: 'ec-gps-fail',
+        title: '8. GPS FAILURE',
+        type: 'checklist',
+        content: [
+          '**1. CIRCLE MODE ........................ ENGAGE**',
+          '2. E/O & ADSB ......................... CORRELATE POS AND MONITOR (OS)',
+          '3. ONBOARD COMPUTER .................. VERIFY GPS ALTITUDE (OS)',
+          '4. IFF ................................. 7700',
+          '--- Low GPS error (<2NM) ---',
+          '5. RTB ................................. DEAD RECKONING WITH ADSB',
+          '--- Medium GPS error (>2NM) ---',
+          '6. RTB ................................. "NO GYRO" VECTORS WITH ATC'
+        ]
+      },
+      {
+        id: 'ec-baro',
+        title: '9. BAROMETRIC ALTITUDE DEVIATION',
+        type: 'checklist',
+        content: [
+          '**1. LOITER MODE ........................ ENGAGE**',
+          '2. AIRCRAFT QNH ........................ CHECK',
+          '3. ADSB (GPS ALTITUDE) ................ MONITOR (OS)',
+          '4. ALTITUDE ............................ SET (IAW EVALUATION)',
+          '5. IFF ................................. 7700',
+          '6. RTB ................................. INITIATE',
+          'WARNING: AUTOLAND IS NOT PERMITTED.'
+        ]
+      },
+      {
+        id: 'ec-link-loss',
+        title: '10. LINK LOSS',
+        type: 'checklist',
+        content: [
+          '1. ANTENNAS ........................... CHECK SIGNAL AND CONNECT',
+          '--- If link not restored ---',
+          '2. ADSB ............................... MONITOR (7400 ACTIVATION)',
+          '3. ANTENNAS SERVER .................... CONFIRM STATUS (OS)',
+          '4. DATA SWITCH ........................ CONFIRM STATUS',
+          '5. ANTENNAS POE ....................... CONFIRM POWERED (OS)',
+          '6. STC ................................ CONFIRM HIGH POWER AND AUTO',
+          '--- If STC is pointing wrong direction ---',
+          '7. STC ................................ MAN',
+          '8. STC AZIMUTH ........................ SET (CHECK ADSB)',
+          '9. STC ELEVATION ...................... BETWEEN 1 AND 5º'
+        ]
+      },
+      {
+        id: 'ec-cockpit-energy',
+        title: '11. COCKPIT ENERGY FAILURE',
+        type: 'checklist',
+        content: [
+          '**1. BACKUP GENERATOR ................... ON (OS)**',
+          '**2. AVAILABLE POWER SOURCE ............. CONNECT (OS)**',
+          'NOTE: RTB unless tactical situation dictates otherwise.'
+        ]
+      },
+      {
+        id: 'ec-gcs-failure',
+        title: '12. GCS FAILURE',
+        type: 'checklist',
+        content: [
+          '--- Software Failure ---',
+          '**1. COCKPIT SOFTWARE ................... ON**',
+          '**2. SOFTWARE ........................... CONNECT**',
+          '--- Computer Failure ---',
+          '**3. KVM ................................ SWITCH TO BACKUP**',
+          '**4. ETHERNET CABLE ..................... SWITCH TO BACKUP**',
+          '--- After control regained ---',
+          '5. LOITER MODE ........................ ENGAGE (IF REQUIRED)',
+          '6. EMERGENCY MISSIONS ................. RE-SET AND ACTIVATE',
+          '7. FLY HOME ALTITUDE .................. RE-SET',
+          '8. TRANSPONDER ........................ VERIFY',
+          '9. UPDATE PARAMETERS .................. ENGAGE'
+        ]
+      },
+      {
+        id: 'ec-fire-smoke',
+        title: '13. FIRE, SMOKE OR FUMES IN COCKPIT',
+        type: 'checklist',
+        content: [
+          '**1. RTL/EM ............................. ENGAGE**',
+          '**2. POWER SUPPLY ....................... OFF**',
+          '**3. EMERGENCY ALARM/DISCHARGE .......... ACTIVATE**',
+          '4. COCKPIT ............................ EVACUATE (IF NECESSARY)',
+          'WARNING: DO NOT VENTILATE COCKPIT UNLESS REQUIRED FOR SURVIVABILITY.'
+        ]
+      },
+      {
+        id: 'ec-comms-fail',
+        title: '14. COMMS FAILURE (EXT/INT PILOT)',
+        type: 'checklist',
+        content: [
+          '--- On final or below 400ft AGL ---',
+          '**1. EXTERNAL PILOT ..................... LAND APPROVED**',
+          '2. COMMS .............................. RE-ESTABLISH (OS)',
+          '--- Above 400ft AGL or go-around ---',
+          '**3. FTH ................................. EXECUTE**',
+          '4. COMMS .............................. RE-ESTABLISH (OS)'
+        ]
+      },
+      {
+        id: 'ec-ext-pilot-lost',
+        title: '15. EXTERNAL PILOT LOST CONTROL',
+        type: 'checklist',
+        content: [
+          '**1. FTH ................................. EXECUTE**',
+          '2. HANDSET ............................ STATUS (PRE)',
+          '3. POWER CONTROL BOX .................. POWERED (PRE)',
+          '4. COMMUNICATION BOX .................. CONNECTED (PRE)',
+          '5. CABLES ............................. STATUS (PRE)',
+          '--- If control not regained ---',
+          '6. COMMUNICATION BOX .................. RECONFIGURE AND TEST (PRE)',
+          '7. EXTERNAL BACKUP SETUP .............. USE (PRE)',
+          '--- If unsuccessful ---',
+          '8. AUTOLAND ........................... PERFORM (IF POSSIBLE)'
+        ]
+      },
+      {
+        id: 'ec-limitations',
+        title: 'AIRCRAFT LIMITATIONS',
+        type: 'table',
+        content: {
+          headers: ['Parameter', 'Value'],
+          rows: [
+            ['Vne (Never Exceed)', '76 Kts'],
+            ['Vmin', '42 Kts'],
+            ['Vcruise', '51 - 57 Kts'],
+            ['Vstall', '39.5 Kts'],
+            ['MTOW', '40 Kg'],
+            ['MIN RUNWAY SIZE', '300x10 m'],
+            ['MAX CEILING', '10100 ft'],
+            ['HEAD WIND', '20 Kts'],
+            ['CROSS WIND', '10 Kts'],
+            ['IAT', '5 to 40 Cº'],
+            ['HUMIDITY', '≤ 98%'],
+            ['RAIN', '0,9 mm/h'],
+            ['VISIBILITY', '600 m']
+          ]
+        }
+      },
+      {
+        id: 'ec-engine-limits',
+        title: 'ENGINE LIMITATIONS',
+        type: 'table',
+        content: {
+          rows: [
+            [{text: 'ENGINE LIMITATIONS', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
+            ['RPM IDLE (GND)', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 3500', bg: '#4ade80', center: true, colSpan: 3}, {text: '>3500', bg: '#ff4d4d', center: true}],
+            ['RPM WOT (GND)', {text: '<5800', bg: '#ff4d4d', center: true}, {text: '5800 - 6700', bg: '#4ade80', center: true, colSpan: 3}, {text: '>6700', bg: '#ff4d4d', center: true}],
+            ['WOT TIME LIMITATION', {text: '• GROUND - LESS THAN 5 SECONDS (IF CHT IS LESS THAN 115ºC)\n• AIR - TWO MINUTES', colSpan: 5}],
+            ['RPM', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 2750', bg: '#facc15', center: true}, {text: '2750 - 6750', bg: '#4ade80', center: true}, {text: '6750 - 7000', bg: '#facc15', center: true}, {text: '>7700', bg: '#ff4d4d', center: true}],
+            ['CHT (Cº)', {text: '<70', bg: '#ff4d4d', center: true}, {text: '70 - 80', bg: '#facc15', center: true}, {text: '80 - 120', bg: '#4ade80', center: true}, {text: '120 - 130', bg: '#facc15', center: true}, {text: '>130', bg: '#ff4d4d', center: true}]
+          ]
+        }
+      },
+      {
+        id: 'ec-electrical',
+        title: 'ELECTRICAL SYSTEM',
+        type: 'table',
+        content: {
+          rows: [
+            [{text: 'ELECTRICAL SYSTEM', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
+            ['MAIN (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 23.5', bg: '#facc15', center: true}, {text: '23.5 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
+            ['EMERGENCY (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 22.2', bg: '#facc15', center: true}, {text: '22.2 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
+            ['EFI (V)', {text: '<10', bg: '#ff4d4d', center: true}, {text: '10 - 10.4', bg: '#facc15', center: true}, {text: '10.4 - 13.4', bg: '#4ade80', center: true}, {text: '13.4 - 14', bg: '#facc15', center: true}, {text: '>14', bg: '#ff4d4d', center: true}],
+            ['EXT (V)', {text: '<22.2', bg: '#ff4d4d', center: true}, {text: '22.2 - 23', bg: '#facc15', center: true}, {text: '23 - 24.5', bg: '#4ade80', center: true}, {text: '24.5 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
+            ['PAYLOAD (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 22.2', bg: '#facc15', center: true}, {text: '22.2 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
+            ['COMMS (V)', {text: '<27.7', bg: '#ff4d4d', center: true}, {text: '27.7 - 28.3', bg: '#4ade80', center: true, colSpan: 3}, {text: '>28.3', bg: '#ff4d4d', center: true}]
+          ]
         }
       }
     ]
@@ -1239,280 +1513,6 @@ export const guideData: GuideSection[] = [
           '6. Preservar o local do incidente',
           '7. Reporte DIVOC no sistema SIPA'
         ]
-      }
-    ]
-  },
-  {
-    id: 'EMERGENCY_CHECKLIST',
-    label: 'EMERGENCY CHECKLIST',
-    title: 'Emergency Checklist',
-    items: [
-      {
-        id: 'ec-engine-far',
-        title: '1. ENGINE FAILURE FAR FROM AERODROME',
-        type: 'checklist',
-        content: [
-          '**1. FTH ................................. AWAY FROM POPULATED AREAS**',
-          '**2. TIMEOUT ............................ X10**',
-          '3. PROPELLER .......................... CHECK ROTATION (OS)',
-          '--- If external pilot have handset range (~7NM) ---',
-          '4. STABILIZE MODE ..................... ENGAGE',
-          '5. THROTTLE ........................... IDLE (PRE)',
-          '6. GUIDED OR MISSION .................. ENGAGE',
-          '--- If external pilot do NOT have handset range ---',
-          '7. RADIUS ............................. 200M',
-          '8. CRASH SITE ......................... SEARCH (OS)',
-          '9. IFF ................................ 7700'
-        ]
-      },
-      {
-        id: 'ec-engine-near',
-        title: '2. ENGINE FAILURE NEAR THE AERODROME',
-        type: 'checklist',
-        content: [
-          '**1. FTH ................................. INTO THE AIRFIELD**',
-          '**2. TRANSITION .......................... EXECUTE**',
-          'NOTE: If unable to glide to the RWY execute engine failure far from aerodrome.'
-        ]
-      },
-      {
-        id: 'ec-fire-board',
-        title: '3. ON BOARD FIRE',
-        type: 'checklist',
-        content: [
-          '**1. RTB ................................. INITIATE**',
-          '**2. MAXIMUM SPEED ...................... SET**',
-          'WARNING: LOSS OF CONTROL MAY HAPPEN. AVOID POPULATED AREAS.',
-          '3. FIRE OR SMOKE ON AIRCRAFT ........... MONITOR (OS)',
-          '4. IFF ................................. 7700',
-          '5. TRANSITION .......................... EXECUTE',
-          '6. KILL ENGINE (GROUND) ................ SET AND CONFIRM (MC)',
-          '7. FIRE EXTINGUISHER .................. USE'
-        ]
-      },
-      {
-        id: 'ec-structural-no-c2',
-        title: '4. STRUCTURAL PROBLEM WITHOUT C2',
-        type: 'checklist',
-        content: [
-          '**1. TIMEOUT ............................ X10**',
-          '**2. RADIUS ............................. 200M**',
-          '3. CRASH SITE ......................... SEARCH (OS)',
-          '4. IFF ................................. 7700',
-          '5. KILL ENGINE ........................ SET AND CONFIRM (MC)'
-        ]
-      },
-      {
-        id: 'ec-structural-with-c2',
-        title: '5. STRUCTURAL PROBLEM WITH C2',
-        type: 'checklist',
-        content: [
-          '**1. RTB ................................. INITIATE**',
-          '2. AIRCRAFT STRUCTURE .................. CHECK (OS)',
-          '3. IFF ................................. 7700',
-          'CAUTION: Unstable behavior is expected. Maintain speed. Avoid populated areas.'
-        ]
-      },
-      {
-        id: 'ec-energy-failure',
-        title: '6. ONBOARD ENERGY FAILURE',
-        type: 'checklist',
-        content: [
-          '**1. RTB ................................. INITIATE**',
-          '**2. GIMBAL .............................. OFF**',
-          '**3. MAXIMUM SPEED ...................... SET**',
-          '4. IFF ................................. 7700',
-          'WARNING: IF BACKUP BATTERY < 22V CONSIDER CONTROLLED CRASH.'
-        ]
-      },
-      {
-        id: 'ec-erratic',
-        title: '7. ERRATIC BEHAVIOUR',
-        type: 'checklist',
-        content: [
-          '**1. MODE ................................ REFRESH**',
-          '**2. CHANNELS ............................ CHECK**',
-          '3. EMERGENCY MISSION .................. CONFIRM ACTIVE',
-          '4. RETURN TO PREVIOUS AREA ............ PERFORM',
-          '--- If normal behavior is regained ---',
-          '5. RTB ................................. INITIATE',
-          '--- If normal behavior NOT regained ---',
-          '6. RTL/EM .............................. ENGAGE',
-          '7. ADSB ................................ MONITOR (OS)',
-          '8. EXTERNAL PILOT ..................... OVERRIDE WHEN POSSIBLE'
-        ]
-      },
-      {
-        id: 'ec-gps-fail',
-        title: '8. GPS FAILURE',
-        type: 'checklist',
-        content: [
-          '**1. CIRCLE MODE ........................ ENGAGE**',
-          '2. E/O & ADSB ......................... CORRELATE POS AND MONITOR (OS)',
-          '3. ONBOARD COMPUTER .................. VERIFY GPS ALTITUDE (OS)',
-          '4. IFF ................................. 7700',
-          '--- Low GPS error (<2NM) ---',
-          '5. RTB ................................. DEAD RECKONING WITH ADSB',
-          '--- Medium GPS error (>2NM) ---',
-          '6. RTB ................................. "NO GYRO" VECTORS WITH ATC'
-        ]
-      },
-      {
-        id: 'ec-baro',
-        title: '9. BAROMETRIC ALTITUDE DEVIATION',
-        type: 'checklist',
-        content: [
-          '**1. LOITER MODE ........................ ENGAGE**',
-          '2. AIRCRAFT QNH ........................ CHECK',
-          '3. ADSB (GPS ALTITUDE) ................ MONITOR (OS)',
-          '4. ALTITUDE ............................ SET (IAW EVALUATION)',
-          '5. IFF ................................. 7700',
-          '6. RTB ................................. INITIATE',
-          'WARNING: AUTOLAND IS NOT PERMITTED.'
-        ]
-      },
-      {
-        id: 'ec-link-loss',
-        title: '10. LINK LOSS',
-        type: 'checklist',
-        content: [
-          '1. ANTENNAS ........................... CHECK SIGNAL AND CONNECT',
-          '--- If link not restored ---',
-          '2. ADSB ............................... MONITOR (7400 ACTIVATION)',
-          '3. ANTENNAS SERVER .................... CONFIRM STATUS (OS)',
-          '4. DATA SWITCH ........................ CONFIRM STATUS',
-          '5. ANTENNAS POE ....................... CONFIRM POWERED (OS)',
-          '6. STC ................................ CONFIRM HIGH POWER AND AUTO',
-          '--- If STC is pointing wrong direction ---',
-          '7. STC ................................ MAN',
-          '8. STC AZIMUTH ........................ SET (CHECK ADSB)',
-          '9. STC ELEVATION ...................... BETWEEN 1 AND 5º'
-        ]
-      },
-      {
-        id: 'ec-cockpit-energy',
-        title: '11. COCKPIT ENERGY FAILURE',
-        type: 'checklist',
-        content: [
-          '**1. BACKUP GENERATOR ................... ON (OS)**',
-          '**2. AVAILABLE POWER SOURCE ............. CONNECT (OS)**',
-          'NOTE: RTB unless tactical situation dictates otherwise.'
-        ]
-      },
-      {
-        id: 'ec-gcs-failure',
-        title: '12. GCS FAILURE',
-        type: 'checklist',
-        content: [
-          '--- Software Failure ---',
-          '**1. COCKPIT SOFTWARE ................... ON**',
-          '**2. SOFTWARE ........................... CONNECT**',
-          '--- Computer Failure ---',
-          '**3. KVM ................................ SWITCH TO BACKUP**',
-          '**4. ETHERNET CABLE ..................... SWITCH TO BACKUP**',
-          '--- After control regained ---',
-          '5. LOITER MODE ........................ ENGAGE (IF REQUIRED)',
-          '6. EMERGENCY MISSIONS ................. RE-SET AND ACTIVATE',
-          '7. FLY HOME ALTITUDE .................. RE-SET',
-          '8. TRANSPONDER ........................ VERIFY',
-          '9. UPDATE PARAMETERS .................. ENGAGE'
-        ]
-      },
-      {
-        id: 'ec-fire-smoke',
-        title: '13. FIRE, SMOKE OR FUMES IN COCKPIT',
-        type: 'checklist',
-        content: [
-          '**1. RTL/EM ............................. ENGAGE**',
-          '**2. POWER SUPPLY ....................... OFF**',
-          '**3. EMERGENCY ALARM/DISCHARGE .......... ACTIVATE**',
-          '4. COCKPIT ............................ EVACUATE (IF NECESSARY)',
-          'WARNING: DO NOT VENTILATE COCKPIT UNLESS REQUIRED FOR SURVIVABILITY.'
-        ]
-      },
-      {
-        id: 'ec-comms-fail',
-        title: '14. COMMS FAILURE (EXT/INT PILOT)',
-        type: 'checklist',
-        content: [
-          '--- On final or below 400ft AGL ---',
-          '**1. EXTERNAL PILOT ..................... LAND APPROVED**',
-          '2. COMMS .............................. RE-ESTABLISH (OS)',
-          '--- Above 400ft AGL or go-around ---',
-          '**3. FTH ................................. EXECUTE**',
-          '4. COMMS .............................. RE-ESTABLISH (OS)'
-        ]
-      },
-      {
-        id: 'ec-ext-pilot-lost',
-        title: '15. EXTERNAL PILOT LOST CONTROL',
-        type: 'checklist',
-        content: [
-          '**1. FTH ................................. EXECUTE**',
-          '2. HANDSET ............................ STATUS (PRE)',
-          '3. POWER CONTROL BOX .................. POWERED (PRE)',
-          '4. COMMUNICATION BOX .................. CONNECTED (PRE)',
-          '5. CABLES ............................. STATUS (PRE)',
-          '--- If control not regained ---',
-          '6. COMMUNICATION BOX .................. RECONFIGURE AND TEST (PRE)',
-          '7. EXTERNAL BACKUP SETUP .............. USE (PRE)',
-          '--- If unsuccessful ---',
-          '8. AUTOLAND ........................... PERFORM (IF POSSIBLE)'
-        ]
-      },
-      {
-        id: 'ec-limitations',
-        title: 'AIRCRAFT LIMITATIONS',
-        type: 'table',
-        content: {
-          headers: ['Parameter', 'Value'],
-          rows: [
-            ['Vne (Never Exceed)', '76 Kts'],
-            ['Vmin', '42 Kts'],
-            ['Vcruise', '51 - 57 Kts'],
-            ['Vstall', '39.5 Kts'],
-            ['MTOW', '40 Kg'],
-            ['MIN RUNWAY SIZE', '300x10 m'],
-            ['MAX CEILING', '10100 ft'],
-            ['HEAD WIND', '20 Kts'],
-            ['CROSS WIND', '10 Kts'],
-            ['IAT', '5 to 40 Cº'],
-            ['HUMIDITY', '≤ 98%'],
-            ['RAIN', '0,9 mm/h'],
-            ['VISIBILITY', '600 m']
-          ]
-        }
-      },
-      {
-        id: 'ec-engine-limits',
-        title: 'ENGINE LIMITATIONS',
-        type: 'table',
-        content: {
-          rows: [
-            [{text: 'ENGINE LIMITATIONS', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
-            ['RPM IDLE (GND)', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 3500', bg: '#4ade80', center: true, colSpan: 3}, {text: '>3500', bg: '#ff4d4d', center: true}],
-            ['RPM WOT (GND)', {text: '<5800', bg: '#ff4d4d', center: true}, {text: '5800 - 6700', bg: '#4ade80', center: true, colSpan: 3}, {text: '>6700', bg: '#ff4d4d', center: true}],
-            ['WOT TIME LIMITATION', {text: '• GROUND - LESS THAN 5 SECONDS (IF CHT IS LESS THAN 115ºC)\n• AIR - TWO MINUTES', colSpan: 5}],
-            ['RPM', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 2750', bg: '#facc15', center: true}, {text: '2750 - 6750', bg: '#4ade80', center: true}, {text: '6750 - 7000', bg: '#facc15', center: true}, {text: '>7700', bg: '#ff4d4d', center: true}],
-            ['CHT (Cº)', {text: '<70', bg: '#ff4d4d', center: true}, {text: '70 - 80', bg: '#facc15', center: true}, {text: '80 - 120', bg: '#4ade80', center: true}, {text: '120 - 130', bg: '#facc15', center: true}, {text: '>130', bg: '#ff4d4d', center: true}]
-          ]
-        }
-      },
-      {
-        id: 'ec-electrical',
-        title: 'ELECTRICAL SYSTEM',
-        type: 'table',
-        content: {
-          rows: [
-            [{text: 'ELECTRICAL SYSTEM', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
-            ['MAIN (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 23.5', bg: '#facc15', center: true}, {text: '23.5 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
-            ['EMERGENCY (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 22.2', bg: '#facc15', center: true}, {text: '22.2 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
-            ['EFI (V)', {text: '<10', bg: '#ff4d4d', center: true}, {text: '10 - 10.4', bg: '#facc15', center: true}, {text: '10.4 - 13.4', bg: '#4ade80', center: true}, {text: '13.4 - 14', bg: '#facc15', center: true}, {text: '>14', bg: '#ff4d4d', center: true}],
-            ['EXT (V)', {text: '<22.2', bg: '#ff4d4d', center: true}, {text: '22.2 - 23', bg: '#facc15', center: true}, {text: '23 - 24.5', bg: '#4ade80', center: true}, {text: '24.5 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
-            ['PAYLOAD (V)', {text: '<21.6', bg: '#ff4d4d', center: true}, {text: '21.6 - 22.2', bg: '#facc15', center: true}, {text: '22.2 - 25.1', bg: '#4ade80', center: true}, {text: '25.1 - 26', bg: '#facc15', center: true}, {text: '>26', bg: '#ff4d4d', center: true}],
-            ['COMMS (V)', {text: '<27.7', bg: '#ff4d4d', center: true}, {text: '27.7 - 28.3', bg: '#4ade80', center: true, colSpan: 3}, {text: '>28.3', bg: '#ff4d4d', center: true}]
-          ]
-        }
       }
     ]
   }
