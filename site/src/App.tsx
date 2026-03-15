@@ -4,12 +4,17 @@ import './index.css'
 
 function App() {
   const [activeSectionId, setActiveSectionId] = useState<string>('HOME')
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
 
   const activeSection = guideData.find(s => s.id === activeSectionId) || guideData[0]
 
   const handleSectionChange = (id: string) => {
     setActiveSectionId(id)
+    // On mobile, hide sidebar after selection
+    if (window.innerWidth <= 768) {
+      setIsSidebarVisible(false)
+    }
     // Scroll to top of content area when section changes
     const contentArea = document.querySelector('.content-area')
     if (contentArea) contentArea.scrollTop = 0
@@ -19,6 +24,10 @@ function App() {
     const element = contentRefs.current[itemId]
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // On mobile, hide sidebar after clicking an item
+      if (window.innerWidth <= 768) {
+        setIsSidebarVisible(false)
+      }
     }
   }
 
@@ -30,32 +39,58 @@ function App() {
         color: 'white', 
         padding: '10px', 
         display: 'flex', 
+        alignItems: 'center',
         gap: '10px',
         overflowX: 'auto',
         flexShrink: 0,
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
         zIndex: 10
       }}>
-        {guideData.map(section => (
-          <button 
-            key={section.id}
-            onClick={() => handleSectionChange(section.id)}
-            style={{ 
-              backgroundColor: activeSectionId === section.id 
-                ? (section.id === 'EMERGENCY_CHECKLIST' ? '#ff1744' : 'var(--highlight-color)') 
-                : (section.id === 'EMERGENCY_CHECKLIST' ? '#b71c1c' : 'rgba(255,255,255,0.1)'),
-              color: activeSectionId === section.id 
-                ? (section.id === 'EMERGENCY_CHECKLIST' ? 'white' : 'black') 
-                : 'white',
-              border: section.id === 'EMERGENCY_CHECKLIST' ? '2px solid #ff5252' : '1px solid rgba(255,255,255,0.3)',
-              whiteSpace: 'nowrap',
-              padding: '10px 20px',
-              fontWeight: section.id === 'EMERGENCY_CHECKLIST' ? 'bold' : 'normal'
-            }}
-          >
-            {section.label}
-          </button>
-        ))}
+        {/* Sidebar Toggle Button */}
+        <button 
+          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '8px 12px',
+            fontSize: '1.2em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            marginRight: '5px',
+            minWidth: '44px'
+          }}
+          title={isSidebarVisible ? "Esconder Menu" : "Mostrar Menu"}
+        >
+          {isSidebarVisible ? '✕' : '☰'}
+        </button>
+
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', flex: 1, paddingBottom: '2px' }}>
+          {guideData.map(section => (
+            <button 
+              key={section.id}
+              onClick={() => handleSectionChange(section.id)}
+              style={{ 
+                backgroundColor: activeSectionId === section.id 
+                  ? (section.id === 'EMERGENCY_CHECKLIST' ? '#ff1744' : 'var(--highlight-color)') 
+                  : (section.id === 'EMERGENCY_CHECKLIST' ? '#b71c1c' : 'rgba(255,255,255,0.1)'),
+                color: activeSectionId === section.id 
+                  ? (section.id === 'EMERGENCY_CHECKLIST' ? 'white' : 'black') 
+                  : 'white',
+                border: section.id === 'EMERGENCY_CHECKLIST' ? '2px solid #ff5252' : '1px solid rgba(255,255,255,0.3)',
+                whiteSpace: 'nowrap',
+                padding: '8px 15px',
+                fontSize: '0.9em',
+                fontWeight: section.id === 'EMERGENCY_CHECKLIST' ? 'bold' : 'normal'
+              }}
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
       </header>
 
       {/* Main Body */}
@@ -63,62 +98,88 @@ function App() {
         
         {/* Sidebar */}
         <aside className="sidebar" style={{ 
-          width: '280px', 
+          width: isSidebarVisible ? '280px' : '0px', 
           backgroundColor: '#f8f9fa', 
-          borderRight: '1px solid var(--border-color)',
+          borderRight: isSidebarVisible ? '1px solid var(--border-color)' : 'none',
           overflowY: 'auto',
-          padding: '10px',
+          overflowX: 'hidden',
+          padding: isSidebarVisible ? '10px' : '0px',
           flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
           gap: '5px',
-          zIndex: 5
+          zIndex: 5,
+          transition: 'width 0.3s ease, padding 0.3s ease',
+          // On mobile, the sidebar should overlay the content
+          position: window.innerWidth <= 768 ? 'absolute' : 'relative',
+          height: '100%',
+          boxShadow: (isSidebarVisible && window.innerWidth <= 768) ? '4px 0 10px rgba(0,0,0,0.1)' : 'none'
         }}>
-          <h3 style={{ 
-            fontSize: '0.9em', 
-            padding: '10px 5px', 
-            borderBottom: '2px solid var(--primary-color)',
-            color: 'var(--primary-color)',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            marginBottom: '10px'
-          }}>
-            {activeSection.title}
-          </h3>
-          
-          <div className="sidebar-items" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {activeSection.items.map(item => (
-              <button
-                key={item.id}
-                onClick={() => scrollToItem(item.id)}
-                style={{
-                  textAlign: 'left',
-                  backgroundColor: 'transparent',
-                  color: '#444',
-                  border: 'none',
-                  borderLeft: '4px solid transparent',
-                  borderRadius: '0 4px 4px 0',
-                  padding: '10px',
-                  fontSize: '0.9em',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#eee'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                {item.title}
-              </button>
-            ))}
-          </div>
+          {isSidebarVisible && (
+            <>
+              <h3 style={{ 
+                fontSize: '0.9em', 
+                padding: '10px 5px', 
+                borderBottom: '2px solid var(--primary-color)',
+                color: 'var(--primary-color)',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                marginBottom: '10px',
+                whiteSpace: 'nowrap'
+              }}>
+                {activeSection.title}
+              </h3>
+              
+              <div className="sidebar-items" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: '260px' }}>
+                {activeSection.items.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToItem(item.id)}
+                    style={{
+                      textAlign: 'left',
+                      backgroundColor: 'transparent',
+                      color: '#444',
+                      border: 'none',
+                      borderLeft: '4px solid transparent',
+                      borderRadius: '0 4px 4px 0',
+                      padding: '10px',
+                      fontSize: '0.9em',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#eee'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </aside>
 
         {/* Content Area */}
         <main className="content-area" style={{ 
           flex: 1, 
-          padding: '0 40px 40px 40px', 
+          padding: window.innerWidth <= 768 ? '0 15px 40px 15px' : '0 40px 40px 40px', 
           overflowY: 'auto',
           backgroundColor: 'white',
           scrollBehavior: 'smooth'
         }}>
+          {/* Overlay to close sidebar on mobile when clicking outside */}
+          {isSidebarVisible && window.innerWidth <= 768 && (
+            <div 
+              onClick={() => setIsSidebarVisible(false)}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.1)',
+                zIndex: 4
+              }}
+            />
+          )}
           {activeSection.items.map((item) => (
             <section 
               key={item.id} 
