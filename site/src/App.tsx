@@ -43,13 +43,19 @@ const formatText = (text: string) => {
   });
 };
 
-const ChecklistRenderer = ({ content }: { content: string[] }) => (
+const ChecklistRenderer = ({ itemId, content, progress, onToggle }: { 
+  itemId: string, 
+  content: string[], 
+  progress: { [index: number]: boolean },
+  onToggle: (itemId: string, index: number) => void
+}) => (
   <div className="checklist" style={{ maxWidth: '900px' }}>
     {content.map((check, idx) => {
       const isMemoryItem = check.startsWith('**') && check.endsWith('**');
-      const isSpecialLine = check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---');
+      const isSpecialLine = !check.trim() || check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---');
       
       if (isSpecialLine) {
+        if (!check.trim()) return <div key={idx} style={{ height: '10px' }} />;
         return (
           <div key={idx} style={{ 
             textAlign: 'center', 
@@ -65,15 +71,21 @@ const ChecklistRenderer = ({ content }: { content: string[] }) => (
       }
 
       return (
-        <label key={idx} className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`}>
-          <input type="checkbox" style={{ 
-            marginTop: '4px',
-            marginRight: '15px', 
-            width: '22px', 
-            height: '22px',
-            cursor: 'pointer'
-          }} />
-          <span>
+        <label key={idx} className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`} style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', padding: '10px', transition: 'background-color 0.2s' }}>
+          <input 
+            type="checkbox" 
+            checked={!!progress[idx]}
+            onChange={() => onToggle(itemId, idx)}
+            style={{ 
+              marginTop: '4px',
+              marginRight: '15px', 
+              width: '22px', 
+              height: '22px',
+              cursor: 'pointer',
+              flexShrink: 0
+            }} 
+          />
+          <span style={{ textDecoration: progress[idx] ? 'line-through' : 'none', color: progress[idx] ? '#888' : 'inherit' }}>
             {formatText(check)}
           </span>
         </label>
@@ -134,13 +146,20 @@ function App() {
   const [activeSectionId, setActiveSectionId] = useState<string>('MISSION_PLANNING')
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
+  const [checklistProgress, setChecklistProgress] = useState<{ [itemId: string]: { [index: number]: boolean } }>(() => {
+    const saved = localStorage.getItem('checklistProgress');
+    return saved ? JSON.parse(saved) : {};
+  });
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
+
+  useEffect(() => {
+    localStorage.setItem('checklistProgress', JSON.stringify(checklistProgress));
+  }, [checklistProgress]);
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      // Automatically show sidebar if returning from mobile to desktop
       if (!mobile) setIsSidebarVisible(true);
     };
     window.addEventListener('resize', handleResize);
@@ -164,6 +183,50 @@ function App() {
     }
   }
 
+  const handleToggle = (itemId: string, index: number) => {
+    setChecklistProgress(prev => ({
+      ...prev,
+      [itemId]: {
+        ...(prev[itemId] || {}),
+        [index]: !prev[itemId]?.[index]
+      }
+    }));
+  };
+
+  const resetCurrentChecklists = () => {
+    if (window.confirm('Resetar todos os checklists da secção atual?')) {
+      const newProgress = { ...checklistProgress };
+      activeSection.items.forEach(item => {
+        delete newProgress[item.id];
+      });
+      setChecklistProgress(newProgress);
+    }
+  };
+
+  const resetAllChecklists = () => {
+    if (window.confirm('Resetar TODOS os checklists do guia?')) {
+      setChecklistProgress({});
+    }
+  };
+
+  const isItemComplete = (item: GuideItem) => {
+    let checklist: string[] | undefined;
+    if (item.type === 'checklist') {
+      checklist = item.content as string[];
+    } else if (item.type === 'mixed') {
+      checklist = (item.content as any).checklist;
+    }
+
+    if (!checklist) return false;
+
+    const progress = checklistProgress[item.id] || {};
+    return checklist.every((line, index) => {
+      const isSpecialLine = !line.trim() || line.startsWith('WARNING:') || line.startsWith('CAUTION:') || line.startsWith('NOTE:') || line.startsWith('---');
+      if (isSpecialLine) return true;
+      return !!progress[index];
+    });
+  };
+
   const renderContent = (item: GuideItem) => {
     if (item.type === 'text') {
       return (
@@ -186,7 +249,12 @@ function App() {
     }
     
     if (item.type === 'checklist') {
-      return <ChecklistRenderer content={item.content as string[]} />;
+      return <ChecklistRenderer 
+        itemId={item.id} 
+        content={item.content as string[]} 
+        progress={checklistProgress[item.id] || {}}
+        onToggle={handleToggle}
+      />;
     }
 
     if (item.type === 'table') {
@@ -206,7 +274,12 @@ function App() {
               ))}
             </div>
           )}
-          {content.checklist && <ChecklistRenderer content={content.checklist} />}
+          {content.checklist && <ChecklistRenderer 
+            itemId={item.id} 
+            content={content.checklist} 
+            progress={checklistProgress[item.id] || {}}
+            onToggle={handleToggle}
+          />}
           {content.table && <TableRenderer tableData={content.table} />}
           {content.tables && content.tables.map((t: any, i: number) => <TableRenderer tableData={t} keyPrefix={i} />)}
         </div>
@@ -308,27 +381,32 @@ function App() {
               </h3>
               
               <div className="sidebar-items" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: '260px' }}>
-                {activeSection.items.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToItem(item.id)}
-                    style={{
-                      textAlign: 'left',
-                      backgroundColor: 'transparent',
-                      color: '#444',
-                      border: 'none',
-                      borderLeft: '4px solid transparent',
-                      borderRadius: '0 4px 4px 0',
-                      padding: '10px',
-                      fontSize: '0.9em',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#eee'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    {item.title}
-                  </button>
-                ))}
+                {activeSection.items.map(item => {
+                  const complete = isItemComplete(item);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollToItem(item.id)}
+                      style={{
+                        textAlign: 'left',
+                        backgroundColor: complete ? '#e8f5e9' : 'transparent',
+                        color: complete ? '#2e7d32' : '#444',
+                        border: 'none',
+                        borderLeft: complete ? '4px solid #4caf50' : '4px solid transparent',
+                        borderRadius: '0 4px 4px 0',
+                        padding: '10px',
+                        fontSize: '0.9em',
+                        transition: 'all 0.2s',
+                        fontWeight: complete ? 'bold' : 'normal'
+                      }}
+                      onMouseOver={(e) => { if (!complete) e.currentTarget.style.backgroundColor = '#eee'; }}
+                      onMouseOut={(e) => { if (!complete) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    >
+                      {complete && <span style={{ marginRight: '5px' }}>✓</span>}
+                      {item.title}
+                    </button>
+                  );
+                })}
               </div>
             </>
           )}
@@ -378,6 +456,61 @@ function App() {
             </section>
           ))}
         </main>
+      </div>
+
+      <div style={{ 
+        position: 'fixed', 
+        bottom: '20px', 
+        left: '20px', 
+        zIndex: 100, 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: '10px' 
+      }}>
+        <button 
+          onClick={resetCurrentChecklists}
+          style={{
+            backgroundColor: 'white',
+            color: 'var(--primary-color)',
+            border: '2px solid var(--primary-color)',
+            padding: '8px 15px',
+            borderRadius: '20px',
+            fontSize: '0.85em',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+            e.currentTarget.style.color = 'white';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.color = 'var(--primary-color)';
+          }}
+        >
+          Reset Secção
+        </button>
+        <button 
+          onClick={resetAllChecklists}
+          style={{
+            backgroundColor: 'var(--accent-color)',
+            color: 'white',
+            border: 'none',
+            padding: '8px 15px',
+            borderRadius: '20px',
+            fontSize: '0.85em',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          Reset Total
+        </button>
       </div>
     </div>
   )
