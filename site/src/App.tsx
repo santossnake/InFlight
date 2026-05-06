@@ -364,29 +364,30 @@ function App() {
 
   const renderContent = (item: GuideItem) => {
     if (item.id === 'bingo-calc') {
-      const fInit = parseFloat(fuelInit) || 0;
-      const fCurr = parseFloat(fuelCurrent) || 0;
+      const f = parseFloat(fuelInit) || 0;
+      const b = parseFloat(burnRate) || 0;
       
+      // Calculate elapsed time since Engine ON for informational purposes
+      let elapsedMinutes = 0;
       const engOnStr = engineOnManual || missionLogs['eng-on'];
-      const timeData = getDiffTime(engOnStr || '');
-      
-      let burnRateCalculated = 0;
-      let remainingToBingo = 0;
-      let hours = 0, mins = 0;
-
-      if (timeData && timeData.totalMins > 1) {
-        const fuelUsed = fInit - fCurr;
-        burnRateCalculated = (fuelUsed / timeData.totalMins) * 60;
-        
-        if (burnRateCalculated > 0) {
-          const fuelToBingo = Math.max(0, fCurr - 2.5);
-          remainingToBingo = (fuelToBingo / burnRateCalculated) * 60;
-          hours = Math.floor(remainingToBingo / 60);
-          mins = Math.round(remainingToBingo % 60);
-        }
+      if (engOnStr) {
+        const [h, m] = engOnStr.split(':').map(Number);
+        const engOnDate = new Date();
+        engOnDate.setHours(h, m, 0);
+        const now = new Date();
+        if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
+        elapsedMinutes = (now.getTime() - engOnDate.getTime()) / (1000 * 60);
       }
 
-      const fuelPercentage = (fCurr / fInit) * 100 || 0;
+      const fuelConsumed = (elapsedMinutes / 60) * b;
+      const currentFuel = Math.max(0, f - fuelConsumed);
+      const fuelToBingo = Math.max(0, currentFuel - 2.5);
+      
+      const enduranceToBingo = b > 0 ? fuelToBingo / b : 0;
+      const hours = Math.floor(enduranceToBingo);
+      const mins = Math.round((enduranceToBingo - hours) * 60);
+      
+      const fuelPercentage = (currentFuel / f) * 100 || 0;
 
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -396,11 +397,8 @@ function App() {
               <input type="number" value={fuelInit} onChange={e => setFuelInit(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L)</label>
-              <div style={{ display: 'flex', gap: '5px' }}>
-                <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ flex: 1, padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
-                <button onClick={saveFuelPoint} style={{ padding: '0 10px', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>REC</button>
-              </div>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>CONSUMO (L/H)</label>
+              <input type="number" value={burnRate} onChange={e => setBurnRate(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
@@ -410,8 +408,8 @@ function App() {
 
           <div style={{ marginBottom: '25px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8em', marginBottom: '5px' }}>
-              <span>CONSUMO: {burnRateCalculated.toFixed(1)} L/H</span>
-              <span>RESTANTE: {fCurr.toFixed(1)}L / {fInit}L</span>
+              <span>CONSUMO ESTIMADO</span>
+              <span>{currentFuel.toFixed(1)}L / {f}L</span>
             </div>
             <div style={{ height: '25px', width: '100%', backgroundColor: '#eee', borderRadius: '12px', overflow: 'hidden', border: '1px solid #ccc' }}>
               <div style={{ 
@@ -426,48 +424,10 @@ function App() {
             </div>
           </div>
 
-          <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
+          <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px' }}>TEMPO RESTANTE ATÉ 2.5L (BINGO)</div>
-            {burnRateCalculated > 0 ? (
-              <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
-            ) : (
-              <div style={{ fontSize: '1.5em', margin: '15px 0' }}>Aguardando Dados...</div>
-            )}
-            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Cálculo baseado no consumo médio real.</div>
-          </div>
-
-          {/* FUEL HISTORY CHART (CSS SVG) */}
-          {fuelHistory.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '0.7em', fontWeight: 'bold', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>HISTÓRICO DE CONSUMO</span>
-                <button onClick={() => setFuelHistory([])} style={{ background: 'none', border: 'none', color: 'var(--accent-color)', fontSize: '1em', cursor: 'pointer' }}>Limpar</button>
-              </div>
-              <div style={{ height: '120px', borderLeft: '1px solid #ccc', borderBottom: '1px solid #ccc', position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 10px', gap: '5px' }}>
-                {fuelHistory.map((pt, i) => {
-                  const h = (pt.fuel / fInit) * 100;
-                  return (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                      <div style={{ width: '100%', height: `${h}px`, backgroundColor: 'var(--primary-color)', position: 'relative' }}>
-                        <span style={{ position: 'absolute', top: '-15px', width: '100%', textAlign: 'center', fontSize: '0.6em' }}>{pt.fuel}L</span>
-                      </div>
-                      <span style={{ fontSize: '0.5em', transform: 'rotate(-45deg)', marginTop: '5px', whiteSpace: 'nowrap' }}>{pt.time}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <div style={{ padding: '15px', backgroundColor: 'rgba(250, 204, 21, 0.1)', color: '#856404', borderRadius: '8px', textAlign: 'center', border: '1px solid #facc15' }}>
-              <div style={{ fontSize: '0.75em', fontWeight: 'bold' }}>BINGO 25%</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(fInit * 0.25).toFixed(1)} L</div>
-            </div>
-            <div style={{ padding: '15px', backgroundColor: 'rgba(255, 77, 77, 0.1)', color: 'var(--accent-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--accent-color)' }}>
-              <div style={{ fontSize: '0.75em', fontWeight: 'bold' }}>BINGO 15%</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(fInit * 0.15).toFixed(1)} L</div>
-            </div>
+            <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
+            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Baseado em {burnRate} L/H e {elapsedMinutes.toFixed(0)}m de operação.</div>
           </div>
         </div>
       );
