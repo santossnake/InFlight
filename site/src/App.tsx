@@ -186,6 +186,10 @@ function App() {
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
   const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '13')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
+  const [fuelHistory, setFuelHistory] = useState<{time: string, fuel: number}[]>(() => {
+    const saved = localStorage.getItem('fuelHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
     const saved = localStorage.getItem('missionLogs');
@@ -218,7 +222,8 @@ function App() {
   useEffect(() => {
     localStorage.setItem('fuelInit', fuelInit);
     localStorage.setItem('fuelCurrent', fuelCurrent);
-  }, [fuelInit, fuelCurrent]);
+    localStorage.setItem('fuelHistory', JSON.stringify(fuelHistory));
+  }, [fuelInit, fuelCurrent, fuelHistory]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -264,8 +269,11 @@ function App() {
   }
 
   const logEvent = (event: string) => {
-    const timeStr = new Date().toLocaleTimeString('pt-PT', { hour12: false });
-    setMissionLogs(prev => ({ ...prev, [event]: timeStr }));
+    // ONLY set if not already set. Must use double-click (resetMissionEvent) to change.
+    if (!missionLogs[event]) {
+      const timeStr = new Date().toLocaleTimeString('pt-PT', { hour12: false, hour: '2-digit', minute: '2-digit' });
+      setMissionLogs(prev => ({ ...prev, [event]: timeStr }));
+    }
   }
 
   const lastTapRef = useRef<{ [key: string]: number }>({});
@@ -309,6 +317,7 @@ function App() {
       setFuelInit('13');
       setFuelCurrent('13');
       setEngineOnManual('');
+      setFuelHistory([]);
     }
   };
 
@@ -345,6 +354,14 @@ function App() {
     });
   };
 
+  const saveFuelPoint = () => {
+    const val = parseFloat(fuelCurrent);
+    if (!isNaN(val)) {
+      const now = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      setFuelHistory(prev => [...prev, { time: now, fuel: val }]);
+    }
+  }
+
   const renderContent = (item: GuideItem) => {
     if (item.id === 'bingo-calc') {
       const fInit = parseFloat(fuelInit) || 0;
@@ -380,7 +397,10 @@ function App() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L)</label>
-              <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ flex: 1, padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+                <button onClick={saveFuelPoint} style={{ padding: '0 10px', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>REC</button>
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
@@ -415,6 +435,29 @@ function App() {
             )}
             <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Cálculo baseado no consumo médio real.</div>
           </div>
+
+          {/* FUEL HISTORY CHART (CSS SVG) */}
+          {fuelHistory.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '0.7em', fontWeight: 'bold', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>HISTÓRICO DE CONSUMO</span>
+                <button onClick={() => setFuelHistory([])} style={{ background: 'none', border: 'none', color: 'var(--accent-color)', fontSize: '1em', cursor: 'pointer' }}>Limpar</button>
+              </div>
+              <div style={{ height: '120px', borderLeft: '1px solid #ccc', borderBottom: '1px solid #ccc', position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 10px', gap: '5px' }}>
+                {fuelHistory.map((pt, i) => {
+                  const h = (pt.fuel / fInit) * 100;
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                      <div style={{ width: '100%', height: `${h}px`, backgroundColor: 'var(--primary-color)', position: 'relative' }}>
+                        <span style={{ position: 'absolute', top: '-15px', width: '100%', textAlign: 'center', fontSize: '0.6em' }}>{pt.fuel}L</span>
+                      </div>
+                      <span style={{ fontSize: '0.5em', transform: 'rotate(-45deg)', marginTop: '5px', whiteSpace: 'nowrap' }}>{pt.time}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div style={{ padding: '15px', backgroundColor: 'rgba(250, 204, 21, 0.1)', color: '#856404', borderRadius: '8px', textAlign: 'center', border: '1px solid #facc15' }}>
