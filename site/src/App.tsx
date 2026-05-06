@@ -370,13 +370,18 @@ function App() {
       // Calculate elapsed time since Engine ON for informational purposes
       let elapsedMinutes = 0;
       const engOnStr = engineOnManual || missionLogs['eng-on'];
-      if (engOnStr) {
-        const [h, m] = engOnStr.split(':').map(Number);
-        const engOnDate = new Date();
-        engOnDate.setHours(h, m, 0);
-        const now = new Date();
-        if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
-        elapsedMinutes = (now.getTime() - engOnDate.getTime()) / (1000 * 60);
+      
+      if (engOnStr && engOnStr.includes(':')) {
+        try {
+          const [h, m] = engOnStr.split(':').map(Number);
+          const engOnDate = new Date();
+          engOnDate.setHours(h, m, 0, 0);
+          const now = new Date();
+          if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
+          elapsedMinutes = Math.max(0, (now.getTime() - engOnDate.getTime()) / (1000 * 60));
+        } catch (e) {
+          console.error("Erro ao calcular tempo Engine ON", e);
+        }
       }
 
       const fuelConsumed = (elapsedMinutes / 60) * b;
@@ -387,7 +392,7 @@ function App() {
       const hours = Math.floor(enduranceToBingo);
       const mins = Math.round((enduranceToBingo - hours) * 60);
       
-      const fuelPercentage = (currentFuel / f) * 100 || 0;
+      const fuelPercentage = f > 0 ? (currentFuel / f) * 100 : 0;
 
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -402,13 +407,13 @@ function App() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
-              <input type="text" placeholder="--:--" value={engineOnManual || missionLogs['eng-on'] || ''} onChange={e => setEngineOnManual(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+              <input type="text" placeholder="--:--" value={engOnStr || ''} onChange={e => setEngineOnManual(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
           </div>
 
           <div style={{ marginBottom: '25px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8em', marginBottom: '5px' }}>
-              <span>CONSUMO ESTIMADO</span>
+              <span>FUEL RESTANTE (EST.)</span>
               <span>{currentFuel.toFixed(1)}L / {f}L</span>
             </div>
             <div style={{ height: '25px', width: '100%', backgroundColor: '#eee', borderRadius: '12px', overflow: 'hidden', border: '1px solid #ccc' }}>
@@ -427,7 +432,7 @@ function App() {
           <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px' }}>TEMPO RESTANTE ATÉ 2.5L (BINGO)</div>
             <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
-            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Baseado em {burnRate} L/H e {elapsedMinutes.toFixed(0)}m de operação.</div>
+            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Baseado em {burnRate} L/H e {elapsedMinutes.toFixed(0)}m desde Engine ON.</div>
           </div>
         </div>
       );
