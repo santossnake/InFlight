@@ -143,7 +143,7 @@ const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: a
 );
 
 function App() {
-  const [activeSectionId, setActiveSectionId] = useState<string>('MISSION_PLANNING')
+  const [activeSectionId, setActiveSectionId] = useState<string>('NORMAL_PROCEDURES')
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
   const [checklistProgress, setChecklistProgress] = useState<{ [itemId: string]: { [index: number]: boolean } }>(() => {
