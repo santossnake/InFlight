@@ -16,543 +16,6 @@ export interface GuideSection {
 
 export const guideData: GuideSection[] = [
   {
-    id: 'MISSION_PLANNING',
-    label: 'MISSION PLANNING',
-    title: 'Mission Planning',
-    items: [
-      {
-        id: 'mp-briefing-guide',
-        title: 'BRIEFING GUIDE',
-        type: 'image',
-        content: ['/assets/briefing-guide-1.png', '/assets/briefing-guide-2.png']
-      },
-      {
-        id: 'mp-mission-folder',
-        title: 'MISSION FOLDER',
-        type: 'image',
-        content: [
-          '/assets/mission-folder-1.png',
-          '/assets/mission-folder-2.png',
-          '/assets/mission-folder-3.png',
-          '/assets/mission-folder-4.png'
-        ]
-      },
-      {
-        id: 'mp-wind-chart',
-        title: 'WIND CHART',
-        type: 'image',
-        content: ['/assets/wind-chart.png']
-      },
-      {
-        id: 'mp-config-icao',
-        title: 'OGS42 CONFIGURATION & ICAO CODES',
-        type: 'table',
-        content: {
-          headers: ['PRT', 'ICAO CODE', 'AC NAME', 'BAT', 'FUEL'],
-          rows: [
-            ['PRT001', '497CD->0', 'ABRANTES01', '2H', '16L'],
-            ['PRT002', '497CD->1', 'BEJA02', '2H', '11L'],
-            ['PRT003', '497CD->2', 'COIMBRA03', '2H', '16L'],
-            ['PRT004', '497CD->3', 'DIVOR04', '2H', '16L'],
-            ['PRT005', '497CD->4', 'ESPINHO05', '2H', '11L'],
-            ['PRT006', '497CD->5', 'FARO06', '2H', '16L'],
-            ['PRT007', '497CD->6', 'GAIA07', '1H', '11L'],
-            ['PRT008', '497CD->7', 'HORTA08', '1H', '11L'],
-            ['PRT009', '497CD->8', 'ILHAVO09', '1H', '11L'],
-            ['PRT010', '497CD->9', 'JUROMENHA10', '1H', '11L'],
-            ['PRT011', '497CD->A', 'LAJES11', '1H', '11L'],
-            ['PRT012', '497CD->B', 'MACHICO12', '1H', '16L']
-          ]
-        }
-      },
-      {
-        id: 'mp-callsign-cnl',
-        title: 'CALLSIGN & CNL',
-        type: 'mixed',
-        content: {
-          table: {
-            headers: ['LOCAL', 'CALLSIGN (Day)', 'IFF (Day)', 'CALLSIGN (Night)', 'IFF (Night)'],
-            rows: [
-              ['LPOT', 'SHADW72', '5672', 'SHADW73', '5673'],
-              ['LPBJ', 'SPOOK74', '5674', 'SPOOK75', '5675'],
-              ['LPMI', 'KNIGT76', '5676', 'KNIGT77', '5677']
-            ]
-          },
-          tables: [
-            {
-              title: 'CÓDIGOS DE CANCELAMENTO (CNL)',
-              rows: [
-                ['CNL 11', 'INDISPONIBILIDADE DE MATERIAL - AERONAVE'],
-                ['CNL 12', 'INDISPONIBILIDADE DE MATERIAL - Eq. MISSÃO / SENSORES'],
-                ['CNL 13', 'INDISPONIBILIDADE DE MATERIAL - ARMAMENTO'],
-                ['CNL 20', 'INDISPONIBILIDADE DE PESSOAL - TRIPULAÇÃO'],
-                ['CNL 31', 'CONDIÇÕES METEO - AERÓDROMO PARTIDA'],
-                ['CNL 32', 'CONDIÇÕES METEO - AERÓDROMO CHEGADA'],
-                ['CNL 33', 'CONDIÇÕES METEO - AERÓDROMO ROTA'],
-                ['CNL 34', 'CONDIÇÕES METEO - ÁREA DE OPERAÇÕES'],
-                ['CNL 35', 'CONDIÇÕES METEO - ALVO'],
-                ['CNL 40', 'PELA ENTIDADE BENEFICIÁRIA DA MISSÃO'],
-                ['CNL 51', 'RAZÕES OPERACIONAIS - AERÓDROMO DE PARTIDA'],
-                ['CNL 52', 'RAZÕES OPERACIONAIS - COORDENAÇÃO TÁCTICA'],
-                ['CNL 53', 'RAZÕES OPERACIONAIS - RESTRIÇÕES DE ESPAÇO AÉREO'],
-                ['CNL 55', 'RAZÕES OPERACIONAIS - OUTRAS'],
-                ['CNL 60', 'FALTA DE AUTORIZAÇÃO DE SOBREVOO E/OU ATERRAGEM']
-              ]
-            }
-          ]
-        }
-      },
-      {
-        id: 'mp-airtasks',
-        title: 'AIRTASKS',
-        type: 'table',
-        content: {
-          headers: ['Code', 'Description'],
-          rows: [
-            [{text: 'TIPO DE MISSÃO', colSpan: 2, bg: '#eee', bold: true}],
-            ['00U / 80U / 90U', 'Treino / Manutenção / Instrução na base mãe'],
-            ['00A / 80A / 90A', 'Treino / Manutenção / Instrução fora da base mãe'],
-            ['40A', 'Operacional VTER'],
-            ['45A', 'Operacional VMAR'],
-            [{text: 'MODALIDADES DE ACÇÃO', colSpan: 2, bg: '#eee', bold: true}],
-            ['AQUAL', 'Aircraft Qualification'],
-            ['INST', 'Instruction'],
-            ['ISR', 'Intelligence Surveillance & Reconnaissance'],
-            ['MNT', 'Maintenance'],
-            ['AMOV', 'Air Movement'],
-            ['ADEM', 'Air Demostration'],
-            [{text: 'TIPO DE MODALIDADE', colSpan: 2, bg: '#eee', bold: true}],
-            ['INST', 'Instrução'],
-            ['OPER', 'Operacional'],
-            ['TRM', 'Treino De Manutenção De Qualificação'],
-            ['TRQ', 'Treino De Qualificação'],
-            ['TRU', 'Treino De Uniformização'],
-            [{text: 'DESIGNADORES DE MISSÃO', colSpan: 2, bg: '#eee', bold: true}],
-            ['00', 'Teste Ou Treino'],
-            ['20', 'Caça'],
-            ['25', 'Caça (Marítimo)'],
-            ['30', 'Ataque'],
-            ['35', 'Ataque (Marítimo)'],
-            ['40', 'Reconhecimento'],
-            ['45', 'Reconhecimento (Marítimo)'],
-            ['50', 'Transporte'],
-            ['55', 'Transporte (Marítimo)'],
-            ['60', 'Apoio Ao Combate Sar'],
-            ['65', 'Apoio Ao Combate Sar (Marítimo)'],
-            ['70', 'Treino'],
-            ['75', 'Treino (Marítimo)'],
-            ['80', 'Manutenção'],
-            ['90', 'Instrução']
-          ]
-        }
-      },
-      {
-        id: 'mp-flight-plan',
-        title: 'FLIGHT PLAN',
-        type: 'mixed',
-        content: {
-          image: '/assets/flight-plan.png',
-          checklist: [
-            '--- SUBMISSION & AREAS ACTIVATION ---',
-            'Texto a introduzir no email para LPPPARO@NAV.PT:',
-            '',
-            '(FPL-SPRTN40-IM',
-            '-1ZZZZ/L-GV/E',
-            '-LPMI1000',
-            '-N0051A050 DCT ZOPS DCT',
-            '-LPOT0700',
-            '-DOF/251203 REG/PRT004 CODE/497CD3 TYP/OGS42N PER/A',
-            'STS/STATE OPR/PRT AIR FORCE NAV/GPS ADS B',
-            'RMK/SSR3040 00A4658 UNMANNED AIRCRAFT RTE DCT',
-            'N DCT N9 DCT N4 DCT N9 DCT N DCT N DCT',
-            '-E/0900 P/TBN R/UE',
-            '-A/GREY)',
-            '',
-            '• Sempre que houver atividade na área R73 (N, C ou S), enviar email no dia anterior para: CA.SECGEA@EMFA.GOV.PT',
-            '• Se houver necessidade imediata de ativar a área pode ser em coordenação tática com a EITA'
-          ]
-        }
-      },
-      {
-        id: 'mp-restricted-danger',
-        title: 'RESTRICTED & DANGER AREAS',
-        type: 'image',
-        content: ['/assets/restricted-danger-1.png', '/assets/restricted-danger-2.png']
-      },
-      {
-        id: 'mp-op-areas-pt',
-        title: 'OPERATIONAL AREAS - PT',
-        type: 'image',
-        content: ['/assets/op-area-pt.png']
-      },
-      {
-        id: 'mp-mef-north',
-        title: 'OPERATIONAL AREAS - NORTH PT',
-        type: 'mixed',
-        content: {
-          image: '/assets/op-area-north.png',
-          table: {
-            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
-            rows: [
-              ['N', '4000\'', 'N10', '4000\''],
-              ['N1', '3000\'', 'N11', '3400\''],
-              ['N2', '4800\'', 'N12', '4800\''],
-              ['N3', '4900\'', 'N13', '3200\''],
-              ['N4', '5200\'', 'N14', '3100\''],
-              ['N5', '3500\'', 'N15', '3200\''],
-              ['N6', '5000\'', 'N16', '4600\''],
-              ['N7', '4800\'', 'N17', '3700\''],
-              ['N8', '4500\'', 'N18', '3700\''],
-              ['N9', '3900\'', 'N19', '3700\''],
-              [{text: 'Transition Altitude: 5000FT AMSL', colSpan: 4, center: true, italic: true}]
-            ]
-          }
-        }
-      },
-      {
-        id: 'mp-mef-center',
-        title: 'OPERATIONAL AREAS - CENTER PT',
-        type: 'mixed',
-        content: {
-          image: '/assets/op-area-center.png',
-          table: {
-            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
-            rows: [
-              ['C', '4100\'', 'C13', '3100\''],
-              ['C1', '3600\'', 'C14', '2100\''],
-              ['C2', '3600\'', 'C15', '2400\''],
-              ['C3', '5800\'', 'C16', '1200\''],
-              ['C4', '600\'', 'C17', '2200\''],
-              ['C5', '4100\'', 'C18', '2200\''],
-              ['C6', '4500\'', 'C19', '3200\''],
-              ['C7', '6700\'', 'C20', '600\''],
-              ['C8', '4100\'', 'C9', '4100\''],
-              ['C10', '4100\'', 'C11', '1900\''],
-              ['C12', '1800\'', 'C21', '900\''],
-              ['C22', '2800\'', 'C23', '900\''],
-              ['C24', '1600\'', '', ''],
-              [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
-            ]
-          }
-        }
-      },
-      {
-        id: 'mp-mef-south',
-        title: 'OPERATIONAL AREAS - SOUTH PT',
-        type: 'mixed',
-        content: {
-          image: '/assets/op-area-south.png',
-          table: {
-            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
-            rows: [
-              ['S', '3100\'', 'S16', '300\''],
-              ['S1', '1600\'', 'S17', '1300\''],
-              ['S2', '2300\'', 'S18', '1400\''],
-              ['S3', '1500\'', 'S19', '100\''],
-              ['S6', '100\'', 'S20', '3000\''],
-              ['S7', '500\'', 'S21', '100\''],
-              ['S8', '1200\'', 'S22', '100\''],
-              ['S9', '800\'', 'S23', '300\''],
-              ['S10', '100\'', 'S24', '100\''],
-              ['S11', '400\'', 'S12', '1300\''],
-              ['S13', '1400\'', 'S14', '100\''],
-              ['S15', '300\'', '', ''],
-              [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
-            ]
-          }
-        }
-      },
-      {
-        id: 'mp-working-areas',
-        title: 'WORKING AREAS - LPBJ',
-        type: 'image',
-        content: ['/assets/work-aerea-lpbj.png']
-      },
-      {
-        id: 'mp-airspace',
-        title: 'AIRSPACE - CLASS G',
-        type: 'table',
-        content: {
-          headers: ['Provision', 'IFR (GAT)', 'VFR (GAT)', 'Operational and Training Low Level Flights (OAT)'],
-          rows: [
-            ['SEPARATION PROVIDED', 'NIL', 'NIL', 'NIL'],
-            ['SERVICE PROVIDED', 'Flight Information Service (FIS)', 'FIS', 'Flight Information Service'],
-            ['VMC MINIMA', 'Not Applicable', 
-              'At and above FL100:\n• 8 Km visibility\n• 1500 m horizontal and 300 m vertical distance from clouds\n\n' +
-              'Below FL100 and above 3000 ft AMSL or 1000 ft AGL whichever is higher:\n• 5 Km visibility\n• 1500 m horizontal and 300 m vertical distance from clouds\n\n' +
-              'At and below 3000 ft AMSL or 1000 ft AGL whichever is higher:\n• 5 Km* visibility\n• Clear of cloud and in sight of ground or water', 
-              'Not Applicable'
-            ],
-            ['SPEED LIMITATION**', '250 Kt IAS below 3050 m (10000 ft AMSL)', '250 Kt IAS below 3050 m (10000 ft AMSL)', 'MACH 0.7'],
-            ['RADIO COMMUNICATION', 'Continuous two-way', 
-              'Within Lisbon FIR:\n• Civilian ACFT not required***;\n• MIL ACFT required with Lisboa INFORMATION.\n\n' +
-              'Within Santa Maria Oceanic FIR:\n• Required.', 
-              'Continuous two-way'
-            ],
-            ['FLIGHT PLAN', 'Required for MIL ACFT', 'Required for MIL ACFT', 'Required'],
-            [{text: '* Helicopters at or below 3000 ft AMSL and in sight of the surface may operate at a speed which, having regard to the visibility, is reasonable.\n' +
-                    '** When the height of transition altitude is lower than 3050 m (10000 ft AMSL), FL100 should be used in lieu of 10000 ft.\n' +
-                    '*** Except in LPBG (AIP PORTUGAL AD 2.17), LPVR (AIP PORTUGAL AD 2.17), LPCH and LPPM (AIP PORTUGAL ENR 2.2.1.4.) ATZ.\n\n' +
-                    'Class G Airspace comprises: All airspace not covered by classes "A", "C" and "D" within Lisboa FIR and Santa Maria Oceanic FIR.', colSpan: 4, italic: true}]
-          ]
-        }
-      },
-      {
-        id: 'mp-sar-signals',
-        title: 'SAR SIGNALS & TRANSITION',
-        type: 'table',
-        content: {
-          headers: ['Message', 'Symbol', 'Message', 'Symbol'],
-          rows: [
-            [{text: 'SEARCH AND RESCUE SIGNALS', colSpan: 4, bg: '#eee', bold: true, center: true}],
-            ['Require Assistance', 'V', 'Yes or Affirmative', 'Y'],
-            ['Require Medical Assist.', 'X', 'Proceeding in this dir.', '↑'],
-            ['No or Negative', 'N', 'IF IN DOUBT USE', 'SOS'],
-            [{text: 'FOR RESCUE UNITS', colSpan: 4, bg: '#ddd', bold: true, center: true}],
-            ['Operation Completed', 'LLL', 'Found all personnel', 'LL'],
-            ['Found only some pers.', '++', 'We are not able to cont.', 'XX'],
-            [{text: 'TRANSITION ALTITUDES', colSpan: 4, bg: '#eee', bold: true, center: true}],
-            ['LPOT / LPBJ / Cascais / Lisboa / Porto / Beja / Évora', '4000 ft', 'LPMI / Madeira / Porto Santo', '5000 ft'],
-            ['Bragança / Vila Real', '8000 ft', '', '']
-          ]
-        }
-      },
-      {
-        id: 'mp-antenna-coverage',
-        title: 'MAXIMUM ANTENNAS COVERAGE (43NM)',
-        type: 'image',
-        content: ['/assets/antenas-coverage.png']
-      },
-      {
-        id: 'mp-aerodrome-charts',
-        title: 'AERODROME CHARTS',
-        type: 'image',
-        content: [
-          '/assets/lpot.png',
-          '/assets/lpmi.png',
-          '/assets/lpbj.jpg'
-        ]
-      },
-      {
-        id: 'mp-contacts',
-        title: 'CONTACTS',
-        type: 'table',
-        content: {
-          headers: ['LOCAL', 'POSITION', 'TLM / EXT', 'OUTLOOK'],
-          rows: [
-            [{text: 'LPMI', colSpan: 1, bold: true}, 'MC', '590 465 / 912 741 812', 'e991.ao.adj@emfa.gov.pt'],
-            ['', 'OPS', '590 424 / 912 741 864', ''],
-            ['', 'COCKPIT', '509 555 / 217 716 106', ''],
-            ['', 'GNR', '278 201 000', '-'],
-            ['', 'Diretor AD', '932 657 050', 'dir.aerodromo.lpmi@gmail.com'],
-            [{text: 'LPOT', colSpan: 1, bold: true}, 'MC', '590 481 / 912 573 229', 'e991.ao.adj@emfa.gov.pt'],
-            ['', 'OPS', '590 457 / 912 741 326', ''],
-            ['', 'COCKPIT', '502 981', ''],
-            ['', 'CCSD', '502 033 / 263 740 147', '-'],
-            [{text: 'LPBJ', colSpan: 1, bold: true}, 'MC', '590 455 / 912 741 767', 'e991.ao.adj@emfa.gov.pt'],
-            ['', 'OPS', '590 458 / 912 741 842', ''],
-            ['', 'COCKPIT', '550 554', ''],
-            ['', 'CCSD', '550 092 / 284 314 692', '-'],
-            [{text: 'OUTROS', colSpan: 1, bold: true}, 'EITA', '509 335 / 217 716 175', '-'],
-            ['', 'OPS CA', '529 305 / 217 708 205', '-'],
-            ['', 'CMDT GO21', '590 066 / 915 064 366', 'cfmta.go.cmdt@emfa.gov.pt'],
-            ['', 'CMDT E991', '590 920 / 913 874 429', 'e991.cmdt@emfa.gov.pt'],
-            ['', 'OFOPS E991', '590 874 / 919 425 747', 'e991.esqlhao@emfa.gov.pt']
-          ]
-        }
-      },
-      {
-        id: 'mp-detach-general',
-        title: 'GENERAL DETACHMENTS CHECKLIST',
-        type: 'checklist',
-        content: [
-          '1. Pedir NOTAM(s) (10 dias úteis antecedência)',
-          '2. Pedir "tasking" da missão',
-          '3. Solicitar à EMA Aeronaves para a missão',
-          '4. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
-          '5. Solicitar à EMA 1 kit de PRE completo',
-          '6. Pedir Guias de Marcha',
-          '7. Reservar dormidas militares (e-mail dat.spmissoes)',
-          '8. Fazer reserva no restaurante',
-          '9. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
-          '10. Solicitar kit noturno (se nec.)',
-          '11. Solicitar viatura(s) para a operação',
-          '12. Verificar níveis óleo, água, adblue e combustível',
-          '13. Verificar boletim das viaturas',
-          '14. Confirmar cartão Galp frota',
-          '15. Pedir atrelado e matrícula (se nec.)'
-        ]
-      },
-      {
-        id: 'mp-detach-lpbj',
-        title: 'LPBJ (BEJA) CHECKLIST',
-        type: 'checklist',
-        content: [
-          '1. Coordenar atividade aérea com as Operações de Beja',
-          '2. Pedir NOTAM(s) (10 dias úteis antecedência)',
-          '3. Pedir "tasking" da missão',
-          '4. Solicitar à EMA Aeronaves para a missão',
-          '5. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
-          '6. Solicitar à EMA 1 kit de PRE completo',
-          '7. Pedir Guias de Marcha',
-          '8. Reservar Alojamento',
-          '9. Marcar Refeições',
-          '10. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
-          '11. Solicitar kit noturno (se nec.)',
-          '12. Solicitar viatura(s) para a operação',
-          '13. Verificar níveis óleo, água, adblue e combustível',
-          '14. Verificar boletim das viaturas',
-          '15. Confirmar cartão Galp frota',
-          '16. Pedir atrelado e matrícula (se nec.)'
-        ]
-      },
-      {
-        id: 'mp-detach-lpmi',
-        title: 'LPMI (MIRANDELA) CHECKLIST',
-        type: 'checklist',
-        content: [
-          '1. Pedir NOTAM(s) (10 dias úteis antecedência)',
-          '2. Pedir "tasking" da missão',
-          '3. Solicitar à EMA Aeronaves para a missão',
-          '4. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
-          '5. Solicitar à EMA 1 kit de PRE completo',
-          '6. Pedir Guias de Marcha',
-          '7. Reservar dormidas militares',
-          '8. Fazer reserva no restaurante',
-          '9. Solicitar a chave do cockpit',
-          '10. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
-          '11. Solicitar kit noturno (se nec.)',
-          '12. Solicitar viatura(s) para a operação',
-          '13. Verificar níveis óleo, água, adblue e combustível',
-          '14. Verificar boletim das viaturas',
-          '15. Confirmar cartão Galp frota',
-          '16. Pedir atrelado e matrícula (se nec.)',
-          '17. Contactar Diretor Aeródromo (Sr. João Vinhais - 932657050)',
-          '18. Contactar CA antes de entrar e após sair',
-          '19. Utilizar aplicação "SALTO" para abertura de portas'
-        ]
-      },
-      {
-        id: 'mp-night-flight',
-        title: 'NIGHT FLIGHT SETUP',
-        type: 'mixed',
-        content: {
-          image: '/assets/nf-lights.png',
-          table: {
-            headers: ['Posição', 'Localização', 'Finalidade'],
-            rows: [
-              ['Tripé 1', '10m antes da posição do PRE', 'Iluminação de zona de toque'],
-              ['Tripé 2', '25m antes da posição do PRE', 'Iluminação de aproximação'],
-              ['Tripé 3', '50m antes da posição do PRE', 'Iluminação de aproximação inicial'],
-              ['Tripé 4', '10m depois da posição do PRE', 'Iluminação de zona de travagem'],
-              [{text: 'As luzes devem ser colocadas de 25 em 25m nos limites laterais da pista, até aos 100m.', colSpan: 3, italic: true, center: true}]
-            ]
-          }
-        }
-      },
-      {
-        id: 'mp-emergency-day',
-        title: 'EMERGENCY OF THE DAY',
-        type: 'table',
-        content: {
-          headers: ['DAY', 'MONTH (1,3,5,7,9,11)', 'DAY', 'MONTH (2,4,6,8,10,12)'],
-          rows: [
-            ['1', 'ENGINE FAILURE FAR FROM AERODROME', '1', 'FIRE, SMOKE OR FUMES IN THE COCKPIT'],
-            ['2', 'ENGINE FAILURE NEAR THE AERODROME', '2', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT'],
-            ['3', 'ON BOARD FIRE', '3', 'EXTERNAL PILOT LOST CONTROL'],
-            ['4', 'STRUCTURAL PROBLEM (WITHOUT C2)', '4', 'AIRSPEED LIMITATIONS'],
-            ['5', 'STRUCTURAL PROBLEM (WITH C2)', '5', 'OPERATIONAL LIMITS'],
-            ['6', 'ONBOARD GENERATOR FAILURE', '6', 'EVENTS FOR MANDATORY INSPECTION'],
-            ['7', 'ERRATIC BEHAVIOUR', '7', 'ENGINE LIMITATIONS'],
-            ['8', 'GPS FAILURE', '8', 'ENGINE FAILURE FAR FROM AERODROME'],
-            ['9', 'BAROMETRIC ALTITUDE DEVIATION', '9', 'ENGINE FAILURE NEAR THE AERODROME'],
-            ['10', 'LINK LOSS', '10', 'ON BOARD FIRE'],
-            ['11', 'COCKPIT ENERGY FAILURE', '11', 'STRUCTURAL PROBLEM (WITHOUT C2)'],
-            ['12', 'GCS FAILURE', '12', 'STRUCTURAL PROBLEM (WITH C2)'],
-            ['13', 'FIRE, SMOKE OR FUMES IN THE COCKPIT', '13', 'ONBOARD GENERATOR FAILURE'],
-            ['14', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT', '14', 'ERRATIC BEHAVIOUR'],
-            ['15', 'EXTERNAL PILOT LOST CONTROL', '15', 'GPS FAILURE'],
-            ['16', 'AIRSPEED LIMITATIONS', '16', 'BAROMETRIC ALTITUDE DEVIATION'],
-            ['17', 'OPERATIONAL LIMITS', '17', 'LINK LOSS'],
-            ['18', 'EVENTS FOR MANDATORY INSPECTION', '18', 'COCKPIT ENERGY FAILURE'],
-            ['19', 'ENGINE LIMITATIONS', '19', 'GCS FAILURE'],
-            ['20', 'ENGINE FAILURE FAR FROM AERODROME', '20', 'FIRE, SMOKE OR FUMES IN THE COCKPIT'],
-            ['21', 'ENGINE FAILURE NEAR THE AERODROME', '21', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT'],
-            ['22', 'ON BOARD FIRE', '22', 'EXTERNAL PILOT LOST CONTROL'],
-            ['23', 'STRUCTURAL PROBLEM (WITHOUT C2)', '23', 'AIRSPEED LIMITATIONS'],
-            ['24', 'STRUCTURAL PROBLEM (WITH C2)', '24', 'OPERATIONAL LIMITS'],
-            ['25', 'ONBOARD GENERATOR FAILURE', '25', 'EVENTS FOR MANDATORY INSPECTION'],
-            ['26', 'ERRATIC BEHAVIOUR', '26', 'ENGINE LIMITATIONS'],
-            ['27', 'GPS FAILURE', '27', 'ENGINE FAILURE FAR FROM AERODROME'],
-            ['28', 'BAROMETRIC ALTITUDE DEVIATION', '28', 'ENGINE FAILURE NEAR THE AERODROME'],
-            ['29', 'LINK LOSS', '29', 'ON BOARD FIRE'],
-            ['30', 'COCKPIT ENERGY FAILURE', '30', 'STRUCTURAL PROBLEM (WITHOUT C2)'],
-            ['31', 'GCS FAILURE', '31', 'STRUCTURAL PROBLEM (WITH C2)']
-          ]
-        }
-      },
-      {
-        id: 'mp-mmel',
-        title: 'MASTER MINIMUM EQUIPMENT LIST (MMEL)',
-        type: 'checklist',
-        content: [
-          '1. UAV',
-          '2. GCS (Principal, Backup, EO Station, Server, VHF, UPS, Generator)',
-          '3. Sensor EO (Gimbal) ou Gimbal Dummy',
-          '4. AIS',
-          '5. Kit PRE (Comandos, Power, Comms, Starter, Extintor)',
-          '6. Antena STC',
-          '7. Antena Omni / Omni Amplificada',
-          '8. Estação Meteorológica',
-          '9. Iluminação de Pista (Noite)'
-        ]
-      },
-      {
-        id: 'mp-mel',
-        title: 'MINIMUM EQUIPMENT LIST (MEL)',
-        type: 'table',
-        content: {
-          headers: ['EQUIPMENT', 'TRQ', 'ISR', 'HO / TO'],
-          rows: [
-            ['UAV', 'X', 'X', 'X'],
-            ['COCKPIT / PORTÁTIL', 'X', 'X', 'X2'],
-            ['SENSOR EO (GIMBAL)', {text: 'X', colSpan: 1, center: true}, 'X', 'X'],
-            ['GIMBAL DUMMY', 'X', '', ''],
-            ['KIT PRE', 'X', 'X', 'X'],
-            ['ANTENA STC', 'X', 'X', 'X2'],
-            ['ANTENA OMNI / OMNI AMP', 'X', 'X', 'X2'],
-            ['ESTAÇÃO METEOROLÓGICA', 'X', 'X', 'X']
-          ]
-        }
-      },
-      {
-        id: 'mp-system-status',
-        title: 'SYSTEM STATUS INDICATORS',
-        type: 'mixed',
-        content: {
-          image: '/assets/status-systems.png',
-          table: {
-            headers: ['#', 'System Component'],
-            rows: [
-              ['1', 'ONBOARD PC'],
-              ['2/3', 'EXTERNAL TO SERIAL CONVERTER 1/2'],
-              ['4', 'ONBOARD ROUTER'],
-              ['5', 'STORM COMM COMMUNICATION BOARD'],
-              ['6/7', 'ANTENNA OMNI / OMNI AMP'],
-              ['8', 'STORM COMM'],
-              ['9', 'EMERGENCY RECOVERY'],
-              ['11', 'ADSB'],
-              ['12', 'TRANSPONDER COMMUNICATION'],
-              ['13', 'LINK TO PC SERVER'],
-              ['14/15', 'LINK TO STORM COMM COMMUNICATOR'],
-              ['16', 'LINK TO LINK CONTROLLER']
-            ]
-          }
-        }
-      }
-    ]
-  },
-  {
     id: 'EMERGENCY_CHECKLIST',
     label: 'EMERGENCY CHECKLIST',
     title: 'Emergency Checklist',
@@ -1381,6 +844,570 @@ export const guideData: GuideSection[] = [
             ['Axes 5 (R3)', 'Zoom']
           ]
         }
+      }
+    ]
+  },
+  {
+    id: 'MISSION_PLANNING',
+    label: 'MISSION PLANNING',
+    title: 'Mission Planning',
+    items: [
+      {
+        id: 'mp-briefing-guide',
+        title: 'BRIEFING GUIDE',
+        type: 'image',
+        content: ['/assets/briefing-guide-1.png', '/assets/briefing-guide-2.png']
+      },
+      {
+        id: 'mp-mission-folder',
+        title: 'MISSION FOLDER',
+        type: 'image',
+        content: [
+          '/assets/mission-folder-1.png',
+          '/assets/mission-folder-2.png',
+          '/assets/mission-folder-3.png',
+          '/assets/mission-folder-4.png'
+        ]
+      },
+      {
+        id: 'mp-wind-chart',
+        title: 'WIND CHART',
+        type: 'image',
+        content: ['/assets/wind-chart.png']
+      },
+      {
+        id: 'mp-config-icao',
+        title: 'OGS42 CONFIGURATION & ICAO CODES',
+        type: 'table',
+        content: {
+          headers: ['PRT', 'ICAO CODE', 'AC NAME', 'BAT', 'FUEL'],
+          rows: [
+            ['PRT001', '497CD->0', 'ABRANTES01', '2H', '16L'],
+            ['PRT002', '497CD->1', 'BEJA02', '2H', '11L'],
+            ['PRT003', '497CD->2', 'COIMBRA03', '2H', '16L'],
+            ['PRT004', '497CD->3', 'DIVOR04', '2H', '16L'],
+            ['PRT005', '497CD->4', 'ESPINHO05', '2H', '11L'],
+            ['PRT006', '497CD->5', 'FARO06', '2H', '16L'],
+            ['PRT007', '497CD->6', 'GAIA07', '1H', '11L'],
+            ['PRT008', '497CD->7', 'HORTA08', '1H', '11L'],
+            ['PRT009', '497CD->8', 'ILHAVO09', '1H', '11L'],
+            ['PRT010', '497CD->9', 'JUROMENHA10', '1H', '11L'],
+            ['PRT011', '497CD->A', 'LAJES11', '1H', '11L'],
+            ['PRT012', '497CD->B', 'MACHICO12', '1H', '16L']
+          ]
+        }
+      },
+      {
+        id: 'mp-callsign-cnl',
+        title: 'CALLSIGN & CNL',
+        type: 'mixed',
+        content: {
+          table: {
+            headers: ['LOCAL', 'CALLSIGN (Day)', 'IFF (Day)', 'CALLSIGN (Night)', 'IFF (Night)'],
+            rows: [
+              ['LPOT', 'SHADW72', '5672', 'SHADW73', '5673'],
+              ['LPBJ', 'SPOOK74', '5674', 'SPOOK75', '5675'],
+              ['LPMI', 'KNIGT76', '5676', 'KNIGT77', '5677']
+            ]
+          },
+          tables: [
+            {
+              title: 'CÓDIGOS DE CANCELAMENTO (CNL)',
+              rows: [
+                ['CNL 11', 'INDISPONIBILIDADE DE MATERIAL - AERONAVE'],
+                ['CNL 12', 'INDISPONIBILIDADE DE MATERIAL - Eq. MISSÃO / SENSORES'],
+                ['CNL 13', 'INDISPONIBILIDADE DE MATERIAL - ARMAMENTO'],
+                ['CNL 20', 'INDISPONIBILIDADE DE PESSOAL - TRIPULAÇÃO'],
+                ['CNL 31', 'CONDIÇÕES METEO - AERÓDROMO PARTIDA'],
+                ['CNL 32', 'CONDIÇÕES METEO - AERÓDROMO CHEGADA'],
+                ['CNL 33', 'CONDIÇÕES METEO - AERÓDROMO ROTA'],
+                ['CNL 34', 'CONDIÇÕES METEO - ÁREA DE OPERAÇÕES'],
+                ['CNL 35', 'CONDIÇÕES METEO - ALVO'],
+                ['CNL 40', 'PELA ENTIDADE BENEFICIÁRIA DA MISSÃO'],
+                ['CNL 51', 'RAZÕES OPERACIONAIS - AERÓDROMO DE PARTIDA'],
+                ['CNL 52', 'RAZÕES OPERACIONAIS - COORDENAÇÃO TÁCTICA'],
+                ['CNL 53', 'RAZÕES OPERACIONAIS - RESTRIÇÕES DE ESPAÇO AÉREO'],
+                ['CNL 55', 'RAZÕES OPERACIONAIS - OUTRAS'],
+                ['CNL 60', 'FALTA DE AUTORIZAÇÃO DE SOBREVOO E/OU ATERRAGEM']
+              ]
+            }
+          ]
+        }
+      },
+      {
+        id: 'mp-airtasks',
+        title: 'AIRTASKS',
+        type: 'table',
+        content: {
+          headers: ['Code', 'Description'],
+          rows: [
+            [{text: 'TIPO DE MISSÃO', colSpan: 2, bg: '#eee', bold: true}],
+            ['00U / 80U / 90U', 'Treino / Manutenção / Instrução na base mãe'],
+            ['00A / 80A / 90A', 'Treino / Manutenção / Instrução fora da base mãe'],
+            ['40A', 'Operacional VTER'],
+            ['45A', 'Operacional VMAR'],
+            [{text: 'MODALIDADES DE ACÇÃO', colSpan: 2, bg: '#eee', bold: true}],
+            ['AQUAL', 'Aircraft Qualification'],
+            ['INST', 'Instruction'],
+            ['ISR', 'Intelligence Surveillance & Reconnaissance'],
+            ['MNT', 'Maintenance'],
+            ['AMOV', 'Air Movement'],
+            ['ADEM', 'Air Demostration'],
+            [{text: 'TIPO DE MODALIDADE', colSpan: 2, bg: '#eee', bold: true}],
+            ['INST', 'Instrução'],
+            ['OPER', 'Operacional'],
+            ['TRM', 'Treino De Manutenção De Qualificação'],
+            ['TRQ', 'Treino De Qualificação'],
+            ['TRU', 'Treino De Uniformização'],
+            [{text: 'DESIGNADORES DE MISSÃO', colSpan: 2, bg: '#eee', bold: true}],
+            ['00', 'Teste Ou Treino'],
+            ['20', 'Caça'],
+            ['25', 'Caça (Marítimo)'],
+            ['30', 'Ataque'],
+            ['35', 'Ataque (Marítimo)'],
+            ['40', 'Reconhecimento'],
+            ['45', 'Reconhecimento (Marítimo)'],
+            ['50', 'Transporte'],
+            ['55', 'Transporte (Marítimo)'],
+            ['60', 'Apoio Ao Combate Sar'],
+            ['65', 'Apoio Ao Combate Sar (Marítimo)'],
+            ['70', 'Treino'],
+            ['75', 'Treino (Marítimo)'],
+            ['80', 'Manutenção'],
+            ['90', 'Instrução']
+          ]
+        }
+      },
+      {
+        id: 'mp-flight-plan',
+        title: 'FLIGHT PLAN',
+        type: 'mixed',
+        content: {
+          image: '/assets/flight-plan.png',
+          checklist: [
+            '--- SUBMISSION & AREAS ACTIVATION ---',
+            'Texto a introduzir no email para LPPPARO@NAV.PT:',
+            '',
+            '(FPL-SPRTN40-IM',
+            '-1ZZZZ/L-GV/E',
+            '-LPMI1000',
+            '-N0051A050 DCT ZOPS DCT',
+            '-LPOT0700',
+            '-DOF/251203 REG/PRT004 CODE/497CD3 TYP/OGS42N PER/A',
+            'STS/STATE OPR/PRT AIR FORCE NAV/GPS ADS B',
+            'RMK/SSR3040 00A4658 UNMANNED AIRCRAFT RTE DCT',
+            'N DCT N9 DCT N4 DCT N9 DCT N DCT N DCT',
+            '-E/0900 P/TBN R/UE',
+            '-A/GREY)',
+            '',
+            '• Sempre que houver atividade na área R73 (N, C ou S), enviar email no dia anterior para: CA.SECGEA@EMFA.GOV.PT',
+            '• Se houver necessidade imediata de ativar a área pode ser em coordenação tática com a EITA'
+          ]
+        }
+      },
+      {
+        id: 'mp-restricted-danger',
+        title: 'RESTRICTED & DANGER AREAS',
+        type: 'image',
+        content: ['/assets/restricted-danger-1.png', '/assets/restricted-danger-2.png']
+      },
+      {
+        id: 'mp-op-areas-pt',
+        title: 'OPERATIONAL AREAS - PT',
+        type: 'image',
+        content: ['/assets/op-area-pt.png']
+      },
+      {
+        id: 'mp-mef-north',
+        title: 'OPERATIONAL AREAS - NORTH PT',
+        type: 'mixed',
+        content: {
+          image: '/assets/op-area-north.png',
+          table: {
+            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
+            rows: [
+              ['N', '4000\'', 'N10', '4000\''],
+              ['N1', '3000\'', 'N11', '3400\''],
+              ['N2', '4800\'', 'N12', '4800\''],
+              ['N3', '4900\'', 'N13', '3200\''],
+              ['N4', '5200\'', 'N14', '3100\''],
+              ['N5', '3500\'', 'N15', '3200\''],
+              ['N6', '5000\'', 'N16', '4600\''],
+              ['N7', '4800\'', 'N17', '3700\''],
+              ['N8', '4500\'', 'N18', '3700\''],
+              ['N9', '3900\'', 'N19', '3700\''],
+              [{text: 'Transition Altitude: 5000FT AMSL', colSpan: 4, center: true, italic: true}]
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-mef-center',
+        title: 'OPERATIONAL AREAS - CENTER PT',
+        type: 'mixed',
+        content: {
+          image: '/assets/op-area-center.png',
+          table: {
+            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
+            rows: [
+              ['C', '4100\'', 'C13', '3100\''],
+              ['C1', '3600\'', 'C14', '2100\''],
+              ['C2', '3600\'', 'C15', '2400\''],
+              ['C3', '5800\'', 'C16', '1200\''],
+              ['C4', '600\'', 'C17', '2200\''],
+              ['C5', '4100\'', 'C18', '2200\''],
+              ['C6', '4500\'', 'C19', '3200\''],
+              ['C7', '6700\'', 'C20', '600\''],
+              ['C8', '4100\'', 'C9', '4100\''],
+              ['C10', '4100\'', 'C11', '1900\''],
+              ['C12', '1800\'', 'C21', '900\''],
+              ['C22', '2800\'', 'C23', '900\''],
+              ['C24', '1600\'', '', ''],
+              [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-mef-south',
+        title: 'OPERATIONAL AREAS - SOUTH PT',
+        type: 'mixed',
+        content: {
+          image: '/assets/op-area-south.png',
+          table: {
+            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
+            rows: [
+              ['S', '3100\'', 'S16', '300\''],
+              ['S1', '1600\'', 'S17', '1300\''],
+              ['S2', '2300\'', 'S18', '1400\''],
+              ['S3', '1500\'', 'S19', '100\''],
+              ['S6', '100\'', 'S20', '3000\''],
+              ['S7', '500\'', 'S21', '100\''],
+              ['S8', '1200\'', 'S22', '100\''],
+              ['S9', '800\'', 'S23', '300\''],
+              ['S10', '100\'', 'S24', '100\''],
+              ['S11', '400\'', 'S12', '1300\''],
+              ['S13', '1400\'', 'S14', '100\''],
+              ['S15', '300\'', '', ''],
+              [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-working-areas',
+        title: 'WORKING AREAS - LPBJ',
+        type: 'mixed',
+        content: {
+          image: '/assets/work-aerea-lpbj.png',
+          table: {
+            headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
+            rows: [
+              ['B1', "1400'", 'B11', "1100'"],
+              ['B2', "1300'", 'B12', "1400'"],
+              ['B3', "1200'", 'B13', "2000'"],
+              ['B4', "1300'", 'B14', "1000'"],
+              ['B5', "900'", 'B15', "1500'"],
+              ['B6', "1400'", 'B16', "1800'"],
+              ['B7', "1500'", 'B17', "900'"],
+              ['B8', "1000'", 'B18', "800'"],
+              ['B9', "1000'", 'B19', "1000'"],
+              ['B10', "1000'", 'B20', "1100'"],
+              ['B21', "1300'", 'B22', "900'"],
+              ['B23', "1200'", 'B24', "1100'"],
+              ['B25', "900'", '', ''],
+              [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-airspace',
+        title: 'AIRSPACE - CLASS G',
+        type: 'table',
+        content: {
+          headers: ['Provision', 'IFR (GAT)', 'VFR (GAT)', 'Operational and Training Low Level Flights (OAT)'],
+          rows: [
+            ['SEPARATION PROVIDED', 'NIL', 'NIL', 'NIL'],
+            ['SERVICE PROVIDED', 'Flight Information Service (FIS)', 'FIS', 'Flight Information Service'],
+            ['VMC MINIMA', 'Not Applicable', 
+              'At and above FL100:\n• 8 Km visibility\n• 1500 m horizontal and 300 m vertical distance from clouds\n\n' +
+              'Below FL100 and above 3000 ft AMSL or 1000 ft AGL whichever is higher:\n• 5 Km visibility\n• 1500 m horizontal and 300 m vertical distance from clouds\n\n' +
+              'At and below 3000 ft AMSL or 1000 ft AGL whichever is higher:\n• 5 Km* visibility\n• Clear of cloud and in sight of ground or water', 
+              'Not Applicable'
+            ],
+            ['SPEED LIMITATION**', '250 Kt IAS below 3050 m (10000 ft AMSL)', '250 Kt IAS below 3050 m (10000 ft AMSL)', 'MACH 0.7'],
+            ['RADIO COMMUNICATION', 'Continuous two-way', 
+              'Within Lisbon FIR:\n• Civilian ACFT not required***;\n• MIL ACFT required with Lisboa INFORMATION.\n\n' +
+              'Within Santa Maria Oceanic FIR:\n• Required.', 
+              'Continuous two-way'
+            ],
+            ['FLIGHT PLAN', 'Required for MIL ACFT', 'Required for MIL ACFT', 'Required'],
+            [{text: '* Helicopters at or below 3000 ft AMSL and in sight of the surface may operate at a speed which, having regard to the visibility, is reasonable.\n' +
+                    '** When the height of transition altitude is lower than 3050 m (10000 ft AMSL), FL100 should be used in lieu of 10000 ft.\n' +
+                    '*** Except in LPBG (AIP PORTUGAL AD 2.17), LPVR (AIP PORTUGAL AD 2.17), LPCH and LPPM (AIP PORTUGAL ENR 2.2.1.4.) ATZ.\n\n' +
+                    'Class G Airspace comprises: All airspace not covered by classes "A", "C" and "D" within Lisboa FIR and Santa Maria Oceanic FIR.', colSpan: 4, italic: true}]
+          ]
+        }
+      },
+      {
+        id: 'mp-sar-signals',
+        title: 'SAR SIGNALS & TRANSITION',
+        type: 'table',
+        content: {
+          headers: ['Message', 'Symbol', 'Message', 'Symbol'],
+          rows: [
+            [{text: 'SEARCH AND RESCUE SIGNALS', colSpan: 4, bg: '#eee', bold: true, center: true}],
+            ['Require Assistance', 'V', 'Yes or Affirmative', 'Y'],
+            ['Require Medical Assist.', 'X', 'Proceeding in this dir.', '↑'],
+            ['No or Negative', 'N', 'IF IN DOUBT USE', 'SOS'],
+            [{text: 'FOR RESCUE UNITS', colSpan: 4, bg: '#ddd', bold: true, center: true}],
+            ['Operation Completed', 'LLL', 'Found all personnel', 'LL'],
+            ['Found only some pers.', '++', 'We are not able to cont.', 'XX'],
+            [{text: 'TRANSITION ALTITUDES', colSpan: 4, bg: '#eee', bold: true, center: true}],
+            ['LPOT / LPBJ / Cascais / Lisboa / Porto / Beja / Évora', '4000 ft', 'LPMI / Madeira / Porto Santo', '5000 ft'],
+            ['Bragança / Vila Real', '8000 ft', '', '']
+          ]
+        }
+      },
+      {
+        id: 'mp-antenna-coverage',
+        title: 'MAXIMUM ANTENNAS COVERAGE (43NM)',
+        type: 'image',
+        content: ['/assets/antenas-coverage.png']
+      },
+      {
+        id: 'mp-aerodrome-charts',
+        title: 'AERODROME CHARTS',
+        type: 'image',
+        content: [
+          '/assets/lpot.png',
+          '/assets/lpmi.png',
+          '/assets/lpbj.jpg'
+        ]
+      },
+      {
+        id: 'mp-contacts',
+        title: 'CONTACTS',
+        type: 'table',
+        content: {
+          headers: ['LOCAL', 'POSITION', 'TLM / EXT', 'OUTLOOK'],
+          rows: [
+            [{text: 'LPMI', colSpan: 1, bold: true}, 'MC', '590 465 / 912 741 812', 'e991.ao.adj@emfa.gov.pt'],
+            ['', 'OPS', '590 424 / 912 741 864', ''],
+            ['', 'COCKPIT', '509 555 / 217 716 106', ''],
+            ['', 'GNR', '278 201 000', '-'],
+            ['', 'Diretor AD', '932 657 050', 'dir.aerodromo.lpmi@gmail.com'],
+            [{text: 'LPOT', colSpan: 1, bold: true}, 'MC', '590 481 / 912 573 229', 'e991.ao.adj@emfa.gov.pt'],
+            ['', 'OPS', '590 457 / 912 741 326', ''],
+            ['', 'COCKPIT', '502 981', ''],
+            ['', 'CCSD', '502 033 / 263 740 147', '-'],
+            [{text: 'LPBJ', colSpan: 1, bold: true}, 'MC', '590 455 / 912 741 767', 'e991.ao.adj@emfa.gov.pt'],
+            ['', 'OPS', '590 458 / 912 741 842', ''],
+            ['', 'COCKPIT', '550 554', ''],
+            ['', 'CCSD', '550 092 / 284 314 692', '-'],
+            [{text: 'OUTROS', colSpan: 1, bold: true}, 'EITA', '509 335 / 217 716 175', '-'],
+            ['', 'OPS CA', '529 305 / 217 708 205', '-'],
+            ['', 'CMDT GO21', '590 066 / 915 064 366', 'cfmta.go.cmdt@emfa.gov.pt'],
+            ['', 'CMDT E991', '590 920 / 913 874 429', 'e991.cmdt@emfa.gov.pt'],
+            ['', 'OFOPS E991', '590 874 / 919 425 747', 'e991.esqlhao@emfa.gov.pt']
+          ]
+        }
+      },
+      {
+        id: 'mp-detach-general',
+        title: 'GENERAL DETACHMENTS CHECKLIST',
+        type: 'checklist',
+        content: [
+          '1. Pedir NOTAM(s) (10 dias úteis antecedência)',
+          '2. Pedir "tasking" da missão',
+          '3. Solicitar à EMA Aeronaves para a missão',
+          '4. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
+          '5. Solicitar à EMA 1 kit de PRE completo',
+          '6. Pedir Guias de Marcha',
+          '7. Reservar dormidas militares (e-mail dat.spmissoes)',
+          '8. Fazer reserva no restaurante',
+          '9. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
+          '10. Solicitar kit noturno (se nec.)',
+          '11. Solicitar viatura(s) para a operação',
+          '12. Verificar níveis óleo, água, adblue e combustível',
+          '13. Verificar boletim das viaturas',
+          '14. Confirmar cartão Galp frota',
+          '15. Pedir atrelado e matrícula (se nec.)'
+        ]
+      },
+      {
+        id: 'mp-detach-lpbj',
+        title: 'LPBJ (BEJA) CHECKLIST',
+        type: 'checklist',
+        content: [
+          '1. Coordenar atividade aérea com as Operações de Beja',
+          '2. Pedir NOTAM(s) (10 dias úteis antecedência)',
+          '3. Pedir "tasking" da missão',
+          '4. Solicitar à EMA Aeronaves para a missão',
+          '5. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
+          '6. Solicitar à EMA 1 kit de PRE completo',
+          '7. Pedir Guias de Marcha',
+          '8. Reservar Alojamento',
+          '9. Marcar Refeições',
+          '10. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
+          '11. Solicitar kit noturno (se nec.)',
+          '12. Solicitar viatura(s) para a operação',
+          '13. Verificar níveis óleo, água, adblue e combustível',
+          '14. Verificar boletim das viaturas',
+          '15. Confirmar cartão Galp frota',
+          '16. Pedir atrelado e matrícula (se nec.)'
+        ]
+      },
+      {
+        id: 'mp-detach-lpmi',
+        title: 'LPMI (MIRANDELA) CHECKLIST',
+        type: 'checklist',
+        content: [
+          '1. Pedir NOTAM(s) (10 dias úteis antecedência)',
+          '2. Pedir "tasking" da missão',
+          '3. Solicitar à EMA Aeronaves para a missão',
+          '4. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
+          '5. Solicitar à EMA 1 kit de PRE completo',
+          '6. Pedir Guias de Marcha',
+          '7. Reservar dormidas militares',
+          '8. Fazer reserva no restaurante',
+          '9. Solicitar a chave do cockpit',
+          '10. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
+          '11. Solicitar kit noturno (se nec.)',
+          '12. Solicitar viatura(s) para a operação',
+          '13. Verificar níveis óleo, água, adblue e combustível',
+          '14. Verificar boletim das viaturas',
+          '15. Confirmar cartão Galp frota',
+          '16. Pedir atrelado e matrícula (se nec.)',
+          '17. Contactar Diretor Aeródromo (Sr. João Vinhais - 932657050)',
+          '18. Contactar CA antes de entrar e após sair',
+          '19. Utilizar aplicação "SALTO" para abertura de portas'
+        ]
+      },
+      {
+        id: 'mp-night-flight',
+        title: 'NIGHT FLIGHT SETUP',
+        type: 'mixed',
+        content: {
+          image: '/assets/nf-lights.png',
+          table: {
+            headers: ['Posição', 'Localização', 'Finalidade'],
+            rows: [
+              ['Tripé 1', '10m antes da posição do PRE', 'Iluminação de zona de toque'],
+              ['Tripé 2', '25m antes da posição do PRE', 'Iluminação de aproximação'],
+              ['Tripé 3', '50m antes da posição do PRE', 'Iluminação de aproximação inicial'],
+              ['Tripé 4', '10m depois da posição do PRE', 'Iluminação de zona de travagem'],
+              [{text: 'As luzes devem ser colocadas de 25 em 25m nos limites laterais da pista, até aos 100m.', colSpan: 3, italic: true, center: true}]
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-emergency-day',
+        title: 'EMERGENCY OF THE DAY',
+        type: 'table',
+        content: {
+          headers: ['DAY', 'MONTH (1,3,5,7,9,11)', 'DAY', 'MONTH (2,4,6,8,10,12)'],
+          rows: [
+            ['1', 'ENGINE FAILURE FAR FROM AERODROME', '1', 'FIRE, SMOKE OR FUMES IN THE COCKPIT'],
+            ['2', 'ENGINE FAILURE NEAR THE AERODROME', '2', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT'],
+            ['3', 'ON BOARD FIRE', '3', 'EXTERNAL PILOT LOST CONTROL'],
+            ['4', 'STRUCTURAL PROBLEM (WITHOUT C2)', '4', 'AIRSPEED LIMITATIONS'],
+            ['5', 'STRUCTURAL PROBLEM (WITH C2)', '5', 'OPERATIONAL LIMITS'],
+            ['6', 'ONBOARD GENERATOR FAILURE', '6', 'EVENTS FOR MANDATORY INSPECTION'],
+            ['7', 'ERRATIC BEHAVIOUR', '7', 'ENGINE LIMITATIONS'],
+            ['8', 'GPS FAILURE', '8', 'ENGINE FAILURE FAR FROM AERODROME'],
+            ['9', 'BAROMETRIC ALTITUDE DEVIATION', '9', 'ENGINE FAILURE NEAR THE AERODROME'],
+            ['10', 'LINK LOSS', '10', 'ON BOARD FIRE'],
+            ['11', 'COCKPIT ENERGY FAILURE', '11', 'STRUCTURAL PROBLEM (WITHOUT C2)'],
+            ['12', 'GCS FAILURE', '12', 'STRUCTURAL PROBLEM (WITH C2)'],
+            ['13', 'FIRE, SMOKE OR FUMES IN THE COCKPIT', '13', 'ONBOARD GENERATOR FAILURE'],
+            ['14', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT', '14', 'ERRATIC BEHAVIOUR'],
+            ['15', 'EXTERNAL PILOT LOST CONTROL', '15', 'GPS FAILURE'],
+            ['16', 'AIRSPEED LIMITATIONS', '16', 'BAROMETRIC ALTITUDE DEVIATION'],
+            ['17', 'OPERATIONAL LIMITS', '17', 'LINK LOSS'],
+            ['18', 'EVENTS FOR MANDATORY INSPECTION', '18', 'COCKPIT ENERGY FAILURE'],
+            ['19', 'ENGINE LIMITATIONS', '19', 'GCS FAILURE'],
+            ['20', 'ENGINE FAILURE FAR FROM AERODROME', '20', 'FIRE, SMOKE OR FUMES IN THE COCKPIT'],
+            ['21', 'ENGINE FAILURE NEAR THE AERODROME', '21', 'COMMS FAILURE BETWEEN EXTERNAL AND INTERNAL PILOT'],
+            ['22', 'ON BOARD FIRE', '22', 'EXTERNAL PILOT LOST CONTROL'],
+            ['23', 'STRUCTURAL PROBLEM (WITHOUT C2)', '23', 'AIRSPEED LIMITATIONS'],
+            ['24', 'STRUCTURAL PROBLEM (WITH C2)', '24', 'OPERATIONAL LIMITS'],
+            ['25', 'ONBOARD GENERATOR FAILURE', '25', 'EVENTS FOR MANDATORY INSPECTION'],
+            ['26', 'ERRATIC BEHAVIOUR', '26', 'ENGINE LIMITATIONS'],
+            ['27', 'GPS FAILURE', '27', 'ENGINE FAILURE FAR FROM AERODROME'],
+            ['28', 'BAROMETRIC ALTITUDE DEVIATION', '28', 'ENGINE FAILURE NEAR THE AERODROME'],
+            ['29', 'LINK LOSS', '29', 'ON BOARD FIRE'],
+            ['30', 'COCKPIT ENERGY FAILURE', '30', 'STRUCTURAL PROBLEM (WITHOUT C2)'],
+            ['31', 'GCS FAILURE', '31', 'STRUCTURAL PROBLEM (WITH C2)']
+          ]
+        }
+      },
+      {
+        id: 'mp-mmel',
+        title: 'MASTER MINIMUM EQUIPMENT LIST (MMEL)',
+        type: 'checklist',
+        content: [
+          '1. UAV',
+          '2. GCS (Principal, Backup, EO Station, Server, VHF, UPS, Generator)',
+          '3. Sensor EO (Gimbal) ou Gimbal Dummy',
+          '4. AIS',
+          '5. Kit PRE (Comandos, Power, Comms, Starter, Extintor)',
+          '6. Antena STC',
+          '7. Antena Omni / Omni Amplificada',
+          '8. Estação Meteorológica',
+          '9. Iluminação de Pista (Noite)'
+        ]
+      },
+      {
+        id: 'mp-mel',
+        title: 'MINIMUM EQUIPMENT LIST (MEL)',
+        type: 'table',
+        content: {
+          headers: ['EQUIPMENT', 'TRQ', 'ISR', 'HO / TO'],
+          rows: [
+            ['UAV', 'X', 'X', 'X'],
+            ['COCKPIT / PORTÁTIL', 'X', 'X', 'X2'],
+            ['SENSOR EO (GIMBAL)', {text: 'X', colSpan: 1, center: true}, 'X', 'X'],
+            ['GIMBAL DUMMY', 'X', '', ''],
+            ['KIT PRE', 'X', 'X', 'X'],
+            ['ANTENA STC', 'X', 'X', 'X2'],
+            ['ANTENA OMNI / OMNI AMP', 'X', 'X', 'X2'],
+            ['ESTAÇÃO METEOROLÓGICA', 'X', 'X', 'X']
+          ]
+        }
+      },
+      {
+        id: 'mp-system-status',
+        title: 'SYSTEM STATUS INDICATORS',
+        type: 'mixed',
+        content: {
+          image: '/assets/status-systems.png',
+          table: {
+            headers: ['#', 'System Component'],
+            rows: [
+              ['1', 'ONBOARD PC'],
+              ['2/3', 'EXTERNAL TO SERIAL CONVERTER 1/2'],
+              ['4', 'ONBOARD ROUTER'],
+              ['5', 'STORM COMM COMMUNICATION BOARD'],
+              ['6/7', 'ANTENNA OMNI / OMNI AMP'],
+              ['8', 'STORM COMM'],
+              ['9', 'EMERGENCY RECOVERY'],
+              ['11', 'ADSB'],
+              ['12', 'TRANSPONDER COMMUNICATION'],
+              ['13', 'LINK TO PC SERVER'],
+              ['14/15', 'LINK TO STORM COMM COMMUNICATOR'],
+              ['16', 'LINK TO LINK CONTROLLER']
+            ]
+          }
+        }
+      },
+      {
+        id: 'mp-gcs-internals',
+        title: 'GCS INTERNAL COMPONENTS',
+        type: 'image',
+        content: ['/assets/gcs-internal-components.png']
       }
     ]
   },

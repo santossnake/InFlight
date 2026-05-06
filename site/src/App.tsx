@@ -323,27 +323,101 @@ function App() {
         </button>
 
         <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', flex: 1, paddingBottom: '2px' }}>
-          {guideData.map(section => (
-            <button 
-              key={section.id}
-              onClick={() => handleSectionChange(section.id)}
-              style={{ 
-                backgroundColor: activeSectionId === section.id 
-                  ? (section.id === 'EMERGENCY_CHECKLIST' ? '#ff1744' : 'var(--highlight-color)') 
-                  : (section.id === 'EMERGENCY_CHECKLIST' ? '#b71c1c' : 'rgba(255,255,255,0.1)'),
-                color: activeSectionId === section.id 
-                  ? (section.id === 'EMERGENCY_CHECKLIST' ? 'white' : 'black') 
-                  : 'white',
-                border: section.id === 'EMERGENCY_CHECKLIST' ? '2px solid #ff5252' : '1px solid rgba(255,255,255,0.3)',
-                whiteSpace: 'nowrap',
-                padding: '8px 15px',
-                fontSize: '0.9em',
-                fontWeight: section.id === 'EMERGENCY_CHECKLIST' ? 'bold' : 'normal'
-              }}
-            >
-              {section.label}
-            </button>
-          ))}
+          {guideData.map(section => {
+            // Determine section color based on PDF borders
+            let sectionColor = '#003366'; // Default
+            let activeBg = 'var(--highlight-color)';
+            let textColor = 'white';
+            let activeTextColor = 'black';
+
+            if (section.id === 'EMERGENCY_CHECKLIST') {
+              sectionColor = '#b71c1c'; // Red
+              activeBg = '#ff1744';
+              activeTextColor = 'white';
+            } else if (section.id === 'NORMAL_PROCEDURES') {
+              sectionColor = '#0d47a1'; // Blue
+              activeBg = '#2979ff';
+              activeTextColor = 'white';
+            } else if (section.id === 'SENSOR_OPERATOR') {
+              sectionColor = '#1b5e20'; // Green
+              activeBg = '#00c853';
+              activeTextColor = 'white';
+            } else if (section.id === 'MISSION_PLANNING') {
+              sectionColor = '#37474f'; // Grey/Blue
+              activeBg = '#90a4ae';
+              activeTextColor = 'black';
+            } else if (section.id === 'HANDOVER_TAKEOVER') {
+              sectionColor = '#f57f17'; // Yellow/Orange
+              activeBg = '#ffea00';
+              activeTextColor = 'black';
+            } else if (section.id === 'CRASH_RESPONSE') {
+              sectionColor = '#4e342e'; // Brown/Red
+              activeBg = '#d84315';
+              activeTextColor = 'white';
+            }
+
+            const isActive = activeSectionId === section.id;
+
+            return (
+              <button 
+                key={section.id}
+                onClick={() => handleSectionChange(section.id)}
+                style={{ 
+                  backgroundColor: isActive ? activeBg : sectionColor,
+                  color: isActive ? activeTextColor : 'white',
+                  border: isActive ? `2px solid white` : '1px solid rgba(255,255,255,0.3)',
+                  whiteSpace: 'nowrap',
+                  padding: '8px 15px',
+                  fontSize: '0.9em',
+                  fontWeight: isActive ? 'bold' : 'normal',
+                  borderRadius: '4px',
+                  boxShadow: isActive ? '0 0 8px rgba(255,255,255,0.5)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ display: 'flex', gap: '5px', marginLeft: '10px' }}>
+          <button 
+            onClick={resetCurrentChecklists}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.5)',
+              padding: '6px 10px',
+              borderRadius: '4px',
+              fontSize: '0.8em',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            Reset Secção
+          </button>
+          <button 
+            onClick={resetAllChecklists}
+            style={{
+              backgroundColor: 'var(--accent-color)',
+              color: 'white',
+              border: 'none',
+              padding: '6px 10px',
+              borderRadius: '4px',
+              fontSize: '0.8em',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            Reset Total
+          </button>
         </div>
       </header>
 
@@ -456,61 +530,6 @@ function App() {
             </section>
           ))}
         </main>
-      </div>
-
-      <div style={{ 
-        position: 'fixed', 
-        bottom: '20px', 
-        left: '20px', 
-        zIndex: 100, 
-        display: 'flex', 
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: '10px' 
-      }}>
-        <button 
-          onClick={resetCurrentChecklists}
-          style={{
-            backgroundColor: 'white',
-            color: 'var(--primary-color)',
-            border: '2px solid var(--primary-color)',
-            padding: '8px 15px',
-            borderRadius: '20px',
-            fontSize: '0.85em',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary-color)';
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'white';
-            e.currentTarget.style.color = 'var(--primary-color)';
-          }}
-        >
-          Reset Secção
-        </button>
-        <button 
-          onClick={resetAllChecklists}
-          style={{
-            backgroundColor: 'var(--accent-color)',
-            color: 'white',
-            border: 'none',
-            padding: '8px 15px',
-            borderRadius: '20px',
-            fontSize: '0.85em',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          Reset Total
-        </button>
       </div>
     </div>
   )

@@ -2,7 +2,7 @@ import fitz  # PyMuPDF
 import os
 
 pdf_path = r"E:\Inflight\UN260207_Inflight Guide OGS42.pdf"
-output_dir = r"E:\Inflight\site\public\assets"
+output_dir = r"E:\Inflight\InFlight\site\public\assets"
 
 # Mapeamento: (Página no PDF - 1, Nome do Ficheiro)
 # Nota: fitz usa indexação baseada em 0 (página 10 no PDF é índice 9)
@@ -16,7 +16,8 @@ pages_to_extract = [
     (34, "stc-range.png"),
     (35, "aerodrome-lpot.png"),
     (36, "aerodrome-lpmi.png"),
-    (37, "aerodrome-lpbj.png")
+    (37, "aerodrome-lpbj.png"),
+    (54, "gcs-internal-components.png")
 ]
 
 def extract():
