@@ -185,6 +185,7 @@ function App() {
   // Bingo Calculator State
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
   const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '13')
+  const [burnRate, setBurnRate] = useState<string>(localStorage.getItem('burnRate') || '1.5')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
   const [fuelHistory, setFuelHistory] = useState<{time: string, fuel: number}[]>(() => {
     const saved = localStorage.getItem('fuelHistory');
@@ -222,8 +223,9 @@ function App() {
   useEffect(() => {
     localStorage.setItem('fuelInit', fuelInit);
     localStorage.setItem('fuelCurrent', fuelCurrent);
+    localStorage.setItem('burnRate', burnRate);
     localStorage.setItem('fuelHistory', JSON.stringify(fuelHistory));
-  }, [fuelInit, fuelCurrent, fuelHistory]);
+  }, [fuelInit, fuelCurrent, burnRate, fuelHistory]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -269,7 +271,6 @@ function App() {
   }
 
   const logEvent = (event: string) => {
-    // ONLY set if not already set. Must use double-click (resetMissionEvent) to change.
     if (!missionLogs[event]) {
       const timeStr = new Date().toLocaleTimeString('pt-PT', { hour12: false, hour: '2-digit', minute: '2-digit' });
       setMissionLogs(prev => ({ ...prev, [event]: timeStr }));
@@ -316,6 +317,7 @@ function App() {
       setMissionLogs({});
       setFuelInit('13');
       setFuelCurrent('13');
+      setBurnRate('1.5');
       setEngineOnManual('');
       setFuelHistory([]);
     }
@@ -364,35 +366,30 @@ function App() {
 
   const renderContent = (item: GuideItem) => {
     if (item.id === 'bingo-calc') {
-      const f = parseFloat(fuelInit) || 0;
+      const fInit = parseFloat(fuelInit) || 0;
       const b = parseFloat(burnRate) || 0;
       
-      // Calculate elapsed time since Engine ON for informational purposes
       let elapsedMinutes = 0;
       const engOnStr = engineOnManual || missionLogs['eng-on'];
       
       if (engOnStr && engOnStr.includes(':')) {
-        try {
-          const [h, m] = engOnStr.split(':').map(Number);
-          const engOnDate = new Date();
-          engOnDate.setHours(h, m, 0, 0);
-          const now = new Date();
-          if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
-          elapsedMinutes = Math.max(0, (now.getTime() - engOnDate.getTime()) / (1000 * 60));
-        } catch (e) {
-          console.error("Erro ao calcular tempo Engine ON", e);
-        }
+        const [h, m] = engOnStr.split(':').map(Number);
+        const engOnDate = new Date();
+        engOnDate.setHours(h, m, 0, 0);
+        const now = new Date();
+        if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
+        elapsedMinutes = Math.max(0, (now.getTime() - engOnDate.getTime()) / (1000 * 60));
       }
 
       const fuelConsumed = (elapsedMinutes / 60) * b;
-      const currentFuel = Math.max(0, f - fuelConsumed);
-      const fuelToBingo = Math.max(0, currentFuel - 2.5);
+      const currentFuelEst = Math.max(0, fInit - fuelConsumed);
+      const fuelToBingo = Math.max(0, currentFuelEst - 2.5);
       
       const enduranceToBingo = b > 0 ? fuelToBingo / b : 0;
       const hours = Math.floor(enduranceToBingo);
       const mins = Math.round((enduranceToBingo - hours) * 60);
       
-      const fuelPercentage = f > 0 ? (currentFuel / f) * 100 : 0;
+      const fuelPercentage = fInit > 0 ? (currentFuelEst / fInit) * 100 : 0;
 
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -402,19 +399,27 @@ function App() {
               <input type="number" value={fuelInit} onChange={e => setFuelInit(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L) + GRAVAR</label>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ flex: 1, padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+                <button onClick={saveFuelPoint} style={{ padding: '0 10px', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>REC</button>
+              </div>
+            </div>
+            <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>CONSUMO (L/H)</label>
               <input type="number" value={burnRate} onChange={e => setBurnRate(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
-              <input type="text" placeholder="--:--" value={engOnStr || ''} onChange={e => setEngineOnManual(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
-            </div>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
+            <input type="text" placeholder="--:--" value={engOnStr || ''} onChange={e => setEngineOnManual(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
           </div>
 
           <div style={{ marginBottom: '25px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8em', marginBottom: '5px' }}>
               <span>FUEL RESTANTE (EST.)</span>
-              <span>{currentFuel.toFixed(1)}L / {f}L</span>
+              <span>{currentFuelEst.toFixed(1)}L / {fInit}L</span>
             </div>
             <div style={{ height: '25px', width: '100%', backgroundColor: '#eee', borderRadius: '12px', overflow: 'hidden', border: '1px solid #ccc' }}>
               <div style={{ 
@@ -429,11 +434,34 @@ function App() {
             </div>
           </div>
 
-          <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
+          <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px' }}>TEMPO RESTANTE ATÉ 2.5L (BINGO)</div>
             <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
             <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Baseado em {burnRate} L/H e {elapsedMinutes.toFixed(0)}m desde Engine ON.</div>
           </div>
+
+          {/* FUEL HISTORY CHART (Line Chart Logic) */}
+          {fuelHistory.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '0.7em', fontWeight: 'bold', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>HISTÓRICO DE CONSUMO</span>
+                <button onClick={() => setFuelHistory([])} style={{ background: 'none', border: 'none', color: 'var(--accent-color)', fontSize: '1em', cursor: 'pointer' }}>Limpar</button>
+              </div>
+              <div style={{ height: '150px', borderLeft: '1px solid #ccc', borderBottom: '1px solid #ccc', position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '10px', gap: '10px', overflowX: 'auto' }}>
+                {fuelHistory.map((pt, i) => {
+                  const h = (pt.fuel / fInit) * 100;
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
+                      <div style={{ width: '20px', height: `${h}px`, backgroundColor: 'var(--primary-color)', borderRadius: '2px 2px 0 0', position: 'relative' }}>
+                        <span style={{ position: 'absolute', top: '-15px', width: '100%', textAlign: 'center', fontSize: '0.6em', color: 'var(--text-color)' }}>{pt.fuel}L</span>
+                      </div>
+                      <span style={{ fontSize: '0.5em', transform: 'rotate(-45deg)', marginTop: '15px', whiteSpace: 'nowrap', color: 'var(--text-color)' }}>{pt.time}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       );
     }
