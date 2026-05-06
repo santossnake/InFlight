@@ -184,7 +184,7 @@ function App() {
   
   // Bingo Calculator State
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
-  const [burnRate, setBurnRate] = useState<string>(localStorage.getItem('burnRate') || '1.5')
+  const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '13')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
 
   const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
@@ -217,8 +217,8 @@ function App() {
   
   useEffect(() => {
     localStorage.setItem('fuelInit', fuelInit);
-    localStorage.setItem('burnRate', burnRate);
-  }, [fuelInit, burnRate]);
+    localStorage.setItem('fuelCurrent', fuelCurrent);
+  }, [fuelInit, fuelCurrent]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -307,10 +307,30 @@ function App() {
       setChecklistProgress({});
       setMissionLogs({});
       setFuelInit('13');
-      setBurnRate('1.5');
+      setFuelCurrent('13');
       setEngineOnManual('');
     }
   };
+
+  const getDiffTime = (startStr: string, endStr?: string) => {
+    if (!startStr) return null;
+    const [h1, m1] = startStr.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(h1, m1, 0);
+    
+    const endDate = new Date();
+    if (endStr) {
+      const [h2, m2] = endStr.split(':').map(Number);
+      endDate.setHours(h2, m2, 0);
+    }
+    
+    if (endDate < startDate) endDate.setDate(endDate.getDate() + 1);
+    
+    const diffMs = endDate.getTime() - startDate.getTime();
+    const diffHrs = Math.floor(diffMs / 3600000);
+    const diffMins = Math.floor((diffMs % 3600000) / 60000);
+    return { hrs: diffHrs, mins: diffMins, totalMins: diffMs / 60000 };
+  }
 
   const isItemComplete = (item: GuideItem) => {
     let checklist: string[] | undefined;
@@ -327,33 +347,29 @@ function App() {
 
   const renderContent = (item: GuideItem) => {
     if (item.id === 'bingo-calc') {
-      const f = parseFloat(fuelInit) || 0;
-      const b = parseFloat(burnRate) || 0;
+      const fInit = parseFloat(fuelInit) || 0;
+      const fCurr = parseFloat(fuelCurrent) || 0;
       
-      // Calculate elapsed time since Engine ON
-      let elapsedMinutes = 0;
       const engOnStr = engineOnManual || missionLogs['eng-on'];
-      if (engOnStr) {
-        const [h, m] = engOnStr.split(':').map(Number);
-        const engOnDate = new Date();
-        engOnDate.setHours(h, m, 0);
+      const timeData = getDiffTime(engOnStr || '');
+      
+      let burnRateCalculated = 0;
+      let remainingToBingo = 0;
+      let hours = 0, mins = 0;
+
+      if (timeData && timeData.totalMins > 1) {
+        const fuelUsed = fInit - fCurr;
+        burnRateCalculated = (fuelUsed / timeData.totalMins) * 60;
         
-        const now = new Date();
-        // Handle crossover (if eng on was yesterday)
-        if (now < engOnDate) engOnDate.setDate(engOnDate.getDate() - 1);
-        
-        elapsedMinutes = (now.getTime() - engOnDate.getTime()) / (1000 * 60);
+        if (burnRateCalculated > 0) {
+          const fuelToBingo = Math.max(0, fCurr - 2.5);
+          remainingToBingo = (fuelToBingo / burnRateCalculated) * 60;
+          hours = Math.floor(remainingToBingo / 60);
+          mins = Math.round(remainingToBingo % 60);
+        }
       }
 
-      const fuelConsumed = (elapsedMinutes / 60) * b;
-      const currentFuel = Math.max(0, f - fuelConsumed);
-      const fuelToBingo = Math.max(0, currentFuel - 2.5);
-      
-      const enduranceToBingo = b > 0 ? fuelToBingo / b : 0;
-      const hours = Math.floor(enduranceToBingo);
-      const mins = Math.round((enduranceToBingo - hours) * 60);
-      
-      const fuelPercentage = (currentFuel / f) * 100 || 0;
+      const fuelPercentage = (fCurr / fInit) * 100 || 0;
 
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -363,8 +379,8 @@ function App() {
               <input type="number" value={fuelInit} onChange={e => setFuelInit(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>CONSUMO (L/H)</label>
-              <input type="number" value={burnRate} onChange={e => setBurnRate(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L)</label>
+              <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
@@ -374,8 +390,8 @@ function App() {
 
           <div style={{ marginBottom: '25px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8em', marginBottom: '5px' }}>
-              <span>CONSUMO ESTIMADO</span>
-              <span>{currentFuel.toFixed(1)}L / {f}L</span>
+              <span>CONSUMO: {burnRateCalculated.toFixed(1)} L/H</span>
+              <span>RESTANTE: {fCurr.toFixed(1)}L / {fInit}L</span>
             </div>
             <div style={{ height: '25px', width: '100%', backgroundColor: '#eee', borderRadius: '12px', overflow: 'hidden', border: '1px solid #ccc' }}>
               <div style={{ 
@@ -392,18 +408,22 @@ function App() {
 
           <div style={{ padding: '25px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px' }}>TEMPO RESTANTE ATÉ 2.5L (BINGO)</div>
-            <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
-            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Baseado em {burnRate} L/H e {elapsedMinutes.toFixed(0)}m de operação.</div>
+            {burnRateCalculated > 0 ? (
+              <div style={{ fontSize: '3.5em', fontWeight: 'bold', margin: '5px 0' }}>{hours}h {mins}m</div>
+            ) : (
+              <div style={{ fontSize: '1.5em', margin: '15px 0' }}>Aguardando Dados...</div>
+            )}
+            <div style={{ fontSize: '0.75em', opacity: 0.7 }}>Cálculo baseado no consumo médio real.</div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div style={{ padding: '15px', backgroundColor: 'rgba(250, 204, 21, 0.1)', color: '#856404', borderRadius: '8px', textAlign: 'center', border: '1px solid #facc15' }}>
               <div style={{ fontSize: '0.75em', fontWeight: 'bold' }}>BINGO 25%</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(f * 0.25).toFixed(1)} L</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(fInit * 0.25).toFixed(1)} L</div>
             </div>
             <div style={{ padding: '15px', backgroundColor: 'rgba(255, 77, 77, 0.1)', color: 'var(--accent-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--accent-color)' }}>
               <div style={{ fontSize: '0.75em', fontWeight: 'bold' }}>BINGO 15%</div>
-              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(f * 0.15).toFixed(1)} L</div>
+              <div style={{ fontSize: '1.4em', fontWeight: 'bold' }}>{(fInit * 0.15).toFixed(1)} L</div>
             </div>
           </div>
         </div>
@@ -476,6 +496,9 @@ function App() {
       )
     : activeSection.items;
 
+  const engOnTotal = getDiffTime(missionLogs['eng-on'] || '', missionLogs['eng-off']);
+  const flightTotal = getDiffTime(missionLogs['atd'] || '', missionLogs['ata']);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }}>
       {/* HEADER SUPERIOR */}
@@ -493,7 +516,7 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+          <div style={{ textAlign: 'right', fontFamily: 'monospace', display: 'flex', gap: '15px' }}>
             <div style={{ fontSize: '0.8em' }}>LCL: {currentTime.toLocaleTimeString('pt-PT')}</div>
             <div style={{ fontSize: '0.8em', color: 'var(--highlight-color)' }}>ZULU: {currentTime.toISOString().substr(11, 8)}</div>
           </div>
@@ -519,12 +542,12 @@ function App() {
         padding: '8px 15px', display: 'flex', gap: '10px', overflowX: 'auto', flexShrink: 0,
         borderBottom: '2px solid var(--primary-color)', alignItems: 'center'
       }}>
-        <div style={{ fontSize: '0.7em', fontWeight: 'bold', opacity: 0.7, whiteSpace: 'nowrap' }}>MISSION LOG:</div>
+        <div style={{ fontSize: '0.7em', fontWeight: 'bold', opacity: 0.7, whiteSpace: 'nowrap' }}>LOG:</div>
         {[
-          { id: 'eng-on', label: 'ENGINE ON' },
+          { id: 'eng-on', label: 'ENG ON' },
           { id: 'atd', label: 'ATD' },
           { id: 'ata', label: 'ATA' },
-          { id: 'eng-off', label: 'ENGINE OFF' }
+          { id: 'eng-off', label: 'ENG OFF' }
         ].map(evt => (
           <button 
             key={evt.id}
@@ -541,7 +564,13 @@ function App() {
             {evt.label}: {missionLogs[evt.id] || '--:--'}
           </button>
         ))}
-        <div style={{ fontSize: '0.6em', opacity: 0.5, fontStyle: 'italic', whiteSpace: 'nowrap' }}>(Duplo-clique para reset)</div>
+        
+        <div style={{ borderLeft: '1px solid #ccc', height: '20px', margin: '0 5px' }}></div>
+        
+        <div style={{ display: 'flex', gap: '15px', fontSize: '0.75em', whiteSpace: 'nowrap' }}>
+          <span>ENG TOTAL: <strong style={{ color: 'var(--primary-color)' }}>{engOnTotal ? `${engOnTotal.hrs}h ${engOnTotal.mins}m` : '--:--'}</strong></span>
+          <span>FLIGHT: <strong style={{ color: 'var(--primary-color)' }}>{flightTotal ? `${flightTotal.hrs}h ${flightTotal.mins}m` : '--:--'}</strong></span>
+        </div>
       </div>
 
       {/* SECTION NAVIGATION */}
