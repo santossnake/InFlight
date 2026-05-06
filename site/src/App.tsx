@@ -183,14 +183,43 @@ function App() {
     }
   }
 
+  const lastTapRef = useRef<{ [key: string]: number }>({});
+
   const handleToggle = (itemId: string, index: number) => {
-    setChecklistProgress(prev => ({
-      ...prev,
-      [itemId]: {
-        ...(prev[itemId] || {}),
-        [index]: !prev[itemId]?.[index]
+    const key = `${itemId}-${index}`;
+    const isCurrentlyChecked = !!checklistProgress[itemId]?.[index];
+    
+    if (isCurrentlyChecked) {
+      // Logic for UNCHECKING: Requires double tap
+      const now = Date.now();
+      const lastTap = lastTapRef.current[key] || 0;
+      
+      if (now - lastTap < 500) {
+        // Confirmed double tap -> Uncheck
+        setChecklistProgress(prev => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [index]: false
+          }
+        }));
+        delete lastTapRef.current[key];
+      } else {
+        // First tap -> Save time and maybe show a brief hint
+        lastTapRef.current[key] = now;
+        // Optional: Could add a temporary visual state here, 
+        // but for now, the requirement is to prevent accidental scroll-clicks.
       }
-    }));
+    } else {
+      // Logic for CHECKING: Single tap is fine
+      setChecklistProgress(prev => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          [index]: true
+        }
+      }));
+    }
   };
 
   const resetCurrentChecklists = () => {
