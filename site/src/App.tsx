@@ -322,7 +322,7 @@ function App() {
           {isSidebarVisible ? '✕' : '☰'}
         </button>
 
-        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', flex: 1, paddingBottom: '2px' }}>
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', flex: 1, paddingBottom: '2px', alignItems: 'center' }}>
           {guideData.map(section => {
             // Determine section color based on PDF borders
             let sectionColor = '#003366'; // Default
@@ -379,45 +379,45 @@ function App() {
               </button>
             );
           })}
-        </div>
-
-        <div style={{ display: 'flex', gap: '5px', marginLeft: '10px' }}>
-          <button 
-            onClick={resetCurrentChecklists}
-            style={{
-              backgroundColor: 'transparent',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.5)',
-              padding: '6px 10px',
-              borderRadius: '4px',
-              fontSize: '0.8em',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            Reset Secção
-          </button>
-          <button 
-            onClick={resetAllChecklists}
-            style={{
-              backgroundColor: 'var(--accent-color)',
-              color: 'white',
-              border: 'none',
-              padding: '6px 10px',
-              borderRadius: '4px',
-              fontSize: '0.8em',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-          >
-            Reset Total
-          </button>
+          
+          <div style={{ display: 'flex', gap: '5px', borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '10px', marginLeft: '5px' }}>
+            <button 
+              onClick={resetCurrentChecklists}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.5)',
+                padding: '6px 10px',
+                borderRadius: '4px',
+                fontSize: '0.8em',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              Reset Secção
+            </button>
+            <button 
+              onClick={resetAllChecklists}
+              style={{
+                backgroundColor: 'var(--accent-color)',
+                color: 'white',
+                border: 'none',
+                padding: '6px 10px',
+                borderRadius: '4px',
+                fontSize: '0.8em',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              Reset Total
+            </button>
+          </div>
         </div>
       </header>
 
