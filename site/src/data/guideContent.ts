@@ -1,4 +1,4 @@
-export type SectionId = 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
+export type SectionId = 'BINGOS' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
 
 export interface GuideItem {
   id: string;
@@ -15,6 +15,21 @@ export interface GuideSection {
 }
 
 export const guideData: GuideSection[] = [
+  {
+    id: 'BINGOS',
+    label: 'BINGOS',
+    title: 'Calculadora de Bingos & Fuel',
+    items: [
+      {
+        id: 'bingo-calc',
+        title: 'BINGO CALCULATOR',
+        type: 'mixed',
+        content: {
+          text: 'Esta secção permite calcular a autonomia e os tempos de BINGO baseados no fuel atual e consumo médio.'
+        }
+      }
+    ]
+  },
   {
     id: 'EMERGENCY_CHECKLIST',
     label: 'EMERGENCY CHECKLIST',

@@ -2,34 +2,66 @@ import { useState, useRef, useEffect } from 'react'
 import { guideData, GuideItem } from './data/guideContent'
 import './index.css'
 
-// Image component moved outside to avoid hook issues
+// Image component with Fullscreen and Zoom support
 const ImageWithFallback = ({ src, title }: { src: string, title: string }) => {
   const [extensionIdx, setExtensionIdx] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [zoom, setZoom] = useState(1);
   const extensions = ['', '.png', '.jpg', '.jpeg']; 
   
   const basePath = src.replace(/\.(png|jpg|jpeg)$/i, '');
   const currentSrc = extensionIdx === 0 ? src : `${basePath}${extensions[extensionIdx]}`;
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    setZoom(1);
+  };
+
   return (
-    <div style={{ border: '1px solid #ddd', padding: '10px', backgroundColor: '#f9f9f9', marginBottom: '10px' }}>
-      <img 
-        src={currentSrc} 
-        alt={title} 
-        style={{ maxWidth: '100%', display: 'block', margin: '0 auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-        onError={() => {
-          if (extensionIdx < extensions.length - 1) {
-            setExtensionIdx(extensionIdx + 1);
-          } else {
-            console.error(`Falha ao carregar imagem em todas as extensões: ${basePath}`);
-          }
-        }}
-      />
-      {extensionIdx === extensions.length - 1 && (
-        <p style={{ color: 'red', padding: '10px', fontSize: '0.8em' }}>
-          Erro ao carregar: {basePath} (tentado .png, .jpg, .jpeg)
-        </p>
+    <>
+      <div 
+        style={{ border: '1px solid var(--border-color)', padding: '10px', backgroundColor: 'var(--card-bg)', marginBottom: '10px', cursor: 'zoom-in' }}
+        onClick={toggleFullscreen}
+      >
+        <img 
+          src={currentSrc} 
+          alt={title} 
+          style={{ maxWidth: '100%', display: 'block', margin: '0 auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+          onError={() => {
+            if (extensionIdx < extensions.length - 1) {
+              setExtensionIdx(extensionIdx + 1);
+            }
+          }}
+        />
+        <p style={{ fontSize: '0.7em', color: '#888', marginTop: '5px', textAlign: 'center' }}>Clique para ampliar</p>
+      </div>
+
+      {isFullscreen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)', zIndex: 1000,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '10px' }}>
+            <button onClick={() => setZoom(z => Math.min(z + 0.5, 4))} style={{ padding: '10px', fontSize: '1.2em' }}>+</button>
+            <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} style={{ padding: '10px', fontSize: '1.2em' }}>-</button>
+            <button onClick={toggleFullscreen} style={{ padding: '10px', fontSize: '1.2em', backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }}>X</button>
+          </div>
+          <div style={{ overflow: 'auto', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img 
+              src={currentSrc} 
+              alt={title} 
+              style={{ 
+                transform: `scale(${zoom})`, 
+                transition: 'transform 0.2s',
+                maxHeight: zoom > 1 ? 'none' : '90vh',
+                maxWidth: zoom > 1 ? 'none' : '90vw'
+              }} 
+            />
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
@@ -60,10 +92,10 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
           <div key={idx} style={{ 
             textAlign: 'center', 
             padding: '15px', 
-            color: check.startsWith('WARNING') ? 'var(--accent-color)' : '#666',
+            color: check.startsWith('WARNING') ? 'var(--accent-color)' : '#888',
             fontSize: '1em',
             fontStyle: 'italic',
-            borderBottom: '1px solid #eee'
+            borderBottom: '1px solid var(--border-color)'
           }}>
             {formatText(check)}
           </div>
@@ -96,13 +128,13 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
 
 const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: any }) => (
   <div key={keyPrefix} style={{ overflowX: 'auto', margin: '15px 0' }}>
-    {tableData.title && <h4 style={{ margin: '10px 0', color: '#555' }}>{tableData.title}</h4>}
+    {tableData.title && <h4 style={{ margin: '10px 0', color: 'var(--primary-color)' }}>{tableData.title}</h4>}
     <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px', fontSize: '0.9em' }}>
       {tableData.headers && tableData.headers.length > 0 && (
         <thead>
           <tr>
             {tableData.headers.map((h: string, i: number) => (
-              <th key={i} style={{ padding: '12px', backgroundColor: 'var(--primary-color)', color: 'white', border: '1px solid #ddd', textAlign: 'left' }}>{h}</th>
+              <th key={i} style={{ padding: '12px', backgroundColor: 'var(--primary-color)', color: 'white', border: '1px solid var(--border-color)', textAlign: 'left' }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -122,7 +154,7 @@ const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: a
                   colSpan={colSpan}
                   style={{ 
                     padding: '12px 8px', 
-                    border: '1px solid #ccc',
+                    border: '1px solid var(--border-color)',
                     backgroundColor: bgColor,
                     color: textColor,
                     fontWeight: isObject && cell.bold ? 'bold' : (cI === 0 ? 'bold' : 'normal'),
@@ -144,23 +176,56 @@ const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: a
 
 function App() {
   const [activeSectionId, setActiveSectionId] = useState<string>('NORMAL_PROCEDURES')
-  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 768)
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 1024)
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
+  const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('darkMode') === 'true')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentTime, setCurrentTime] = useState(new Date())
+  
+  // Bingo Calculator State
+  const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
+  const [burnRate, setBurnRate] = useState<string>(localStorage.getItem('burnRate') || '1.5')
+
+  const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
+    const saved = localStorage.getItem('missionLogs');
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const [checklistProgress, setChecklistProgress] = useState<{ [itemId: string]: { [index: number]: boolean } }>(() => {
     const saved = localStorage.getItem('checklistProgress');
     return saved ? JSON.parse(saved) : {};
   });
+
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
+
+  useEffect(() => {
+    document.body.className = darkMode ? 'dark-mode' : '';
+    localStorage.setItem('darkMode', darkMode.toString());
+  }, [darkMode]);
 
   useEffect(() => {
     localStorage.setItem('checklistProgress', JSON.stringify(checklistProgress));
   }, [checklistProgress]);
 
   useEffect(() => {
+    localStorage.setItem('missionLogs', JSON.stringify(missionLogs));
+  }, [missionLogs]);
+  
+  useEffect(() => {
+    localStorage.setItem('fuelInit', fuelInit);
+    localStorage.setItem('burnRate', burnRate);
+  }, [fuelInit, burnRate]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (!mobile) setIsSidebarVisible(true);
+      if (!mobile && window.innerWidth > 1024) setIsSidebarVisible(true);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -170,6 +235,7 @@ function App() {
 
   const handleSectionChange = (id: string) => {
     setActiveSectionId(id)
+    setSearchQuery('')
     if (isMobile) setIsSidebarVisible(false)
     const contentArea = document.querySelector('.content-area')
     if (contentArea) contentArea.scrollTop = 0
@@ -183,6 +249,11 @@ function App() {
     }
   }
 
+  const logEvent = (event: string) => {
+    const timeStr = new Date().toLocaleTimeString('pt-PT', { hour12: false });
+    setMissionLogs(prev => ({ ...prev, [event]: timeStr }));
+  }
+
   const lastTapRef = useRef<{ [key: string]: number }>({});
 
   const handleToggle = (itemId: string, index: number) => {
@@ -190,34 +261,21 @@ function App() {
     const isCurrentlyChecked = !!checklistProgress[itemId]?.[index];
     
     if (isCurrentlyChecked) {
-      // Logic for UNCHECKING: Requires double tap
       const now = Date.now();
       const lastTap = lastTapRef.current[key] || 0;
-      
       if (now - lastTap < 500) {
-        // Confirmed double tap -> Uncheck
         setChecklistProgress(prev => ({
           ...prev,
-          [itemId]: {
-            ...(prev[itemId] || {}),
-            [index]: false
-          }
+          [itemId]: { ...(prev[itemId] || {}), [index]: false }
         }));
         delete lastTapRef.current[key];
       } else {
-        // First tap -> Save time and maybe show a brief hint
         lastTapRef.current[key] = now;
-        // Optional: Could add a temporary visual state here, 
-        // but for now, the requirement is to prevent accidental scroll-clicks.
       }
     } else {
-      // Logic for CHECKING: Single tap is fine
       setChecklistProgress(prev => ({
         ...prev,
-        [itemId]: {
-          ...(prev[itemId] || {}),
-          [index]: true
-        }
+        [itemId]: { ...(prev[itemId] || {}), [index]: true }
       }));
     }
   };
@@ -225,29 +283,25 @@ function App() {
   const resetCurrentChecklists = () => {
     if (window.confirm('Resetar todos os checklists da secção atual?')) {
       const newProgress = { ...checklistProgress };
-      activeSection.items.forEach(item => {
-        delete newProgress[item.id];
-      });
+      activeSection.items.forEach(item => { delete newProgress[item.id]; });
       setChecklistProgress(newProgress);
     }
   };
 
   const resetAllChecklists = () => {
-    if (window.confirm('Resetar TODOS os checklists do guia?')) {
+    if (window.confirm('Resetar TODOS os checklists e logs de missão?')) {
       setChecklistProgress({});
+      setMissionLogs({});
+      setFuelInit('13');
+      setBurnRate('1.5');
     }
   };
 
   const isItemComplete = (item: GuideItem) => {
     let checklist: string[] | undefined;
-    if (item.type === 'checklist') {
-      checklist = item.content as string[];
-    } else if (item.type === 'mixed') {
-      checklist = (item.content as any).checklist;
-    }
-
+    if (item.type === 'checklist') checklist = item.content as string[];
+    else if (item.type === 'mixed') checklist = (item.content as any).checklist;
     if (!checklist) return false;
-
     const progress = checklistProgress[item.id] || {};
     return checklist.every((line, index) => {
       const isSpecialLine = !line.trim() || line.startsWith('WARNING:') || line.startsWith('CAUTION:') || line.startsWith('NOTE:') || line.startsWith('---');
@@ -257,6 +311,46 @@ function App() {
   };
 
   const renderContent = (item: GuideItem) => {
+    if (item.id === 'bingo-calc') {
+      const f = parseFloat(fuelInit) || 0;
+      const b = parseFloat(burnRate) || 0;
+      const endurance = b > 0 ? f / b : 0;
+      const hours = Math.floor(endurance);
+      const mins = Math.round((endurance - hours) * 60);
+      
+      const bingo25 = f * 0.25;
+      const bingo15 = f * 0.15;
+
+      return (
+        <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8em', marginBottom: '5px' }}>FUEL INICIAL (L)</label>
+              <input type="number" value={fuelInit} onChange={e => setFuelInit(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.2em' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8em', marginBottom: '5px' }}>CONSUMO MÉDIO (L/H)</label>
+              <input type="number" value={burnRate} onChange={e => setBurnRate(e.target.value)} step="0.1" style={{ width: '100%', padding: '10px', fontSize: '1.2em' }} />
+            </div>
+          </div>
+          <div style={{ padding: '20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '4px', textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ fontSize: '0.9em', opacity: 0.8 }}>AUTONOMIA TOTAL ESTIMADA</div>
+            <div style={{ fontSize: '2.5em', fontWeight: 'bold' }}>{hours}h {mins}m</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ padding: '15px', backgroundColor: '#facc15', color: 'black', borderRadius: '4px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8em', fontWeight: 'bold' }}>BINGO 25%</div>
+              <div style={{ fontSize: '1.5em' }}>{bingo25.toFixed(1)} L</div>
+            </div>
+            <div style={{ padding: '15px', backgroundColor: '#ff4d4d', color: 'white', borderRadius: '4px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8em', fontWeight: 'bold' }}>BINGO 15%</div>
+              <div style={{ fontSize: '1.5em' }}>{bingo15.toFixed(1)} L</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (item.type === 'text') {
       return (
         <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '1.1em' }}>
@@ -268,11 +362,10 @@ function App() {
     if (item.type === 'image') {
       const images = Array.isArray(item.content) ? item.content : [item.content];
       return (
-        <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ textAlign: 'center', padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {images.map((src, i) => (
             <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
           ))}
-          <p style={{ color: '#666', marginTop: '10px', fontStyle: 'italic' }}>Imagens do Guia: {item.title}</p>
         </div>
       )
     }
@@ -297,7 +390,7 @@ function App() {
       return (
         <div>
           {images.length > 0 && (
-            <div style={{ textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ textAlign: 'center', padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {images.map((src, i) => (
                 <ImageWithFallback key={i} src={src} title={`${item.title} ${i + 1}`} />
               ))}
@@ -317,245 +410,169 @@ function App() {
     return <div>Unknown content type</div>
   }
 
+  const filteredItems = searchQuery 
+    ? activeSection.items.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (typeof item.content === 'string' && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : activeSection.items;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      <header className="top-nav" style={{ 
-        backgroundColor: 'var(--primary-color)', 
-        color: 'white', 
-        padding: '10px', 
-        display: 'flex', 
-        alignItems: 'center',
-        gap: '10px',
-        flexShrink: 0,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        zIndex: 10
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }}>
+      {/* HEADER SUPERIOR */}
+      <header style={{ 
+        backgroundColor: 'var(--header-bg)', color: 'white', padding: '5px 15px', 
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 100,
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <button 
-          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '8px 12px',
-            fontSize: '1.2em',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '5px',
-            minWidth: '44px'
-          }}
-          title={isSidebarVisible ? "Esconder Menu" : "Mostrar Menu"}
-        >
-          {isSidebarVisible ? '✕' : '☰'}
-        </button>
-
-        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', flex: 1, paddingBottom: '2px', alignItems: 'center' }}>
-          {guideData.map(section => {
-            // Determine section color based on PDF borders
-            let sectionColor = '#003366'; // Default
-            let activeBg = 'var(--highlight-color)';
-            let textColor = 'white';
-            let activeTextColor = 'black';
-
-            if (section.id === 'EMERGENCY_CHECKLIST') {
-              sectionColor = '#b71c1c'; // Red
-              activeBg = '#ff1744';
-              activeTextColor = 'white';
-            } else if (section.id === 'NORMAL_PROCEDURES') {
-              sectionColor = '#0d47a1'; // Blue
-              activeBg = '#2979ff';
-              activeTextColor = 'white';
-            } else if (section.id === 'SENSOR_OPERATOR') {
-              sectionColor = '#1b5e20'; // Green
-              activeBg = '#00c853';
-              activeTextColor = 'white';
-            } else if (section.id === 'MISSION_PLANNING') {
-              sectionColor = '#37474f'; // Grey/Blue
-              activeBg = '#90a4ae';
-              activeTextColor = 'black';
-            } else if (section.id === 'HANDOVER_TAKEOVER') {
-              sectionColor = '#f57f17'; // Yellow/Orange
-              activeBg = '#ffea00';
-              activeTextColor = 'black';
-            } else if (section.id === 'CRASH_RESPONSE') {
-              sectionColor = '#4e342e'; // Brown/Red
-              activeBg = '#d84315';
-              activeTextColor = 'white';
-            }
-
-            const isActive = activeSectionId === section.id;
-
-            return (
-              <button 
-                key={section.id}
-                onClick={() => handleSectionChange(section.id)}
-                style={{ 
-                  backgroundColor: isActive ? activeBg : sectionColor,
-                  color: isActive ? activeTextColor : 'white',
-                  border: isActive ? `2px solid white` : '1px solid rgba(255,255,255,0.3)',
-                  whiteSpace: 'nowrap',
-                  padding: '8px 15px',
-                  fontSize: '0.9em',
-                  fontWeight: isActive ? 'bold' : 'normal',
-                  borderRadius: '4px',
-                  boxShadow: isActive ? '0 0 8px rgba(255,255,255,0.5)' : 'none',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {section.label}
-              </button>
-            );
-          })}
-          
-          <div style={{ display: 'flex', gap: '5px', borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '10px', marginLeft: '5px' }}>
-            <button 
-              onClick={resetCurrentChecklists}
-              style={{
-                backgroundColor: 'transparent',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.5)',
-                padding: '6px 10px',
-                borderRadius: '4px',
-                fontSize: '0.8em',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              Reset Secção
-            </button>
-            <button 
-              onClick={resetAllChecklists}
-              style={{
-                backgroundColor: 'var(--accent-color)',
-                color: 'white',
-                border: 'none',
-                padding: '6px 10px',
-                borderRadius: '4px',
-                fontSize: '0.8em',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              Reset Total
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5em', cursor: 'pointer' }}>☰</button>
+          <div style={{ lineHeight: 1.1 }}>
+            <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>INFLIGHT GUIDE OGS42</div>
+            <div style={{ fontSize: '0.6em', opacity: 0.7 }}>Last Update: 06 MAY 2026</div>
           </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '0.8em' }}>LCL: {currentTime.toLocaleTimeString('pt-PT')}</div>
+            <div style={{ fontSize: '0.8em', color: 'var(--highlight-color)' }}>ZULU: {currentTime.toISOString().substr(11, 8)}</div>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ padding: '5px 10px', borderRadius: '4px', border: 'none', width: isMobile ? '80px' : '150px', fontSize: '0.8em' }}
+          />
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid white', color: 'white', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
         </div>
       </header>
 
+      {/* MISSION CONTROL PANEL */}
+      <div style={{ 
+        backgroundColor: darkMode ? '#1a1a1a' : '#f0f4f8', 
+        padding: '8px 15px', display: 'flex', gap: '10px', overflowX: 'auto', flexShrink: 0,
+        borderBottom: '2px solid var(--primary-color)', alignItems: 'center'
+      }}>
+        <div style={{ fontSize: '0.7em', fontWeight: 'bold', opacity: 0.7, whiteSpace: 'nowrap' }}>MISSION LOG:</div>
+        {[
+          { id: 'eng-on', label: 'ENGINE ON' },
+          { id: 'atd', label: 'ATD' },
+          { id: 'ata', label: 'ATA' },
+          { id: 'eng-off', label: 'ENGINE OFF' }
+        ].map(evt => (
+          <button 
+            key={evt.id}
+            onClick={() => logEvent(evt.id)}
+            style={{ 
+              padding: '5px 10px', fontSize: '0.75em', borderRadius: '4px', border: '1px solid var(--primary-color)',
+              backgroundColor: missionLogs[evt.id] ? 'var(--primary-color)' : 'transparent',
+              color: missionLogs[evt.id] ? 'white' : 'var(--primary-color)',
+              cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 'bold'
+            }}
+          >
+            {evt.label}: {missionLogs[evt.id] || '--:--'}
+          </button>
+        ))}
+      </div>
+
+      {/* SECTION NAVIGATION */}
+      <nav style={{ 
+        backgroundColor: 'var(--sidebar-bg)', display: 'flex', gap: '5px', overflowX: 'auto', 
+        padding: '5px 10px', borderBottom: '1px solid var(--border-color)', flexShrink: 0
+      }}>
+        {guideData.map(section => {
+          let sectionColor = '#003366';
+          let activeBg = 'var(--highlight-color)';
+          let textColor = 'white';
+          let activeTextColor = 'black';
+
+          if (section.id === 'BINGOS') { sectionColor = '#455a64'; activeBg = '#cfd8dc'; activeTextColor = 'black'; }
+          else if (section.id === 'EMERGENCY_CHECKLIST') { sectionColor = '#b71c1c'; activeBg = '#ff1744'; activeTextColor = 'white'; }
+          else if (section.id === 'NORMAL_PROCEDURES') { sectionColor = '#0d47a1'; activeBg = '#2979ff'; activeTextColor = 'white'; }
+          else if (section.id === 'SENSOR_OPERATOR') { sectionColor = '#1b5e20'; activeBg = '#00c853'; activeTextColor = 'white'; }
+          else if (section.id === 'MISSION_PLANNING') { sectionColor = '#37474f'; activeBg = '#90a4ae'; activeTextColor = 'black'; }
+          else if (section.id === 'HANDOVER_TAKEOVER') { sectionColor = '#f57f17'; activeBg = '#ffea00'; activeTextColor = 'black'; }
+          else if (section.id === 'CRASH_RESPONSE') { sectionColor = '#4e342e'; activeBg = '#d84315'; activeTextColor = 'white'; }
+
+          const isActive = activeSectionId === section.id;
+          return (
+            <button 
+              key={section.id} onClick={() => handleSectionChange(section.id)}
+              style={{ 
+                backgroundColor: isActive ? activeBg : sectionColor, color: isActive ? activeTextColor : 'white',
+                border: 'none', whiteSpace: 'nowrap', padding: '8px 12px', fontSize: '0.8em',
+                fontWeight: isActive ? 'bold' : 'normal', borderRadius: '4px', cursor: 'pointer'
+              }}
+            >
+              {section.label}
+            </button>
+          );
+        })}
+        <div style={{ borderLeft: '1px solid var(--border-color)', marginLeft: '10px', paddingLeft: '10px', display: 'flex', gap: '5px' }}>
+          <button onClick={resetCurrentChecklists} style={{ fontSize: '0.7em', padding: '5px', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'none', color: 'inherit', cursor: 'pointer' }}>Reset Secção</button>
+          <button onClick={resetAllChecklists} style={{ fontSize: '0.7em', padding: '5px', backgroundColor: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Reset Total</button>
+        </div>
+      </nav>
+
       <div className="main-body" style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         <aside className="sidebar" style={{ 
-          width: isSidebarVisible ? '280px' : '0px', 
-          backgroundColor: '#f8f9fa', 
+          width: isSidebarVisible ? '280px' : '0px', backgroundColor: 'var(--sidebar-bg)', 
           borderRight: isSidebarVisible ? '1px solid var(--border-color)' : 'none',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          padding: isSidebarVisible ? '10px' : '0px',
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '5px',
-          zIndex: 5,
-          transition: 'width 0.3s ease, padding 0.3s ease',
-          position: isMobile ? 'absolute' : 'relative',
-          height: '100%',
-          boxShadow: (isSidebarVisible && isMobile) ? '4px 0 10px rgba(0,0,0,0.1)' : 'none'
+          overflowY: 'auto', padding: isSidebarVisible ? '10px' : '0px', flexShrink: 0,
+          transition: 'width 0.3s ease', position: isMobile ? 'absolute' : 'relative',
+          height: '100%', zIndex: 50, boxShadow: (isSidebarVisible && isMobile) ? '4px 0 10px rgba(0,0,0,0.3)' : 'none'
         }}>
           {isSidebarVisible && (
-            <>
-              <h3 style={{ 
-                fontSize: '0.9em', 
-                padding: '10px 5px', 
-                borderBottom: '2px solid var(--primary-color)',
-                color: 'var(--primary-color)',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '10px',
-                whiteSpace: 'nowrap'
-              }}>
-                {activeSection.title}
-              </h3>
-              
-              <div className="sidebar-items" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: '260px' }}>
-                {activeSection.items.map(item => {
-                  const complete = isItemComplete(item);
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => scrollToItem(item.id)}
-                      style={{
-                        textAlign: 'left',
-                        backgroundColor: complete ? '#e8f5e9' : 'transparent',
-                        color: complete ? '#2e7d32' : '#444',
-                        border: 'none',
-                        borderLeft: complete ? '4px solid #4caf50' : '4px solid transparent',
-                        borderRadius: '0 4px 4px 0',
-                        padding: '10px',
-                        fontSize: '0.9em',
-                        transition: 'all 0.2s',
-                        fontWeight: complete ? 'bold' : 'normal'
-                      }}
-                      onMouseOver={(e) => { if (!complete) e.currentTarget.style.backgroundColor = '#eee'; }}
-                      onMouseOut={(e) => { if (!complete) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    >
-                      {complete && <span style={{ marginRight: '5px' }}>✓</span>}
-                      {item.title}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
+            <div className="sidebar-items" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              {activeSection.items.map(item => {
+                const complete = isItemComplete(item);
+                return (
+                  <button
+                    key={item.id} onClick={() => scrollToItem(item.id)}
+                    style={{
+                      textAlign: 'left', backgroundColor: complete ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                      color: complete ? '#4caf50' : 'inherit', border: 'none', borderLeft: complete ? '4px solid #4caf50' : '4px solid transparent',
+                      padding: '10px', fontSize: '0.85em', cursor: 'pointer', fontWeight: complete ? 'bold' : 'normal'
+                    }}
+                  >
+                    {complete && '✓ '} {item.title}
+                  </button>
+                );
+              })}
+            </div>
           )}
         </aside>
 
-        <main className="content-area" style={{ 
-          flex: 1, 
-          padding: isMobile ? '0 15px 40px 15px' : '0 40px 40px 40px', 
-          overflowY: 'auto',
-          backgroundColor: 'white',
-          scrollBehavior: 'smooth'
-        }}>
-          {isSidebarVisible && isMobile && (
-            <div 
-              onClick={() => setIsSidebarVisible(false)}
-              style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.1)',
-                zIndex: 4
-              }}
-            />
+        <main className="content-area" style={{ flex: 1, padding: '0 20px 40px 20px', overflowY: 'auto', backgroundColor: 'var(--bg-color)', scrollBehavior: 'smooth' }}>
+          {isSidebarVisible && isMobile && <div onClick={() => setIsSidebarVisible(false)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 45 }} />}
+          
+          {/* EMERGENCY DASHBOARD */}
+          {activeSectionId === 'EMERGENCY_CHECKLIST' && !searchQuery && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', padding: '20px 0', borderBottom: '2px solid var(--accent-color)' }}>
+              {activeSection.items.filter(i => i.id.startsWith('ec-')).map(item => (
+                <button 
+                  key={item.id} onClick={() => scrollToItem(item.id)}
+                  style={{ padding: '10px', fontSize: '0.7em', backgroundColor: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  {item.title.split('. ')[1] || item.title}
+                </button>
+              ))}
+            </div>
           )}
-          {activeSection.items.map((item) => (
-            <section 
-              key={item.id} 
-              id={item.id}
-              ref={el => contentRefs.current[item.id] = el}
-              style={{ padding: '40px 0', borderBottom: '1px solid #f0f0f0' }}
-            >
-              <h2 style={{ 
-                color: 'var(--primary-color)',
-                marginBottom: '20px',
-                fontSize: '1.8em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <span style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.6em' }}>
-                  {activeSection.label}
-                </span>
+
+          {filteredItems.map((item) => (
+            <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
+              <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {item.title}
               </h2>
-              <div className="content-render">
-                {renderContent(item)}
-              </div>
+              <div className="content-render">{renderContent(item)}</div>
             </section>
           ))}
         </main>
