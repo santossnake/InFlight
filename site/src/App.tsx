@@ -179,7 +179,6 @@ function App() {
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(window.innerWidth > 1024)
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('darkMode') === 'true')
-  const [searchQuery, setSearchQuery] = useState('')
   const [currentTime, setCurrentTime] = useState(new Date())
   
   // Bingo Calculator State
@@ -239,7 +238,6 @@ function App() {
 
   const handleSectionChange = (id: string) => {
     setActiveSectionId(id)
-    setSearchQuery('')
     if (isMobile) setIsSidebarVisible(false)
     const contentArea = document.querySelector('.content-area')
     if (contentArea) contentArea.scrollTop = 0
@@ -481,13 +479,6 @@ function App() {
     return <div>Unknown content type</div>
   }
 
-  const filteredItems = searchQuery 
-    ? activeSection.items.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (typeof item.content === 'string' && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : activeSection.items;
-
   const engOnTotal = getDiffTime(missionLogs['eng-on'] || '', missionLogs['eng-off']);
   const flightTotal = getDiffTime(missionLogs['atd'] || '', missionLogs['ata']);
 
@@ -512,13 +503,6 @@ function App() {
             <div style={{ fontSize: '0.8em' }}>LCL: {currentTime.toLocaleTimeString('pt-PT')}</div>
             <div style={{ fontSize: '0.8em', color: 'var(--highlight-color)' }}>ZULU: {currentTime.toISOString().substr(11, 8)}</div>
           </div>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ padding: '5px 10px', borderRadius: '4px', border: 'none', width: isMobile ? '80px' : '150px', fontSize: '0.8em' }}
-          />
           <button 
             onClick={() => setDarkMode(!darkMode)}
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid white', color: 'white', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}
@@ -637,7 +621,7 @@ function App() {
           {isSidebarVisible && isMobile && <div onClick={() => setIsSidebarVisible(false)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 45 }} />}
           
           {/* EMERGENCY DASHBOARD */}
-          {activeSectionId === 'EMERGENCY_CHECKLIST' && !searchQuery && (
+          {activeSectionId === 'EMERGENCY_CHECKLIST' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', padding: '20px 0', borderBottom: '2px solid var(--accent-color)' }}>
               {activeSection.items.filter(i => i.id.startsWith('ec-')).map(item => (
                 <button 
@@ -650,7 +634,7 @@ function App() {
             </div>
           )}
 
-          {filteredItems.map((item) => (
+          {activeSection.items.map((item) => (
             <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
               <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {item.title}

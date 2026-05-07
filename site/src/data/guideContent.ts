@@ -16,21 +16,6 @@ export interface GuideSection {
 
 export const guideData: GuideSection[] = [
   {
-    id: 'BINGOS',
-    label: 'BINGOS',
-    title: 'Calculadora de Bingos & Fuel',
-    items: [
-      {
-        id: 'bingo-calc',
-        title: 'BINGO CALCULATOR',
-        type: 'mixed',
-        content: {
-          text: 'Esta secção permite calcular a autonomia e os tempos de BINGO baseados no fuel atual e consumo médio.'
-        }
-      }
-    ]
-  },
-  {
     id: 'EMERGENCY_CHECKLIST',
     label: 'EMERGENCY CHECKLIST',
     title: 'Emergency Checklist',
@@ -858,6 +843,21 @@ export const guideData: GuideSection[] = [
             ['Axes 2 (L3)', 'Cam yaw'],
             ['Axes 5 (R3)', 'Zoom']
           ]
+        }
+      }
+    ]
+  },
+  {
+    id: 'BINGOS',
+    label: 'BINGOS',
+    title: 'Calculadora de Bingos & Fuel',
+    items: [
+      {
+        id: 'bingo-calc',
+        title: 'BINGO CALCULATOR',
+        type: 'mixed',
+        content: {
+          text: 'Esta secção permite calcular a autonomia e os tempos de BINGO baseados no fuel atual e consumo médio.'
         }
       }
     ]
