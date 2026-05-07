@@ -1,4 +1,4 @@
-export type SectionId = 'BINGOS' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
+export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
 
 export interface GuideItem {
   id: string;
@@ -848,16 +848,16 @@ export const guideData: GuideSection[] = [
     ]
   },
   {
-    id: 'BINGOS',
-    label: 'BINGOS',
-    title: 'Calculadora de Bingos & Fuel',
+    id: 'ENDURANCE',
+    label: 'ENDURANCE',
+    title: 'Calculadora de Endurance & Fuel',
     items: [
       {
-        id: 'bingo-calc',
-        title: 'BINGO CALCULATOR',
+        id: 'endurance-calc',
+        title: 'ENDURANCE CALCULATOR',
         type: 'mixed',
         content: {
-          text: 'Esta secção permite calcular a autonomia e os tempos de BINGO baseados no fuel atual e consumo médio.'
+          text: 'Esta secção permite calcular a autonomia, o alcance (range) e o fuel restante ao chegar ao destino.'
         }
       }
     ]

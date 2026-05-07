@@ -181,9 +181,11 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('darkMode') === 'true')
   const [currentTime, setCurrentTime] = useState(new Date())
   
-  // Bingo Calculator State
+  // Endurance Calculator State
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
   const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '13')
+  const [gs, setGs] = useState<string>(localStorage.getItem('gs') || '50')
+  const [distHome, setDistHome] = useState<string>(localStorage.getItem('distHome') || '10')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
 
   const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
@@ -217,7 +219,9 @@ function App() {
   useEffect(() => {
     localStorage.setItem('fuelInit', fuelInit);
     localStorage.setItem('fuelCurrent', fuelCurrent);
-  }, [fuelInit, fuelCurrent]);
+    localStorage.setItem('gs', gs);
+    localStorage.setItem('distHome', distHome);
+  }, [fuelInit, fuelCurrent, gs, distHome]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -346,9 +350,11 @@ function App() {
   };
 
   const renderContent = (item: GuideItem) => {
-    if (item.id === 'bingo-calc') {
+    if (item.id === 'endurance-calc') {
       const fInit = parseFloat(fuelInit) || 0;
       const fCurr = parseFloat(fuelCurrent) || 0;
+      const groundSpeed = parseFloat(gs) || 0;
+      const distance = parseFloat(distHome) || 0;
       
       const engOnStr = engineOnManual || missionLogs['eng-on'];
       const timeData = getDiffTime(engOnStr || '');
@@ -356,6 +362,8 @@ function App() {
       let burnRateCalculated = 0;
       let remainingToBingo = 0;
       let hours = 0, mins = 0;
+      let range = 0;
+      let fuelAtHome = 0;
 
       if (timeData && timeData.totalMins > 2) {
         const fuelUsed = Math.max(0, fInit - fCurr);
@@ -366,6 +374,12 @@ function App() {
           remainingToBingo = (fuelAvailable / burnRateCalculated) * 60;
           hours = Math.floor(remainingToBingo / 60);
           mins = Math.round(remainingToBingo % 60);
+          
+          if (groundSpeed > 0) {
+            range = (fCurr / burnRateCalculated) * groundSpeed;
+            const timeToHomeHrs = distance / groundSpeed;
+            fuelAtHome = fCurr - (timeToHomeHrs * burnRateCalculated);
+          }
         }
       }
 
@@ -381,6 +395,14 @@ function App() {
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L)</label>
               <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ width: '100%', padding: '12px', fontSize: '1.2em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>GROUND SPEED (GS)</label>
+              <input type="number" value={gs} onChange={e => setGs(e.target.value)} style={{ width: '100%', padding: '12px', fontSize: '1.2em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>DIST TO HOME (NM)</label>
+              <input type="number" value={distHome} onChange={e => setDistHome(e.target.value)} step="0.1" style={{ width: '100%', padding: '12px', fontSize: '1.2em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
           </div>
           
@@ -405,16 +427,22 @@ function App() {
             </div>
           </div>
 
-          <div style={{ padding: '30px 20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-            <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '10px' }}>AUTONOMIA RESTANTE ATÉ 2.5L</div>
-            {burnRateCalculated > 0.1 ? (
-              <>
-                <div style={{ fontSize: '4em', fontWeight: 'bold', lineHeight: '1' }}>{hours}h {mins}m</div>
-                <div style={{ fontSize: '0.75em', opacity: 0.7, marginTop: '15px' }}>Cálculo baseado no consumo real desde o Engine ON.</div>
-              </>
-            ) : (
-              <div style={{ fontSize: '1.2em', padding: '10px', fontStyle: 'italic' }}>Aguardando estabilização do consumo (2m+)...</div>
-            )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+            <div style={{ padding: '20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>AUTONOMIA ATÉ 2.5L</div>
+              <div style={{ fontSize: '3em', fontWeight: 'bold' }}>{burnRateCalculated > 0.1 ? `${hours}h ${mins}m` : '--:--'}</div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ padding: '15px', backgroundColor: '#455a64', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>RANGE TOTAL (GS)</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{range > 0 ? `${range.toFixed(0)} NM` : '---'}</div>
+              </div>
+              <div style={{ padding: '15px', backgroundColor: fuelAtHome < 2.5 ? 'var(--accent-color)' : '#2e7d32', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>FUEL AT HOME</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{fuelAtHome !== 0 ? `${fuelAtHome.toFixed(1)} L` : '---'}</div>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -560,7 +588,7 @@ function App() {
           let textColor = 'white';
           let activeTextColor = 'black';
 
-          if (section.id === 'BINGOS') { sectionColor = '#455a64'; activeBg = '#cfd8dc'; activeTextColor = 'black'; }
+          if (section.id === 'ENDURANCE') { sectionColor = '#455a64'; activeBg = '#cfd8dc'; activeTextColor = 'black'; }
           else if (section.id === 'EMERGENCY_CHECKLIST') { sectionColor = '#b71c1c'; activeBg = '#ff1744'; activeTextColor = 'white'; }
           else if (section.id === 'NORMAL_PROCEDURES') { sectionColor = '#0d47a1'; activeBg = '#2979ff'; activeTextColor = 'white'; }
           else if (section.id === 'SENSOR_OPERATOR') { sectionColor = '#1b5e20'; activeBg = '#00c853'; activeTextColor = 'white'; }
@@ -622,14 +650,38 @@ function App() {
           
           {/* EMERGENCY DASHBOARD */}
           {activeSectionId === 'EMERGENCY_CHECKLIST' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', padding: '20px 0', borderBottom: '2px solid var(--accent-color)' }}>
-              {activeSection.items.filter(i => i.id.startsWith('ec-')).map(item => (
-                <button 
-                  key={item.id} onClick={() => scrollToItem(item.id)}
-                  style={{ padding: '10px', fontSize: '0.7em', backgroundColor: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  {item.title.split('. ')[1] || item.title}
-                </button>
+            <div style={{ padding: '20px 0', borderBottom: '2px solid var(--accent-color)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {[
+                { label: 'AIRCRAFT (1-10)', items: activeSection.items.filter(i => {
+                  if (!i.id.startsWith('ec-') || i.id.includes('limit') || i.id === 'ec-electrical') return false;
+                  const num = parseInt(i.title.split('.')[0]);
+                  return num >= 1 && num <= 10;
+                })},
+                { label: 'GCS (11-13)', items: activeSection.items.filter(i => {
+                  if (!i.id.startsWith('ec-')) return false;
+                  const num = parseInt(i.title.split('.')[0]);
+                  return num >= 11 && num <= 13;
+                })},
+                { label: 'EXTERNAL PILOT (14-15)', items: activeSection.items.filter(i => {
+                  if (!i.id.startsWith('ec-')) return false;
+                  const num = parseInt(i.title.split('.')[0]);
+                  return num >= 14 && num <= 15;
+                })},
+                { label: 'LIMITATIONS', items: activeSection.items.filter(i => i.id === 'ec-limitations' || i.id === 'ec-engine-limits' || i.id === 'ec-electrical')}
+              ].map(group => (
+                <div key={group.label}>
+                  <div style={{ fontSize: '0.8em', fontWeight: 'bold', marginBottom: '10px', opacity: 0.8, color: 'var(--accent-color)' }}>{group.label}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+                    {group.items.map(item => (
+                      <button 
+                        key={item.id} onClick={() => scrollToItem(item.id)}
+                        style={{ padding: '10px', fontSize: '0.7em', backgroundColor: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                      >
+                        {item.title.includes('.') ? item.title.split('.')[0] + '.' + item.title.split('.')[1].split('  ')[0] : item.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
