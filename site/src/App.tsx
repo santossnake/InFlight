@@ -187,6 +187,8 @@ function App() {
   const [gs, setGs] = useState<string>(localStorage.getItem('gs') || '50')
   const [distHome, setDistHome] = useState<string>(localStorage.getItem('distHome') || '10')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
+  const [editingTimer, setEditingTimer] = useState<{ id: string, label: string } | null>(null)
+  const [modalValue, setModalValue] = useState('')
 
   const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
     const saved = localStorage.getItem('missionLogs');
@@ -255,14 +257,34 @@ function App() {
     }
   }
 
-  const resetMissionEvent = (id: string) => {
-    if (window.confirm(`Resetar tempo de ${id.toUpperCase()}?`)) {
+  const openEditModal = (id: string, label: string) => {
+    setEditingTimer({ id, label });
+    setModalValue(missionLogs[id] || '');
+  }
+
+  const saveTimerValue = () => {
+    if (!editingTimer) return;
+    if (modalValue === '' || /^([01]\d|2[0-3]):([0-5]\d)$/.test(modalValue)) {
       setMissionLogs(prev => {
         const next = { ...prev };
-        delete next[id];
+        if (modalValue === '') delete next[editingTimer.id];
+        else next[editingTimer.id] = modalValue;
         return next;
       });
+      setEditingTimer(null);
+    } else {
+      alert('Formato inválido. Use HH:MM (ex: 14:30)');
     }
+  }
+
+  const resetTimerValue = () => {
+    if (!editingTimer) return;
+    setMissionLogs(prev => {
+      const next = { ...prev };
+      delete next[editingTimer.id];
+      return next;
+    });
+    setEditingTimer(null);
   }
 
   const logEvent = (event: string) => {
@@ -360,25 +382,42 @@ function App() {
       const timeData = getDiffTime(engOnStr || '');
       
       let burnRateCalculated = 0;
-      let remainingToBingo = 0;
       let hours = 0, mins = 0;
       let range = 0;
       let fuelAtHome = 0;
+      let timeToHomeMins = 0;
+      let timeRemainingOnStationMins = 0;
+      let bingoTimeStr = '---';
 
       if (timeData && timeData.totalMins > 2) {
         const fuelUsed = Math.max(0, fInit - fCurr);
         burnRateCalculated = (fuelUsed / timeData.totalMins) * 60;
         
         if (burnRateCalculated > 0.1) {
-          const fuelAvailable = Math.max(0, fCurr - 2.5);
-          remainingToBingo = (fuelAvailable / burnRateCalculated) * 60;
-          hours = Math.floor(remainingToBingo / 60);
-          mins = Math.round(remainingToBingo % 60);
+          const fuelAvailableForBingo = Math.max(0, fCurr - 2.5);
+          const totalEnduranceMins = (fuelAvailableForBingo / burnRateCalculated) * 60;
+          hours = Math.floor(totalEnduranceMins / 60);
+          mins = Math.round(totalEnduranceMins % 60);
           
           if (groundSpeed > 0) {
             range = (fCurr / burnRateCalculated) * groundSpeed;
-            const timeToHomeHrs = distance / groundSpeed;
-            fuelAtHome = fCurr - (timeToHomeHrs * burnRateCalculated);
+            timeToHomeMins = (distance / groundSpeed) * 60;
+            fuelAtHome = fCurr - ((timeToHomeMins / 60) * burnRateCalculated);
+            
+            const fuelNeededForTrip = (timeToHomeMins / 60) * burnRateCalculated;
+            const fuelAvailableOnStation = fCurr - 2.5 - fuelNeededForTrip;
+            
+            if (fuelAvailableOnStation > 0) {
+              timeRemainingOnStationMins = (fuelAvailableOnStation / burnRateCalculated) * 60;
+              
+              // Calculate Bingo Time (Clock time now + Remaining on Station)
+              const bingoDate = new Date(currentTime.getTime() + timeRemainingOnStationMins * 60000);
+              bingoTimeStr = bingoDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            } else {
+              timeRemainingOnStationMins = 0;
+              // If already at or past bingo fuel, bingo time is now
+              bingoTimeStr = currentTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            }
           }
         }
       }
@@ -429,7 +468,7 @@ function App() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
             <div style={{ padding: '20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>AUTONOMIA ATÉ 2.5L</div>
+              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>AUTONOMIA TOTAL (ATÉ 2.5L)</div>
               <div style={{ fontSize: '3em', fontWeight: 'bold' }}>{burnRateCalculated > 0.1 ? `${hours}h ${mins}m` : '--:--'}</div>
             </div>
             
@@ -442,6 +481,22 @@ function App() {
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>FUEL AT HOME</div>
                 <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{fuelAtHome !== 0 ? `${fuelAtHome.toFixed(1)} L` : '---'}</div>
               </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ padding: '15px', backgroundColor: '#1976d2', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>TIME TO HOME</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{timeToHomeMins > 0 ? `${Math.floor(timeToHomeMins)} min` : '---'}</div>
+              </div>
+              <div style={{ padding: '15px', backgroundColor: '#d32f2f', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>BINGO TIME (RTB)</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{bingoTimeStr}</div>
+              </div>
+            </div>
+
+            <div style={{ padding: '15px', backgroundColor: timeRemainingOnStationMins < 5 ? 'var(--accent-color)' : '#546e7a', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>REMAINING ON STATION</div>
+              <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{timeRemainingOnStationMins > 0 ? `${Math.floor(timeRemainingOnStationMins)} min` : '0 min'}</div>
             </div>
           </div>
         </div>
@@ -514,26 +569,26 @@ function App() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }}>
       {/* HEADER SUPERIOR */}
       <header style={{ 
-        backgroundColor: 'var(--header-bg)', color: 'white', padding: '5px 15px', 
+        backgroundColor: 'var(--header-bg)', color: 'white', padding: '10px 20px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 100,
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
+        borderBottom: '1px solid rgba(255,255,255,0.1)', minHeight: '60px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5em', cursor: 'pointer' }}>☰</button>
-          <div style={{ lineHeight: 1.1 }}>
-            <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>INFLIGHT GUIDE OGS42</div>
-            <div style={{ fontSize: '0.6em', opacity: 0.7 }}>Last Update: 06 MAY 2026</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.8em', cursor: 'pointer' }}>☰</button>
+          <div style={{ lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '1px' }}>INFLIGHT GUIDE OGS42</div>
+            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>Last Update: 06 MAY 2026</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <div style={{ textAlign: 'right', fontFamily: 'monospace', display: 'flex', gap: '15px' }}>
-            <div style={{ fontSize: '0.8em' }}>LCL: {currentTime.toLocaleTimeString('pt-PT')}</div>
-            <div style={{ fontSize: '0.8em', color: 'var(--highlight-color)' }}>ZULU: {currentTime.toISOString().substr(11, 8)}</div>
+        <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+          <div style={{ textAlign: 'right', fontFamily: 'monospace', display: 'flex', gap: '25px', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '1.1em' }}>LCL: {currentTime.toLocaleTimeString('pt-PT')}</div>
+            <div style={{ fontSize: '1.1em', color: 'var(--highlight-color)' }}>ZULU: {currentTime.toISOString().substr(11, 8)}</div>
           </div>
           <button 
             onClick={() => setDarkMode(!darkMode)}
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid white', color: 'white', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid white', color: 'white', borderRadius: '50%', width: '35px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
@@ -556,8 +611,8 @@ function App() {
           <button 
             key={evt.id}
             onClick={() => logEvent(evt.id)}
-            onDoubleClick={() => resetMissionEvent(evt.id)}
-            title="Clique para registar, Duplo-Clique para resetar"
+            onDoubleClick={() => openEditModal(evt.id, evt.label)}
+            title="Clique para registar, Duplo-Clique para editar"
             style={{ 
               padding: '5px 10px', fontSize: '0.75em', borderRadius: '4px', border: '1px solid var(--primary-color)',
               backgroundColor: missionLogs[evt.id] ? 'var(--primary-color)' : 'transparent',
@@ -696,6 +751,63 @@ function App() {
           ))}
         </main>
       </div>
+
+      {/* TIMER EDIT MODAL */}
+      {editingTimer && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{ 
+            backgroundColor: 'var(--card-bg)', padding: '25px', borderRadius: '12px', 
+            width: '100%', maxWidth: '350px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            border: '1px solid var(--border-color)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '20px', color: 'var(--primary-color)', textAlign: 'center' }}>
+              EDITAR {editingTimer.label}
+            </h3>
+            
+            <input 
+              type="text" 
+              value={modalValue}
+              onChange={(e) => setModalValue(e.target.value)}
+              placeholder="HH:MM"
+              autoFocus
+              style={{ 
+                width: '100%', padding: '15px', fontSize: '1.5em', textAlign: 'center',
+                borderRadius: '8px', border: '2px solid var(--primary-color)',
+                backgroundColor: 'var(--bg-color)', color: 'var(--text-color)',
+                marginBottom: '20px'
+              }}
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+              <button 
+                onClick={saveTimerValue}
+                style={{ padding: '12px', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                GUARDAR
+              </button>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button 
+                  onClick={resetTimerValue}
+                  style={{ padding: '12px', backgroundColor: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  RESET (ZERO)
+                </button>
+                <button 
+                  onClick={() => setEditingTimer(null)}
+                  style={{ padding: '12px', backgroundColor: '#546e7a', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
