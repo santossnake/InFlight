@@ -407,17 +407,12 @@ function App() {
             const fuelNeededForTrip = (timeToHomeMins / 60) * burnRateCalculated;
             const fuelAvailableOnStation = fCurr - 2.5 - fuelNeededForTrip;
             
-            if (fuelAvailableOnStation > 0) {
-              timeRemainingOnStationMins = (fuelAvailableOnStation / burnRateCalculated) * 60;
-              
-              // Calculate Bingo Time (Clock time now + Remaining on Station)
-              const bingoDate = new Date(currentTime.getTime() + timeRemainingOnStationMins * 60000);
-              bingoTimeStr = bingoDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-            } else {
-              timeRemainingOnStationMins = 0;
-              // If already at or past bingo fuel, bingo time is now
-              bingoTimeStr = currentTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-            }
+            // Allow negative value to show how much time has passed since bingo
+            timeRemainingOnStationMins = (fuelAvailableOnStation / burnRateCalculated) * 60;
+            
+            // Calculate Bingo Time (Clock time now + Remaining on Station)
+            const bingoDate = new Date(currentTime.getTime() + timeRemainingOnStationMins * 60000);
+            bingoTimeStr = bingoDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
           }
         }
       }
