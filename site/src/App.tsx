@@ -485,7 +485,14 @@ function App() {
               </div>
               <div style={{ padding: '15px', backgroundColor: '#d32f2f', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>BINGO TIME (RTB)</div>
-                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{bingoTimeStr}</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>
+                  {bingoTimeStr}
+                  {timeRemainingOnStationMins < 0 && (
+                    <span style={{ fontSize: '0.5em', display: 'block', opacity: 0.8 }}>
+                      ({Math.floor(timeRemainingOnStationMins)} min)
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
