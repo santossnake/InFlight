@@ -419,15 +419,23 @@ function App() {
 
       const fuelPercentage = fInit > 0 ? (fCurr / fInit) * 100 : 0;
 
+      const formatDuration = (totalMins: number) => {
+        const isNeg = totalMins < 0;
+        const absMins = Math.abs(totalMins);
+        const h = Math.floor(absMins / 60);
+        const m = Math.round(absMins % 60);
+        return `${isNeg ? '-' : ''}${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+      };
+
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL INICIAL (L)</label>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>INITIAL FUEL (L)</label>
               <input type="number" value={fuelInit} onChange={e => setFuelInit(e.target.value)} style={{ width: '100%', padding: '12px', fontSize: '1.2em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>FUEL ATUAL (L)</label>
+              <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>CURRENT FUEL (L)</label>
               <input type="number" value={fuelCurrent} onChange={e => setFuelCurrent(e.target.value)} step="0.1" style={{ width: '100%', padding: '12px', fontSize: '1.2em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
             </div>
             <div>
@@ -447,7 +455,7 @@ function App() {
 
           <div style={{ marginBottom: '25px', padding: '15px', backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9em', marginBottom: '10px', fontWeight: 'bold' }}>
-              <span>CONSUMO MÉDIO: {burnRateCalculated > 0 ? burnRateCalculated.toFixed(1) : '--.-'} L/H</span>
+              <span>AVG BURN RATE: {burnRateCalculated > 0 ? burnRateCalculated.toFixed(1) : '--.-'} L/H</span>
               <span style={{ color: fuelPercentage < 20 ? 'var(--accent-color)' : 'inherit' }}>{fCurr.toFixed(1)}L / {fInit}L</span>
             </div>
             <div style={{ height: '20px', width: '100%', backgroundColor: '#ddd', borderRadius: '10px', overflow: 'hidden' }}>
@@ -463,13 +471,13 @@ function App() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
             <div style={{ padding: '20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>AUTONOMIA TOTAL (ATÉ 2.5L)</div>
+              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>TOTAL ENDURANCE (TO 2.5L)</div>
               <div style={{ fontSize: '3em', fontWeight: 'bold' }}>{burnRateCalculated > 0.1 ? `${hours}h ${mins}m` : '--:--'}</div>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
               <div style={{ padding: '15px', backgroundColor: '#455a64', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>RANGE TOTAL (GS)</div>
+                <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>TOTAL RANGE (GS)</div>
                 <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{range > 0 ? `${range.toFixed(0)} NM` : '---'}</div>
               </div>
               <div style={{ padding: '15px', backgroundColor: fuelAtHome < 2.5 ? 'var(--accent-color)' : '#2e7d32', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
@@ -481,7 +489,7 @@ function App() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
               <div style={{ padding: '15px', backgroundColor: '#1976d2', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>TIME TO HOME</div>
-                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{timeToHomeMins > 0 ? `${Math.floor(timeToHomeMins)} min` : '---'}</div>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{timeToHomeMins > 0 ? formatDuration(timeToHomeMins) : '---'}</div>
               </div>
               <div style={{ padding: '15px', backgroundColor: '#d32f2f', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>BINGO TIME (RTB)</div>
@@ -498,7 +506,9 @@ function App() {
 
             <div style={{ padding: '15px', backgroundColor: timeRemainingOnStationMins < 5 ? 'var(--accent-color)' : '#546e7a', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>REMAINING ON STATION</div>
-              <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{timeRemainingOnStationMins > 0 ? `${Math.floor(timeRemainingOnStationMins)} min` : '0 min'}</div>
+              <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>
+                {burnRateCalculated > 0.1 ? formatDuration(timeRemainingOnStationMins) : '00:00'}
+              </div>
             </div>
           </div>
         </div>
@@ -646,7 +656,7 @@ function App() {
           let activeTextColor = 'black';
 
           if (section.id === 'ENDURANCE') { sectionColor = '#455a64'; activeBg = '#cfd8dc'; activeTextColor = 'black'; }
-          else if (section.id === 'EMERGENCY_CHECKLIST') { sectionColor = '#b71c1c'; activeBg = '#ff1744'; activeTextColor = 'white'; }
+          else if (section.id === 'EMERGENCY_CHECKLIST') { sectionColor = '#d32f2f'; activeBg = '#ff1744'; activeTextColor = 'white'; }
           else if (section.id === 'NORMAL_PROCEDURES') { sectionColor = '#0d47a1'; activeBg = '#2979ff'; activeTextColor = 'white'; }
           else if (section.id === 'SENSOR_OPERATOR') { sectionColor = '#1b5e20'; activeBg = '#00c853'; activeTextColor = 'white'; }
           else if (section.id === 'MISSION_PLANNING') { sectionColor = '#37474f'; activeBg = '#90a4ae'; activeTextColor = 'black'; }
