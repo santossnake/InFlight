@@ -30,7 +30,7 @@ interface CrewUniRow {
   trig: string;
   autoTo: boolean;
   autoLand: boolean;
-  att: boolean;
+  att: string | number;
   hoto: boolean;
   isr: boolean;
   lidar: boolean;
@@ -82,7 +82,8 @@ export default function MissionFolder({
       hoToEnd: '',
       onstationStart: '',
       onstationEnd: '',
-      mcSignature: ''
+      mcSignature: '',
+      crewCount: ''
     };
   });
 
@@ -100,7 +101,7 @@ export default function MissionFolder({
   const [crewUni, setCrewUni] = useState<CrewUniRow[]>(() => {
     const saved = localStorage.getItem('mf_crew_uni');
     return saved ? JSON.parse(saved) : [
-      { trig: '', autoTo: false, autoLand: false, att: false, hoto: false, isr: false, lidar: false, gsTo: '', gsLand: '' }
+      { trig: '', autoTo: false, autoLand: false, att: '', hoto: false, isr: false, lidar: false, gsTo: '', gsLand: '' }
     ];
   });
 
@@ -180,15 +181,54 @@ export default function MissionFolder({
   const computedATA = general.ata || missionLogs['ata'] || '';
   const computedEOff = general.eOff || missionLogs['eng-off'] || '';
 
+  const parseTime = (timeStr: string) => {
+    if (!timeStr) return null;
+    const clean = timeStr.replace(/[^0-9]/g, '');
+    if (clean.length === 4) {
+      const hrs = parseInt(clean.substring(0, 2));
+      const mins = parseInt(clean.substring(2, 4));
+      if (hrs >= 0 && hrs < 24 && mins >= 0 && mins < 60) {
+        return { hrs, mins };
+      }
+    }
+    if (timeStr.includes(':')) {
+      const parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        const hrs = parseInt(parts[0]);
+        const mins = parseInt(parts[1]);
+        if (!isNaN(hrs) && !isNaN(mins) && hrs >= 0 && hrs < 24 && mins >= 0 && mins < 60) {
+          return { hrs, mins };
+        }
+      }
+    }
+    return null;
+  };
+
   const calculateHoursTotal = (start: string, end: string) => {
-    if (!start || !end) return null;
-    const [h1, m1] = start.split(':').map(Number);
-    const [h2, m2] = end.split(':').map(Number);
-    let diffMins = (h2 * 60 + m2) - (h1 * 60 + m1);
+    const t1 = parseTime(start);
+    const t2 = parseTime(end);
+    if (!t1 || !t2) return null;
+    let diffMins = (t2.hrs * 60 + t2.mins) - (t1.hrs * 60 + t1.mins);
     if (diffMins < 0) diffMins += 24 * 60; // Crosses midnight
     const hrs = Math.floor(diffMins / 60);
     const mins = Math.round(diffMins % 60);
     return { hrs, mins, totalMins: diffMins };
+  };
+
+  const calculateRowTotal = (row: CrewOpRow) => {
+    let totalMins = 0;
+    if (row.inicio1 && row.fim1) {
+      const diff1 = calculateHoursTotal(row.inicio1, row.fim1);
+      if (diff1) totalMins += diff1.totalMins;
+    }
+    if (row.inicio2 && row.fim2) {
+      const diff2 = calculateHoursTotal(row.inicio2, row.fim2);
+      if (diff2) totalMins += diff2.totalMins;
+    }
+    if (totalMins === 0) return '';
+    const hrs = Math.floor(totalMins / 60);
+    const mins = Math.round(totalMins % 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   };
 
   const computedETotal = formatTimeDiff(calculateHoursTotal(computedEOn, computedEOff)) || formatTimeDiff(engOnTotal);
@@ -324,7 +364,7 @@ export default function MissionFolder({
   };
 
   const addCrewUniRow = () => {
-    setCrewUni([...crewUni, { trig: '', autoTo: false, autoLand: false, att: false, hoto: false, isr: false, lidar: false, gsTo: '', gsLand: '' }]);
+    setCrewUni([...crewUni, { trig: '', autoTo: false, autoLand: false, att: '', hoto: false, isr: false, lidar: false, gsTo: '', gsLand: '' }]);
   };
   const removeCrewUniRow = (index: number) => {
     const next = [...crewUni];
@@ -338,6 +378,10 @@ export default function MissionFolder({
 
   const mapFuelToY = (f: number) => 220 - (f / 16) * 200;
   const mapTimeToX = (h: number) => 40 + (h / 15) * 400;
+
+  const uniqueCrewCount = new Set(
+    crewOp.map(c => c.trig.trim().toUpperCase()).filter(t => t !== '')
+  ).size;
 
   return (
     <div className="mission-folder-container" style={{ padding: '20px 0' }}>
@@ -412,7 +456,7 @@ export default function MissionFolder({
               <div className="col">ETE: <input type="text" placeholder="HH:MM" value={general.ete} onChange={e => setGeneral({...general, ete: e.target.value})} /></div>
             </div>
             <div className="input-row">
-              <div className="col">Nº Tripulantes: <input type="number" readOnly value={crewOp.filter(c => c.trig.trim() !== '').length} /></div>
+              <div className="col">Nº Tripulantes: <input type="number" value={general.crewCount !== undefined && general.crewCount !== '' ? general.crewCount : uniqueCrewCount} onChange={e => setGeneral({...general, crewCount: e.target.value})} /></div>
               <div className="col">ATR: <input type="text" value={general.atr} onChange={e => setGeneral({...general, atr: e.target.value})} /></div>
               <div className="col">ATD (Z): <input type="text" placeholder="--:-- Z" value={computedATD} onChange={e => setGeneral({...general, atd: e.target.value})} /></div>
               <div className="col">ATA (Z): <input type="text" placeholder="--:-- Z" value={computedATA} onChange={e => setGeneral({...general, ata: e.target.value})} /></div>
@@ -565,21 +609,27 @@ export default function MissionFolder({
                     />
                   </td>
                   <td>
-                    <select
+                    <input 
+                      type="text" 
+                      list="crew-functions" 
                       value={row.funcao}
+                      placeholder="Função"
                       onChange={e => {
                         const next = [...crewOp];
-                        next[idx].funcao = e.target.value;
+                        next[idx].funcao = e.target.value.toUpperCase();
                         setCrewOp(next);
-                      }}
-                    >
-                      <option value="MC">MC (Commander)</option>
-                      <option value="PRI">PRI (Internal)</option>
-                      <option value="PRE">PRE (External)</option>
-                      <option value="OS">OS (Sensor)</option>
-                      <option value="QUAL">QUAL (Quali.)</option>
-                      <option value="TRU">TRU (Trainee)</option>
-                    </select>
+                      }} 
+                    />
+                    <datalist id="crew-functions">
+                      <option value="MC" />
+                      <option value="PRI" />
+                      <option value="PRE" />
+                      <option value="OS" />
+                      <option value="PRI-I" />
+                      <option value="PRI-A" />
+                      <option value="PRE-I" />
+                      <option value="PRE-A" />
+                    </datalist>
                   </td>
                   <td>
                     <input 
@@ -633,12 +683,9 @@ export default function MissionFolder({
                     <input 
                       type="text" 
                       placeholder="HH:MM" 
-                      value={row.total} 
-                      onChange={e => {
-                        const next = [...crewOp];
-                        next[idx].total = e.target.value;
-                        setCrewOp(next);
-                      }} 
+                      readOnly
+                      value={calculateRowTotal(row)} 
+                      style={{ textAlign: 'center', fontWeight: 'bold' }}
                     />
                   </td>
                   <td className="no-print">
@@ -704,13 +751,15 @@ export default function MissionFolder({
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <input 
-                      type="checkbox" 
-                      checked={row.att} 
+                      type="number" 
+                      min="0"
+                      value={row.att} 
                       onChange={e => {
                         const next = [...crewUni];
-                        next[idx].att = e.target.checked;
+                        next[idx].att = e.target.value;
                         setCrewUni(next);
                       }} 
+                      style={{ width: '50px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center', fontWeight: 'bold' }}
                     />
                   </td>
                   <td style={{ textAlign: 'center' }}>
