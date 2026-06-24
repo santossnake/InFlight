@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { guideData, GuideItem } from './data/guideContent'
+import MissionFolder from './components/MissionFolder'
 import './index.css'
 
 // Image component with Fullscreen and Zoom support
@@ -200,12 +201,21 @@ function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
+  const [fuelLogs, setFuelLogs] = useState<{ zuluTime: string; fuel: number; elapsedMins: number }[]>(() => {
+    const saved = localStorage.getItem('fuelLogs');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const contentRefs = useRef<{ [key: string]: HTMLElement | null }>({})
 
   useEffect(() => {
     document.body.className = darkMode ? 'dark-mode' : '';
     localStorage.setItem('darkMode', darkMode.toString());
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('fuelLogs', JSON.stringify(fuelLogs));
+  }, [fuelLogs]);
 
   useEffect(() => {
     localStorage.setItem('checklistProgress', JSON.stringify(checklistProgress));
@@ -289,10 +299,21 @@ function App() {
 
   const logEvent = (event: string) => {
     if (!missionLogs[event]) {
-      const timeStr = new Date().toLocaleTimeString('pt-PT', { hour12: false, hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+      const timeStr = now.getUTCHours().toString().padStart(2, '0') + ':' + now.getUTCMinutes().toString().padStart(2, '0');
       setMissionLogs(prev => ({ ...prev, [event]: timeStr }));
     }
   }
+
+  const logFuelEntry = () => {
+    const now = new Date();
+    const zuluTime = now.getUTCHours().toString().padStart(2, '0') + ':' + now.getUTCMinutes().toString().padStart(2, '0');
+    const fuel = parseFloat(fuelCurrent) || 0;
+    const engOnStr = engineOnManual || missionLogs['eng-on'];
+    const timeData = getDiffTime(engOnStr || '');
+    const elapsedMins = timeData ? timeData.totalMins : 0;
+    setFuelLogs(prev => [...prev, { zuluTime, fuel, elapsedMins }]);
+  };
 
   const lastTapRef = useRef<{ [key: string]: number }>({});
 
@@ -335,6 +356,7 @@ function App() {
       setFuelInit('13');
       setFuelCurrent('13');
       setEngineOnManual('');
+      setFuelLogs([]);
     }
   };
 
@@ -452,6 +474,36 @@ function App() {
             <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>ENGINE ON (HH:MM)</label>
             <input type="text" placeholder="--:--" value={engOnStr || ''} onChange={e => setEngineOnManual(e.target.value)} style={{ width: '100%', padding: '10px', fontSize: '1.1em', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} />
           </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <button 
+              onClick={logFuelEntry}
+              style={{ flex: 1, padding: '12px', backgroundColor: '#8e24aa', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9em' }}
+            >
+              REGISTAR CONSUMO (ZULU)
+            </button>
+            {fuelLogs.length > 0 && (
+              <button 
+                onClick={() => setFuelLogs([])}
+                style={{ padding: '12px', backgroundColor: 'transparent', color: 'var(--accent-color)', border: '1px solid var(--accent-color)', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9em' }}
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
+          {fuelLogs.length > 0 && (
+            <div style={{ marginBottom: '20px', fontSize: '0.8em', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Pontos Registados:</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {fuelLogs.map((log, i) => (
+                  <span key={i} style={{ backgroundColor: 'rgba(142, 36, 170, 0.1)', color: '#8e24aa', padding: '3px 8px', borderRadius: '12px', border: '1px solid rgba(142, 36, 170, 0.2)', fontWeight: 'bold' }}>
+                    {log.zuluTime}Z: {log.fuel}L ({Math.round(log.elapsedMins)} min)
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div style={{ marginBottom: '25px', padding: '15px', backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9em', marginBottom: '10px', fontWeight: 'bold' }}>
@@ -578,7 +630,7 @@ function App() {
   const flightTotal = getDiffTime(missionLogs['atd'] || '', missionLogs['ata']);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }}>
+    <div className="app-wrapper">
       {/* HEADER SUPERIOR */}
       <header style={{ 
         backgroundColor: 'var(--header-bg)', color: 'white', padding: '10px 20px', 
@@ -662,6 +714,7 @@ function App() {
           else if (section.id === 'MISSION_PLANNING') { sectionColor = '#37474f'; activeBg = '#90a4ae'; activeTextColor = 'black'; }
           else if (section.id === 'HANDOVER_TAKEOVER') { sectionColor = '#f57f17'; activeBg = '#ffea00'; activeTextColor = 'black'; }
           else if (section.id === 'CRASH_RESPONSE') { sectionColor = '#4e342e'; activeBg = '#d84315'; activeTextColor = 'white'; }
+          else if (section.id === 'MISSION_FOLDER') { sectionColor = '#6a1b9a'; activeBg = '#ba68c8'; activeTextColor = 'white'; }
 
           const isActive = activeSectionId === section.id;
           return (
@@ -753,14 +806,52 @@ function App() {
             </div>
           )}
 
-          {activeSection.items.map((item) => (
-            <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
-              <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {item.title}
-              </h2>
-              <div className="content-render">{renderContent(item)}</div>
-            </section>
-          ))}
+          {activeSectionId === 'MISSION_FOLDER' ? (
+            <MissionFolder 
+              missionLogs={missionLogs}
+              fuelInit={fuelInit}
+              fuelCurrent={fuelCurrent}
+              fuelLogs={fuelLogs}
+              engOnTotal={getDiffTime(missionLogs['eng-on'] || '', missionLogs['eng-off'])}
+              flightTotal={getDiffTime(missionLogs['atd'] || '', missionLogs['ata'])}
+            />
+          ) : (
+            activeSection.items.map((item) => (
+              <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
+                <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {item.title}
+                  {item.id === 'enroute' && (
+                    <button 
+                      onClick={() => {
+                        if (window.confirm('Resetar o checklist Enroute?')) {
+                          setChecklistProgress(prev => {
+                            const next = { ...prev };
+                            delete next['enroute'];
+                            return next;
+                          });
+                        }
+                      }}
+                      className="no-print"
+                      style={{ 
+                        marginLeft: '15px', 
+                        fontSize: '0.45em', 
+                        padding: '4px 8px', 
+                        backgroundColor: 'var(--accent-color)', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '4px', 
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      🔄 Reset Enroute
+                    </button>
+                  )}
+                </h2>
+                <div className="content-render">{renderContent(item)}</div>
+              </section>
+            ))
+          )}
         </main>
       </div>
 

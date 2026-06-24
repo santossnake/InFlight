@@ -1,4 +1,4 @@
-export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE';
+export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'MISSION_FOLDER';
 
 export interface GuideItem {
   id: string;
@@ -188,7 +188,18 @@ export const guideData: GuideSection[] = [
           '6. EMERGENCY MISSIONS ................. RE-SET AND ACTIVATE',
           '7. FLY HOME ALTITUDE .................. RE-SET',
           '8. TRANSPONDER ........................ VERIFY',
-          '9. UPDATE PARAMETERS .................. ENGAGE'
+          '9. UPDATE PARAMETERS .................. ENGAGE',
+          '10. GCS VALUES AND CONFIGURATIONS ...... VERIFY',
+          '    • Safety Altitudes',
+          '    • Throttle Min',
+          '    • Cruise Speed',
+          '    • Timeout',
+          '    • QNH',
+          '    • mBar offset',
+          '    • Mission Alt Offset',
+          '    • Radius',
+          '    • Alt Guided',
+          '    • Initial Home Altitude'
         ]
       },
       {
@@ -464,7 +475,13 @@ export const guideData: GuideSection[] = [
           '10. SHOW AREAS ....................... SET',
           '11. TRANSPONDER SQUAWK CODES ......... CHECK',
           '12. CALLSIGN ......................... SET',
-          '13. CONFIGURATION VALUES ............. SET (Speed, Timeout, Offset, Radius, Alt Guided, Fly home)',
+          '13. CONFIGURATION VALUES ............. SET',
+          '    • Speed',
+          '    • Timeout',
+          '    • Mission Offset',
+          '    • Radius',
+          '    • Alt Guided',
+          '    • Fly home',
           '14. IAT .............................. REGISTER (MC)',
           '15. FUEL QUANTITY .................... REGISTER (MC)',
           '16. INITIAL HOME ALT ................. REGISTER (MC)',
@@ -576,6 +593,18 @@ export const guideData: GuideSection[] = [
           '4. TRANSPONDER ....................... ON',
           '5. AMP RF ............................ ON',
           '6. DEPARTURE CHECKS .................. PERFORM',
+          '   • GPS / HDOP',
+          '   • MODE',
+          '   • HEADING (PFD vs Gimbal)',
+          '   • ENGINE',
+          '   • TIMEOUT',
+          '   • ALT GUIDED',
+          '   • PSU',
+          '   • ANTENNAS',
+          '   • MISSIONS',
+          '   • TRANSPONDER',
+          '   • AMP RF',
+          '   • EMERGENCY RECOVERY SYSTEM',
           '7. T/OFF MISSION (IF AUTO) ........... UPLOAD & CONFIRM (MC)',
           '8. DEPARTURE CLEARANCE (ATC / MC) .... REQUEST',
           '9. BRAKES ............................ ON (PRE)'
@@ -1424,6 +1453,17 @@ export const guideData: GuideSection[] = [
         type: 'image',
         content: ['/assets/gcs-internal-components.png']
       }
+    ]
+  },
+  {
+    id: 'MISSION_FOLDER',
+    label: 'MISSION FOLDER',
+    title: 'Mission Folder & ORM Matrix',
+    items: [
+      { id: 'mf-page1', title: '1. GENERAL INFO & ENDURANCE', type: 'text', content: '' },
+      { id: 'mf-page2', title: '2. CREW SHIFTS & QUALS', type: 'text', content: '' },
+      { id: 'mf-page3', title: '3. BRIEFING & DEBRIEFING', type: 'text', content: '' },
+      { id: 'mf-page4', title: '4. ORM RISK MATRIX', type: 'text', content: '' }
     ]
   },
   {
