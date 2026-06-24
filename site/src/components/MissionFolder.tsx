@@ -295,10 +295,15 @@ export default function MissionFolder({
   // Select Radio option
   const selectRadio = (id: string, optId: string) => {
     if (id === 'its') return; // ITS is auto calculated
-    setOrmSelections(prev => ({
-      ...prev,
-      [id]: optId
-    }));
+    setOrmSelections(prev => {
+      const next = { ...prev };
+      if (next[id] === optId) {
+        delete next[id]; // De-select if already selected
+      } else {
+        next[id] = optId; // Select otherwise
+      }
+      return next;
+    });
   };
 
   const isSelected = (id: string, optId?: string) => {
@@ -359,7 +364,15 @@ export default function MissionFolder({
               <div>Mission: <input type="text" value={general.missionName} onChange={e => setGeneral({...general, missionName: e.target.value})} /></div>
             </div>
             <div className="header-center">
-              <h2 style={{ color: '#d32f2f', margin: 0, fontSize: '1.2em' }}>Mission Folder - {general.folderNum}</h2>
+              <h2 style={{ color: '#d32f2f', margin: 0, fontSize: '1.2em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                Mission Folder - 
+                <input 
+                  type="text" 
+                  value={general.folderNum} 
+                  onChange={e => setGeneral({...general, folderNum: e.target.value})} 
+                  style={{ color: '#d32f2f', border: 'none', borderBottom: '1px dashed #d32f2f', width: '90px', padding: 0, fontSize: 'inherit', fontWeight: 'bold', textAlign: 'center' }} 
+                />
+              </h2>
               <span className="subtitle">991SQN MISSION FOLDER</span>
             </div>
             <div className="header-right">
@@ -881,7 +894,16 @@ export default function MissionFolder({
                   </tr>
                   <tr>
                     <td className="row-header">Personal</td>
-                    <td className={`${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                    <td 
+                      className={`clickable ${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}
+                      onClick={() => {
+                        const current = parseInt(ormSelections['personal_punct_pax'] || '0');
+                        setOrmSelections(prev => ({
+                          ...prev,
+                          personal_punct_pax: current > 0 ? '0' : '1'
+                        }));
+                      }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
                         <span>Punct. (2x)</span>
                         <input 
@@ -889,6 +911,7 @@ export default function MissionFolder({
                           min="0" 
                           style={{ width: '45px', padding: '1px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center', fontWeight: 'bold' }} 
                           value={ormSelections['personal_punct_pax'] || '0'} 
+                          onClick={e => e.stopPropagation()}
                           onChange={e => setOrmSelections(prev => ({
                             ...prev,
                             personal_punct_pax: e.target.value
@@ -896,10 +919,28 @@ export default function MissionFolder({
                         />
                       </div>
                     </td>
-                    <td className={`center bold ${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                    <td 
+                      className={`clickable center bold ${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}
+                      onClick={() => {
+                        const current = parseInt(ormSelections['personal_punct_pax'] || '0');
+                        setOrmSelections(prev => ({
+                          ...prev,
+                          personal_punct_pax: current > 0 ? '0' : '1'
+                        }));
+                      }}
+                    >
                       {parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 2 * (parseInt(ormSelections['personal_punct_pax']) || 0) : '0'}
                     </td>
-                    <td className={`${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                    <td 
+                      className={`clickable ${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}
+                      onClick={() => {
+                        const current = parseInt(ormSelections['personal_recurr_pax'] || '0');
+                        setOrmSelections(prev => ({
+                          ...prev,
+                          personal_recurr_pax: current > 0 ? '0' : '1'
+                        }));
+                      }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
                         <span>Recurr. (4x)</span>
                         <input 
@@ -907,6 +948,7 @@ export default function MissionFolder({
                           min="0" 
                           style={{ width: '45px', padding: '1px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center', fontWeight: 'bold' }} 
                           value={ormSelections['personal_recurr_pax'] || '0'} 
+                          onClick={e => e.stopPropagation()}
                           onChange={e => setOrmSelections(prev => ({
                             ...prev,
                             personal_recurr_pax: e.target.value
@@ -914,7 +956,16 @@ export default function MissionFolder({
                         />
                       </div>
                     </td>
-                    <td className={`center bold ${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                    <td 
+                      className={`clickable center bold ${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}
+                      onClick={() => {
+                        const current = parseInt(ormSelections['personal_recurr_pax'] || '0');
+                        setOrmSelections(prev => ({
+                          ...prev,
+                          personal_recurr_pax: current > 0 ? '0' : '1'
+                        }));
+                      }}
+                    >
                       {parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 4 * (parseInt(ormSelections['personal_recurr_pax']) || 0) : '0'}
                     </td>
                   </tr>
@@ -1113,7 +1164,7 @@ export default function MissionFolder({
 
             {/* ITS CALCULATOR & LEGEND */}
             <div style={{ flex: '0.8', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div className="no-print" style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: '4px', backgroundColor: 'var(--card-bg)' }}>
+              <div className="its-calculator-box" style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: '4px', backgroundColor: 'var(--card-bg)' }}>
                 <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '3px' }}>ITS Calculator (Stress Térmico)</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', fontSize: '0.85em' }}>
                   <div>

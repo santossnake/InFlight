@@ -350,13 +350,20 @@ function App() {
   };
 
   const resetAllChecklists = () => {
-    if (window.confirm('Resetar TODOS os checklists e logs de missão?')) {
+    if (window.confirm('Resetar TODOS os checklists, logs de missão e matriz ORM?')) {
       setChecklistProgress({});
       setMissionLogs({});
       setFuelInit('16');
       setFuelCurrent('16');
       setEngineOnManual('');
       setFuelLogs([]);
+      localStorage.removeItem('mf_orm_selections');
+      localStorage.removeItem('mf_its_input');
+      localStorage.removeItem('mf_general');
+      localStorage.removeItem('mf_crew_op');
+      localStorage.removeItem('mf_crew_uni');
+      localStorage.removeItem('mf_briefings');
+      window.location.reload();
     }
   };
 
