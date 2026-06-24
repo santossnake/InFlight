@@ -121,7 +121,8 @@ export default function MissionFolder({
   const [ormSelections, setOrmSelections] = useState<{ [key: string]: any }>(() => {
     const saved = localStorage.getItem('mf_orm_selections');
     return saved ? JSON.parse(saved) : {
-      personal: { option: 'punct', pax: '1' }
+      personal_punct_pax: '0',
+      personal_recurr_pax: '0'
     };
   });
 
@@ -230,21 +231,20 @@ export default function MissionFolder({
     if (ormSelections['out_sh'] === 'week') score += 3;
     else if (ormSelections['out_sh'] === 'wknd') score += 5;
     
-    if (ormSelections['personal']?.option === 'punct') {
-      score += 2 * (parseInt(ormSelections['personal']?.pax) || 0);
-    } else if (ormSelections['personal']?.option === 'recurr') {
-      score += 4 * (parseInt(ormSelections['personal']?.pax) || 0);
-    }
+    const punctPax = parseInt(ormSelections['personal_punct_pax'] || '0') || 0;
+    const recurrPax = parseInt(ormSelections['personal_recurr_pax'] || '0') || 0;
+    score += 2 * punctPax;
+    score += 4 * recurrPax;
     
     if (ormSelections['cr']) score += 60;
     if (ormSelections['pl_ch']) score += 4;
     if (ormSelections['eet']) score += 2;
     
-    if (ormSelections['unexp'] === 'pri') score += 3;
-    else if (ormSelections['unexp'] === 'pre') score += 6;
+    if (ormSelections['unexp_pri']) score += 3;
+    if (ormSelections['unexp_pre']) score += 6;
     
-    if (ormSelections['no_fly'] === 'pri_30') score += 2;
-    else if (ormSelections['no_fly'] === 'pre_10') score += 4;
+    if (ormSelections['no_fly_pri']) score += 2;
+    if (ormSelections['no_fly_pre']) score += 4;
     
     if (ormSelections['event'] === '2nd') score += 2;
     else if (ormSelections['event'] === '3rd_more') score += 4;
@@ -880,33 +880,42 @@ export default function MissionFolder({
                     <td className={`clickable center bold ${isSelected('out_sh', 'wknd') ? 'selected-cell' : ''}`} onClick={() => selectRadio('out_sh', 'wknd')}>5</td>
                   </tr>
                   <tr>
-                    <td className="row-header">
-                      Personal 
-                      <span className="no-print" style={{ display: 'block', fontSize: '0.8em', fontWeight: 'normal' }}>
-                        Pax: <input 
+                    <td className="row-header">Personal</td>
+                    <td className={`${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                        <span>Punct. (2x)</span>
+                        <input 
                           type="number" 
                           min="0" 
-                          style={{ width: '40px', padding: '1px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center' }} 
-                          value={ormSelections['personal']?.pax || '0'} 
-                          onClick={e => e.stopPropagation()}
+                          style={{ width: '45px', padding: '1px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center', fontWeight: 'bold' }} 
+                          value={ormSelections['personal_punct_pax'] || '0'} 
                           onChange={e => setOrmSelections(prev => ({
                             ...prev,
-                            personal: { option: prev.personal?.option || 'punct', pax: e.target.value }
+                            personal_punct_pax: e.target.value
                           }))}
                         />
-                      </span>
+                      </div>
                     </td>
-                    <td className={`clickable ${ormSelections['personal']?.option === 'punct' ? 'selected-cell' : ''}`} onClick={() => setOrmSelections(prev => ({ ...prev, personal: { option: 'punct', pax: prev.personal?.pax || '1' } }))}>
-                      {ormSelections['personal']?.option === 'punct' && '✓ '}Punct.
+                    <td className={`center bold ${parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                      {parseInt(ormSelections['personal_punct_pax'] || '0') > 0 ? 2 * (parseInt(ormSelections['personal_punct_pax']) || 0) : '0'}
                     </td>
-                    <td className={`clickable center bold ${ormSelections['personal']?.option === 'punct' ? 'selected-cell' : ''}`} onClick={() => setOrmSelections(prev => ({ ...prev, personal: { option: 'punct', pax: prev.personal?.pax || '1' } }))}>
-                      2xPax={ormSelections['personal']?.option === 'punct' ? 2 * (parseInt(ormSelections['personal']?.pax) || 0) : ''}
+                    <td className={`${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                        <span>Recurr. (4x)</span>
+                        <input 
+                          type="number" 
+                          min="0" 
+                          style={{ width: '45px', padding: '1px', border: '1px solid #ccc', borderRadius: '3px', textAlign: 'center', fontWeight: 'bold' }} 
+                          value={ormSelections['personal_recurr_pax'] || '0'} 
+                          onChange={e => setOrmSelections(prev => ({
+                            ...prev,
+                            personal_recurr_pax: e.target.value
+                          }))}
+                        />
+                      </div>
                     </td>
-                    <td className={`clickable ${ormSelections['personal']?.option === 'recurr' ? 'selected-cell' : ''}`} onClick={() => setOrmSelections(prev => ({ ...prev, personal: { option: 'recurr', pax: prev.personal?.pax || '1' } }))}>
-                      {ormSelections['personal']?.option === 'recurr' && '✓ '}Recurr.
-                    </td>
-                    <td className={`clickable center bold ${ormSelections['personal']?.option === 'recurr' ? 'selected-cell' : ''}`} onClick={() => setOrmSelections(prev => ({ ...prev, personal: { option: 'recurr', pax: prev.personal?.pax || '1' } }))}>
-                      4xPax={ormSelections['personal']?.option === 'recurr' ? 4 * (parseInt(ormSelections['personal']?.pax) || 0) : ''}
+                    <td className={`center bold ${parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 'selected-cell' : ''}`}>
+                      {parseInt(ormSelections['personal_recurr_pax'] || '0') > 0 ? 4 * (parseInt(ormSelections['personal_recurr_pax']) || 0) : '0'}
                     </td>
                   </tr>
                   <tr>
@@ -934,25 +943,25 @@ export default function MissionFolder({
                   </tr>
                   <tr>
                     <td className="row-header">Unexp</td>
-                    <td className={`clickable ${isSelected('unexp', 'pri') ? 'selected-cell' : ''}`} onClick={() => selectRadio('unexp', 'pri')}>
-                      {isSelected('unexp', 'pri') && '✓ '}PRI
+                    <td className={`clickable ${ormSelections['unexp_pri'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('unexp_pri')}>
+                      {ormSelections['unexp_pri'] && '✓ '}PRI
                     </td>
-                    <td className={`clickable center bold ${isSelected('unexp', 'pri') ? 'selected-cell' : ''}`} onClick={() => selectRadio('unexp', 'pri')}>3</td>
-                    <td className={`clickable ${isSelected('unexp', 'pre') ? 'selected-cell' : ''}`} onClick={() => selectRadio('unexp', 'pre')}>
-                      {isSelected('unexp', 'pre') && '✓ '}PRE
+                    <td className={`clickable center bold ${ormSelections['unexp_pri'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('unexp_pri')}>3</td>
+                    <td className={`clickable ${ormSelections['unexp_pre'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('unexp_pre')}>
+                      {ormSelections['unexp_pre'] && '✓ '}PRE
                     </td>
-                    <td className={`clickable center bold ${isSelected('unexp', 'pre') ? 'selected-cell' : ''}`} onClick={() => selectRadio('unexp', 'pre')}>6</td>
+                    <td className={`clickable center bold ${ormSelections['unexp_pre'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('unexp_pre')}>6</td>
                   </tr>
                   <tr>
                     <td className="row-header">No Fly</td>
-                    <td className={`clickable ${isSelected('no_fly', 'pri_30') ? 'selected-cell' : ''}`} onClick={() => selectRadio('no_fly', 'pri_30')}>
-                      {isSelected('no_fly', 'pri_30') && '✓ '}&gt; 30 PRI
+                    <td className={`clickable ${ormSelections['no_fly_pri'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('no_fly_pri')}>
+                      {ormSelections['no_fly_pri'] && '✓ '}&gt; 30 PRI
                     </td>
-                    <td className={`clickable center bold ${isSelected('no_fly', 'pri_30') ? 'selected-cell' : ''}`} onClick={() => selectRadio('no_fly', 'pri_30')}>2</td>
-                    <td className={`clickable ${isSelected('no_fly', 'pre_10') ? 'selected-cell' : ''}`} onClick={() => selectRadio('no_fly', 'pre_10')}>
-                      {isSelected('no_fly', 'pre_10') && '✓ '}&gt; 10 PRE
+                    <td className={`clickable center bold ${ormSelections['no_fly_pri'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('no_fly_pri')}>2</td>
+                    <td className={`clickable ${ormSelections['no_fly_pre'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('no_fly_pre')}>
+                      {ormSelections['no_fly_pre'] && '✓ '}&gt; 10 PRE
                     </td>
-                    <td className={`clickable center bold ${isSelected('no_fly', 'pre_10') ? 'selected-cell' : ''}`} onClick={() => selectRadio('no_fly', 'pre_10')}>4</td>
+                    <td className={`clickable center bold ${ormSelections['no_fly_pre'] ? 'selected-cell' : ''}`} onClick={() => toggleCheckbox('no_fly_pre')}>4</td>
                   </tr>
                   <tr>
                     <td className="row-header">Event</td>

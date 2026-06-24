@@ -183,8 +183,8 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   
   // Endurance Calculator State
-  const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '13')
-  const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '13')
+  const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '16')
+  const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '16')
   const [gs, setGs] = useState<string>(localStorage.getItem('gs') || '50')
   const [distHome, setDistHome] = useState<string>(localStorage.getItem('distHome') || '10')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
@@ -353,8 +353,8 @@ function App() {
     if (window.confirm('Resetar TODOS os checklists e logs de missão?')) {
       setChecklistProgress({});
       setMissionLogs({});
-      setFuelInit('13');
-      setFuelCurrent('13');
+      setFuelInit('16');
+      setFuelCurrent('16');
       setEngineOnManual('');
       setFuelLogs([]);
     }
