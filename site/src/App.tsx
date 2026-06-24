@@ -845,13 +845,13 @@ function App() {
               <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
                 <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {item.title}
-                  {item.id === 'enroute' && (
+                  {(item.type === 'checklist' || item.type === 'mixed') && (
                     <button 
                       onClick={() => {
-                        if (window.confirm('Resetar o checklist Enroute?')) {
+                        if (window.confirm(`Resetar o checklist "${item.title}"?`)) {
                           setChecklistProgress(prev => {
                             const next = { ...prev };
-                            delete next['enroute'];
+                            delete next[item.id];
                             return next;
                           });
                         }
@@ -869,7 +869,7 @@ function App() {
                         fontWeight: 'bold'
                       }}
                     >
-                      🔄 Reset Enroute
+                      🔄 Reset
                     </button>
                   )}
                 </h2>
