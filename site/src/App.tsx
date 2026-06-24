@@ -103,8 +103,26 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
         );
       }
 
+      const indentMatch = check.match(/^(\s+)(?:[•\-*]\s*)?(.*)/);
+      const isIndented = !!indentMatch;
+      const labelText = indentMatch ? `• ${indentMatch[2]}` : check;
+
       return (
-        <label key={idx} className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`} style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', padding: '10px', transition: 'background-color 0.2s' }}>
+        <label 
+          key={idx} 
+          className={`checklist-label ${isMemoryItem ? 'memory-item' : ''}`} 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'flex-start', 
+            cursor: 'pointer', 
+            padding: '10px', 
+            paddingLeft: isIndented ? '40px' : '12px',
+            backgroundColor: isIndented ? 'rgba(0,0,0,0.015)' : 'transparent',
+            transition: 'background-color 0.2s',
+            opacity: isIndented ? 0.9 : 1,
+            fontSize: isIndented ? '0.95em' : '1.1em'
+          }}
+        >
           <input 
             type="checkbox" 
             checked={!!progress[idx]}
@@ -112,14 +130,14 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
             style={{ 
               marginTop: '4px',
               marginRight: '15px', 
-              width: '22px', 
-              height: '22px',
+              width: isIndented ? '18px' : '22px', 
+              height: isIndented ? '18px' : '22px',
               cursor: 'pointer',
               flexShrink: 0
             }} 
           />
           <span style={{ textDecoration: progress[idx] ? 'line-through' : 'none', color: progress[idx] ? '#888' : 'inherit' }}>
-            {formatText(check)}
+            {formatText(labelText)}
           </span>
         </label>
       );
