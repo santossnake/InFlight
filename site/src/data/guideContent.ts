@@ -1,4 +1,4 @@
-export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'MISSION_FOLDER';
+export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'MISSION_FOLDER' | 'COMUNICATIONS';
 
 export interface GuideItem {
   id: string;
@@ -135,13 +135,16 @@ export const guideData: GuideSection[] = [
         title: '9. BAROMETRIC ALTITUDE DEVIATION',
         type: 'checklist',
         content: [
-          '**1. LOITER MODE ........................ ENGAGE**',
-          '2. AIRCRAFT QNH ........................ CHECK',
-          '3. ADSB (GPS ALTITUDE) ................ MONITOR (OS)',
-          '4. ALTITUDE ............................ SET (IAW EVALUATION)',
-          '5. IFF ................................. 7700',
-          '6. RTB ................................. INITIATE',
-          'WARNING: AUTOLAND IS NOT PERMITTED.'
+          '**1. EMERGENCY MODE ..................... ENGAGE**',
+          '**2. SP GUIDED NEW ALT ................... ENGAGE**',
+          '3. AIRCRAFT QNH ........................ CHECK',
+          '4. ADSB (GPS ALTITUDE) ................. MONITOR (OS)',
+          '5. ALTITUDE ............................ SET (IAW EVALUATION)',
+          '6. IFF ................................. 7700',
+          '7. RTB ................................. INITIATE',
+          'WARNING: AUTOLAND IS NOT PERMITTED.',
+          'CAUTION: Avoid any populated area.',
+          'CAUTION: Consider to perform a controlled crash if unable to perform RTB safely.'
         ]
       },
       {
@@ -151,15 +154,22 @@ export const guideData: GuideSection[] = [
         content: [
           '1. ANTENNAS ........................... CHECK SIGNAL AND CONNECT',
           '--- If link not restored ---',
-          '2. ADSB ............................... MONITOR (7400 ACTIVATION)',
+          '2. ADSB ............................... MONITOR AND CHECK FOR 7400 ACTIVATION (OS)',
           '3. ANTENNAS SERVER .................... CONFIRM STATUS (OS)',
           '4. DATA SWITCH ........................ CONFIRM STATUS',
           '5. ANTENNAS POE ....................... CONFIRM POWERED (OS)',
           '6. STC ................................ CONFIRM HIGH POWER AND AUTO',
           '--- If STC is pointing wrong direction ---',
-          '7. STC ................................ MAN',
+          '7. STC MODE ........................... MAN',
           '8. STC AZIMUTH ........................ SET (CHECK ADSB)',
-          '9. STC ELEVATION ...................... BETWEEN 1 AND 5º'
+          '9. STC ELEVATION ...................... BETWEEN 1 AND 5º',
+          '--- If link with STC is regained ---',
+          '10. STC MODE .......................... AUTO',
+          'CAUTION: If RTL or EM altitude are different from current A/C altitude CHT may exceed engine limits.',
+          'NOTE: 1. A link loss is not immediate indication of a malfunction.',
+          'NOTE: 2. The A/C position may induce a momentary loss of link.',
+          'NOTE: 3. If unable to regain link, the A/C will perform EM or RTL after timeout is exceeded.',
+          'NOTE: 4. If unable to regain control, when A/C in sight, the External Pilot shall perform override mode.'
         ]
       },
       {
@@ -172,7 +182,7 @@ export const guideData: GuideSection[] = [
           'NOTE: RTB unless tactical situation dictates otherwise.'
         ]
       },
-      {
+      { 
         id: 'ec-gcs-failure',
         title: '12. GCS FAILURE',
         type: 'checklist',
@@ -199,7 +209,8 @@ export const guideData: GuideSection[] = [
           '    • Mission Alt Offset',
           '    • Radius',
           '    • Alt Guided',
-          '    • Initial Home Altitude'
+          '    • Initial Home Altitude',
+          'NOTE: RTB if unable to recover GCS redundancy or tactical situation dictates otherwise.'
         ]
       },
       {
@@ -270,15 +281,31 @@ export const guideData: GuideSection[] = [
       {
         id: 'ec-engine-limits',
         title: 'ENGINE LIMITATIONS',
-        type: 'table',
+        type: 'mixed',
         content: {
-          rows: [
-            [{text: 'ENGINE LIMITATIONS', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
-            ['RPM IDLE (GND)', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 3500', bg: '#4ade80', center: true, colSpan: 3}, {text: '>3500', bg: '#ff4d4d', center: true}],
-            ['RPM WOT (GND)', {text: '<5800', bg: '#ff4d4d', center: true}, {text: '5800 - 6700', bg: '#4ade80', center: true, colSpan: 3}, {text: '>6700', bg: '#ff4d4d', center: true}],
-            ['WOT TIME LIMITATION', {text: '• GROUND - LESS THAN 5 SECONDS (IF CHT IS LESS THAN 115ºC)\n• AIR - TWO MINUTES', colSpan: 5}],
-            ['RPM', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 2750', bg: '#facc15', center: true}, {text: '2750 - 6750', bg: '#4ade80', center: true}, {text: '6750 - 7000', bg: '#facc15', center: true}, {text: '>7700', bg: '#ff4d4d', center: true}],
-            ['CHT (Cº)', {text: '<70', bg: '#ff4d4d', center: true}, {text: '70 - 80', bg: '#facc15', center: true}, {text: '80 - 120', bg: '#4ade80', center: true}, {text: '120 - 130', bg: '#facc15', center: true}, {text: '>130', bg: '#ff4d4d', center: true}]
+          tables: [
+            {
+              title: 'ENGINE LIMITATIONS – OGS42N',
+              rows: [
+                [{text: 'ENGINE LIMITATIONS – OGS42N', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
+                ['RPM IDLE (GND)', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 3500', bg: '#4ade80', center: true, colSpan: 3}, {text: '>3500', bg: '#ff4d4d', center: true}],
+                ['RPM WOT (GND)', {text: '<5800', bg: '#ff4d4d', center: true}, {text: '5800 - 6700', bg: '#4ade80', center: true, colSpan: 3}, {text: '>6700', bg: '#ff4d4d', center: true}],
+                ['WOT TIME LIMITATION', {text: '• GROUND - LESS THAN 5 SECONDS (IF CHT IS LESS THAN 115ºC)\n• AIR - TWO MINUTES', colSpan: 5}],
+                ['RPM', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 2750', bg: '#facc15', center: true}, {text: '2750 - 6750', bg: '#4ade80', center: true}, {text: '6750 - 7000', bg: '#facc15', center: true}, {text: '>7000', bg: '#ff4d4d', center: true}],
+                ['CHT (Cº)', {text: '<70', bg: '#ff4d4d', center: true}, {text: '70 - 80', bg: '#facc15', center: true}, {text: '80 - 120', bg: '#4ade80', center: true}, {text: '120 - 130', bg: '#facc15', center: true}, {text: '>130', bg: '#ff4d4d', center: true}]
+              ]
+            },
+            {
+              title: 'ENGINE LIMITATIONS – OGS42N HORIZON',
+              rows: [
+                [{text: 'ENGINE LIMITATIONS – OGS42N HORIZON', bg: '#0056b3', color: 'white', bold: true, center: true, colSpan: 6}],
+                ['RPM IDLE (GND)', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '1800 - 3500', bg: '#4ade80', center: true, colSpan: 3}, {text: '>3500', bg: '#ff4d4d', center: true}],
+                ['RPM WOT (GND)', {text: '<5800', bg: '#ff4d4d', center: true}, {text: '5800 - 6700', bg: '#4ade80', center: true, colSpan: 3}, {text: '>6700', bg: '#ff4d4d', center: true}],
+                ['WOT TIME LIMITATION', {text: '• GROUND - LESS THAN 5 SECONDS (IF CHT IS LESS THAN 115ºC)\n• AIR - TWO MINUTES', colSpan: 5}],
+                ['RPM', {text: '<1800', bg: '#ff4d4d', center: true}, {text: '2200 - 2750', bg: '#facc15', center: true}, {text: '2750 - 6750', bg: '#4ade80', center: true}, {text: '6750 - 7500', bg: '#facc15', center: true}, {text: '>7500', bg: '#ff4d4d', center: true}],
+                ['CHT (Cº)', {text: '<70', bg: '#ff4d4d', center: true}, {text: '70 - 80', bg: '#facc15', center: true}, {text: '80 - 130', bg: '#4ade80', center: true}, {text: '130 - 140', bg: '#facc15', center: true}, {text: '>140', bg: '#ff4d4d', center: true}]
+              ]
+            }
           ]
         }
       },
@@ -465,30 +492,31 @@ export const guideData: GuideSection[] = [
         content: [
           '1. KVM SWITCH ........................ SET TO MAIN',
           '2. ETHERNET CABLE .................... CONNECT MAIN',
-          '3. MONITORS SCRIPT ................... EXECUTE',
-          '4. MC CHECKS (A/C, SQK, ANT) ......... SELECT',
+          '3. MONITORS SCRIPT / ADJUST .......... AS REQUIRED',
+          '4. MC CHECKS (AIRCRAFT, SQUAWK AND ANTENNAS) ... SELECT',
           '5. SOFTWARE .......................... CONNECT',
           '6. GREEN LIGHT ....................... CONFIRM STEADY',
-          '7. ANTENNA ........................... BEST AVAILABLE',
-          '8. NAV LIGHTS ........................ ON',
-          '9. HOME POINT ........................ SET',
-          '10. SHOW AREAS ....................... SET',
-          '11. TRANSPONDER SQUAWK CODES ......... CHECK',
-          '12. CALLSIGN ......................... SET',
-          '13. CONFIGURATION VALUES ............. SET',
+          '7. STC’s ............................. SET HIGH POWER',
+          '8. ANTENNA ........................... CONNECT TO BEST AVAILABLE',
+          '9. NAV LIGHTS ........................ ON',
+          '10. HOME POINT ....................... SET',
+          '11. SHOW AREAS ....................... SET',
+          '12. TRANSPONDER SQUAWK CODES ......... CHECK',
+          '13. CALLSIGN ......................... SET',
+          '14. CONFIGURATION VALUES ............. SET',
           '    • Speed',
           '    • Timeout',
           '    • Mission Offset',
           '    • Radius',
           '    • Alt Guided',
           '    • Fly home',
-          '14. IAT .............................. REGISTER (MC)',
-          '15. FUEL QUANTITY .................... REGISTER (MC)',
-          '16. INITIAL HOME ALT ................. REGISTER (MC)',
-          '17. SAFETY ALTITUDES ................. SET',
-          '18. PSU VALUES (23-25 V) ............. CHECK',
-          '19. GPS SATS ......................... >10',
-          '20. GPS HDOP ......................... <1'
+          '15. IAT .............................. REGISTER (MC)',
+          '16. FUEL QUANTITY .................... REGISTER (MC)',
+          '17. INITIAL HOME ALT. ................ REGISTER (MC)',
+          '18. SAFETY ALTITUDES ................. SET',
+          '19. PSU VALUES (23-25 V) ............. CHECK',
+          '20. GPS SATS ......................... >10',
+          '21. GPS HDOP ......................... <1'
         ] 
       },
       { 
@@ -585,30 +613,41 @@ export const guideData: GuideSection[] = [
       { 
         id: 'before-takeoff', 
         title: 'BEFORE TAKE OFF', 
-        type: 'checklist', 
-        content: [
-          '1. GPU ............................... DISCONNECT (PRE)',
-          '2. LINE UP ........................... PERFORM (PRE)',
-          '3. AREA CLEAR ........................ CONFIRM (PRE)',
-          '4. TRANSPONDER ....................... ON',
-          '5. AMP RF ............................ ON',
-          '6. DEPARTURE CHECKS .................. PERFORM',
-          '   • GPS / HDOP',
-          '   • MODE',
-          '   • HEADING (PFD vs Gimbal)',
-          '   • ENGINE',
-          '   • TIMEOUT',
-          '   • ALT GUIDED',
-          '   • PSU',
-          '   • ANTENNAS',
-          '   • MISSIONS',
-          '   • TRANSPONDER',
-          '   • AMP RF',
-          '   • EMERGENCY RECOVERY SYSTEM',
-          '7. T/OFF MISSION (IF AUTO) ........... UPLOAD & CONFIRM (MC)',
-          '8. DEPARTURE CLEARANCE (ATC / MC) .... REQUEST',
-          '9. BRAKES ............................ ON (PRE)'
-        ] 
+        type: 'mixed', 
+        content: {
+          checklist: [
+            '1. GPU ............................... DISCONNECT (PRE)',
+            '2. LINE UP ........................... PERFORM (PRE)',
+            '3. AREA CLEAR ........................ CONFIRM (PRE)',
+            '4. AMP RF ............................ ON',
+            '5. TRANSPONDER ....................... ON',
+            '6. DEPARTURE CHECKS .................. PERFORM',
+            '   • GPS / HDOP',
+            '   • MODE',
+            '   • HEADING (PFD vs Gimbal)',
+            '   • ENGINE',
+            '   • TIMEOUT',
+            '   • ALT GUIDED',
+            '   • PSU',
+            '   • ANTENNAS',
+            '   • MISSIONS',
+            '   • TRANSPONDER',
+            '   • AMP RF',
+            '   • EMERGENCY RECOVERY SYSTEM',
+            '7. T/OFF MISSION (IF AUTO T/OFF) ..... UPLOAD & CONFIRM (MC)',
+            '8. DEPARTURE CLEARANCE (ATC / MC) .... REQUEST',
+            '--- If Automatic T/Off ---',
+            '9. BRAKES ............................ ON (PRE)'
+          ],
+          table: {
+            title: 'T/OFF MISSION',
+            headers: ['ID', 'TYPE', 'ALT TYPE', 'ALT / OTHERS', 'POSITION', 'DIST'],
+            rows: [
+              ['1', 'T/OFF', 'Relative to home', '200ft / 10°', 'HP', '-'],
+              ['2', 'Normal', 'AMSL', 'HP Alt + 600ft', 'RWY HDG', '1NM']
+            ]
+          }
+        } 
       },
       { 
         id: 'after-takeoff', 
@@ -741,8 +780,9 @@ export const guideData: GuideSection[] = [
               rows: [
                 ['1', 'Normal', 'AMSL', 'HP Alt + 450ft', 'Base', '750m before final'],
                 ['2', 'Normal', 'AMSL', 'HP Alt + 350ft', 'Final', '2000m before HP'],
-                ['3', 'Normal', 'Relative to home', '100 ft', 'CENTER LINE', '600m before HP'],
-                ['4', 'Land', 'Relative to home', '0 ft', 'CENTER LINE', '-']
+                ['3', 'Normal', 'Relative to home', '100 ft', 'CENTER LINE', '650m before HP'],
+                ['4', 'Normal', 'Relative to home', '100 ft', 'CENTER LINE', '600m before HP'],
+                ['5', 'Land', 'Relative to home', '0 ft', 'CENTER LINE', '-']
               ]
             }
           ]
@@ -762,7 +802,7 @@ export const guideData: GuideSection[] = [
           '7. AMP RF ............................ OFF & INFORM',
           '8. FUEL .............................. REGISTER (MC)',
           '9. ANTENNAS .......................... DISCONNECT',
-          '10. STC .............................. SET LOW POWER',
+          '10. STC’s ............................. SET LOW POWER',
           '11. UAV .............................. OFF (PRE)',
           '12. EXTERNAL SETUP ................... OFF (PRE)',
           '13. GCS VIDEO FILE ................... AS REQUIRED',
@@ -789,7 +829,7 @@ export const guideData: GuideSection[] = [
           '   • Up/Down Movement',
           '   • Zoom In & Out',
           '5. GIMBAL OFF ........................ AS REQUIRED',
-          'NOTE: Switch off if ETA > 10 min or IAT > 25ºC.'
+          'NOTE: The gimbal should be switched off if the ETD is planned to be more than 10 minutes from the current time, or if the IAT exceeds 25°C.'
         ] 
       },
       { 
@@ -843,14 +883,19 @@ export const guideData: GuideSection[] = [
           '4. RECEPTION ......................... CHECK',
           '--- PS3 ---',
           '1. LOG IN ............................ PERFORM',
-          '2. AIRBORNE / ATD .................... INFORM',
+          '2. ATD ............................... INFORM',
           '3. STREAMING ON ...................... INFORM',
           '4. ON STATION ........................ INFORM',
           '5. CHAT COMS ......................... MANAGE',
           '6. OFF STATION ....................... INFORM',
           '7. STREAMING OFF ..................... INFORM',
           '8. CHAT COMS ......................... CLOSE',
-          '   • Info: Callsign, ATD, ATA, ON/OFF STATION',
+          '    • Callsign',
+          '    • ATD',
+          '    • ATA',
+          '    • ON STATION',
+          '    • OFF STATION',
+          'EXAMPLE: KNIGT74 ATD 1200Z, ATA 1220Z, ATE 00H20, PRT006, 01ATR',
           '9. LOG OFF ........................... PERFORM'
         ] 
       },
@@ -889,6 +934,17 @@ export const guideData: GuideSection[] = [
           text: 'Esta secção permite calcular a autonomia, o alcance (range) e o fuel restante ao chegar ao destino.'
         }
       }
+    ]
+  },
+  {
+    id: 'MISSION_FOLDER',
+    label: 'MISSION FOLDER',
+    title: 'Mission Folder & ORM Matrix',
+    items: [
+      { id: 'mf-page1', title: '1. GENERAL INFO & ENDURANCE', type: 'text', content: '' },
+      { id: 'mf-page2', title: '2. CREW SHIFTS & QUALS', type: 'text', content: '' },
+      { id: 'mf-page3', title: '3. BRIEFING & DEBRIEFING', type: 'text', content: '' },
+      { id: 'mf-page4', title: '4. ORM RISK MATRIX', type: 'text', content: '' }
     ]
   },
   {
@@ -1070,16 +1126,16 @@ export const guideData: GuideSection[] = [
           table: {
             headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
             rows: [
-              ['N', '4000\'', 'N10', '4000\''],
-              ['N1', '3000\'', 'N11', '3400\''],
-              ['N2', '4800\'', 'N12', '4800\''],
-              ['N3', '4900\'', 'N13', '3200\''],
-              ['N4', '5200\'', 'N14', '3100\''],
-              ['N5', '3500\'', 'N15', '3200\''],
-              ['N6', '5000\'', 'N16', '4600\''],
-              ['N7', '4800\'', 'N17', '3700\''],
-              ['N8', '4500\'', 'N18', '3700\''],
-              ['N9', '3900\'', 'N19', '3700\''],
+              ['N', '4900\'', 'N10', '4900\''],
+              ['N1', '3300\'', 'N11', '4900\''],
+              ['N2', '5100\'', 'N12', '5200\''],
+              ['N3', '5100\'', 'N13', '5200\''],
+              ['N4', '5600\'', 'N14', '4500\''],
+              ['N5', '5600\'', 'N15', '4500\''],
+              ['N6', '4900\'', 'N16', '5200\''],
+              ['N7', '4900\'', 'N17', '5200\''],
+              ['N8', '5600\'', 'N18', '5100\''],
+              ['N9', '5600\'', 'N19', '5100\''],
               [{text: 'Transition Altitude: 5000FT AMSL', colSpan: 4, center: true, italic: true}]
             ]
           }
@@ -1094,19 +1150,22 @@ export const guideData: GuideSection[] = [
           table: {
             headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
             rows: [
-              ['C', '4100\'', 'C13', '3100\''],
-              ['C1', '3600\'', 'C14', '2100\''],
-              ['C2', '3600\'', 'C15', '2400\''],
-              ['C3', '5800\'', 'C16', '1200\''],
-              ['C4', '600\'', 'C17', '2200\''],
-              ['C5', '4100\'', 'C18', '2200\''],
-              ['C6', '4500\'', 'C19', '3200\''],
-              ['C7', '6700\'', 'C20', '600\''],
-              ['C8', '4100\'', 'C9', '4100\''],
-              ['C10', '4100\'', 'C11', '1900\''],
-              ['C12', '1800\'', 'C21', '900\''],
-              ['C22', '2800\'', 'C23', '900\''],
-              ['C24', '1600\'', '', ''],
+              ['C', '4600\'', 'C13', '4600\''],
+              ['C1', '5100\'', 'C14', '4600\''],
+              ['C2', '7100\'', 'C15', '2800\''],
+              ['C3', '7100\'', 'C16', '4500\''],
+              ['C4', '2400\'', 'C17', '4500\''],
+              ['C5', '4600\'', 'C18', '4600\''],
+              ['C6', '7100\'', 'C19', '4600\''],
+              ['C7', '7100\'', 'C20', '2800\''],
+              ['C8', '4600\'', 'C21', '1500\''],
+              ['C9', '7100\'', 'C22', '3900\''],
+              ['C10', '7100\'', 'C23', '2000\''],
+              ['C11', '2800\'', 'C24', '2700\''],
+              ['C12', '4500\'', '', ''],
+              [{text: 'R73 AREAS', colSpan: 4, bg: '#eee', bold: true, center: true}],
+              ['R73CN', '2300\'', 'R73CC', '1000\''],
+              ['R73CS', '1600\'', '', ''],
               [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
             ]
           }
@@ -1121,18 +1180,22 @@ export const guideData: GuideSection[] = [
           table: {
             headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
             rows: [
-              ['S', '3100\'', 'S16', '300\''],
-              ['S1', '1600\'', 'S17', '1300\''],
-              ['S2', '2300\'', 'S18', '1400\''],
-              ['S3', '1500\'', 'S19', '100\''],
-              ['S6', '100\'', 'S20', '3000\''],
-              ['S7', '500\'', 'S21', '100\''],
-              ['S8', '1200\'', 'S22', '100\''],
-              ['S9', '800\'', 'S23', '300\''],
-              ['S10', '100\'', 'S24', '100\''],
-              ['S11', '400\'', 'S12', '1300\''],
-              ['S13', '1400\'', 'S14', '100\''],
-              ['S15', '300\'', '', ''],
+              ['S', '3500\'', 'S16', '3500\''],
+              ['S1', '2700\'', 'S17', '3500\''],
+              ['S2', '2700\'', 'S18', '100\''],
+              ['S3', '2000\'', 'S19', '3500\''],
+              ['S4', '-', 'S20', '3500\''],
+              ['S5', '-', 'S21', '100\''],
+              ['S6', '100\'', 'S22', '1100\''],
+              ['S7', '1700\'', 'S23', '1100\''],
+              ['S8', '2000\'', 'S24', '100\''],
+              ['S9', '2000\'', 'S25', '-'],
+              ['S10', '100\'', 'S26', '-'],
+              ['S11', '1700\'', 'S27', '-'],
+              ['S12', '1900\'', 'S28', '-'],
+              ['S13', '1900\'', 'S29', '-'],
+              ['S14', '100\'', 'S30', '-'],
+              ['S15', '3500\'', '', ''],
               [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
             ]
           }
@@ -1147,19 +1210,19 @@ export const guideData: GuideSection[] = [
           table: {
             headers: ['AREA', 'MEF (ft)', 'AREA', 'MEF (ft)'],
             rows: [
-              ['B1', "1400'", 'B11', "1100'"],
-              ['B2', "1300'", 'B12', "1400'"],
-              ['B3', "1200'", 'B13', "2000'"],
-              ['B4', "1300'", 'B14', "1000'"],
-              ['B5', "900'", 'B15', "1500'"],
-              ['B6', "1400'", 'B16', "1800'"],
-              ['B7', "1500'", 'B17', "900'"],
-              ['B8', "1000'", 'B18', "800'"],
-              ['B9', "1000'", 'B19', "1000'"],
-              ['B10', "1000'", 'B20', "1100'"],
-              ['B21', "1300'", 'B22', "900'"],
-              ['B23', "1200'", 'B24', "1100'"],
-              ['B25', "900'", '', ''],
+              ['B1', '2000\'', 'B14', '1900\''],
+              ['B2', '2700\'', 'B15', '2900\''],
+              ['B3', '2700\'', 'B16', '2900\''],
+              ['B4', '2900\'', 'B17', '1900\''],
+              ['B5', '2000\'', 'B18', '1800\''],
+              ['B6', '2000\'', 'B19', '2900\''],
+              ['B7', '1900\'', 'B20', '1800\''],
+              ['B8', '2900\'', 'B21', '1800\''],
+              ['B9', '2900\'', 'B22', '2900\''],
+              ['B10', '2000\'', 'B23', '2500\''],
+              ['B11', '1900\'', 'B24', '2500\''],
+              ['B12', '2900\'', 'B25', '2500\''],
+              ['B13', '2900\'', '', ''],
               [{text: 'Transition Altitude: 4000FT AMSL', colSpan: 4, center: true, italic: true}]
             ]
           }
@@ -1308,25 +1371,27 @@ export const guideData: GuideSection[] = [
         title: 'LPMI (MIRANDELA) CHECKLIST',
         type: 'checklist',
         content: [
-          '1. Pedir NOTAM(s) (10 dias úteis antecedência)',
-          '2. Pedir "tasking" da missão',
+          '1. Pedir NOTAM(s) (caso necessário) com 10 dias úteis de antecedência',
+          '2. Pedir “tasking” da missão',
           '3. Solicitar à EMA Aeronaves para a missão',
-          '4. Solicitar à EMA GCS Móvel/Portátil (se nec.)',
+          '4. Solicitar à EMA GCS Móvel/Portátil (caso necessário)',
           '5. Solicitar à EMA 1 kit de PRE completo',
           '6. Pedir Guias de Marcha',
-          '7. Reservar dormidas militares',
-          '8. Fazer reserva no restaurante',
-          '9. Solicitar a chave do cockpit',
-          '10. Solicitar kit de transmissões (Telemóvel, Comms 1/2, Rádio Aero)',
-          '11. Solicitar kit noturno (se nec.)',
-          '12. Solicitar viatura(s) para a operação',
-          '13. Verificar níveis óleo, água, adblue e combustível',
-          '14. Verificar boletim das viaturas',
-          '15. Confirmar cartão Galp frota',
-          '16. Pedir atrelado e matrícula (se nec.)',
-          '17. Contactar Diretor Aeródromo (Sr. João Vinhais - 932657050)',
-          '18. Contactar CA antes de entrar e após sair',
-          '19. Utilizar aplicação "SALTO" para abertura de portas'
+          '7. Enviar e-mail para dat.spmissoes@emfa.gov.pt com o ficheiro "ANEXO PADM.xlsx" preenchido com as datas, local e dados dos militares (Em CC ldsimoes@emfa.gov.pt), para reservar as dormidas dos militares (Preferencial Hotel D. Dinis, motivo garagem)',
+          '8. Fazer reserva no restaurante (965 003 843). Caso não exista, solicitar restaurante da mesma forma descrita no ponto 7',
+          '9. Solicitar à Logística a chave do cockpit',
+          '10. Solicitar à Logística os coletes refletores',
+          '11. Solicitar à Logística um kit de transmissões para destacamento: x1 telemóvel MC; 1x kit “comms 1”; 3x rádios “comms 2”; 1x rádio aeronáutico;',
+          '12. Solicitar à Logística o kit noturno (caso necessário)',
+          '13. Solicitar à Logística viatura(s) para a operação',
+          '14. Verificar níveis do óleo, água, adblue e combustível da(s) viatura(s)',
+          '15. Verificar boletim das viaturas',
+          '16. Confirmar cartão Galp frota na(s) viatura(s)',
+          '17. Pedir atrelado e matrícula (caso necessário)',
+          '18. Contactar o Diretor do Aeródromo de Mirandela (Sr. João Vinhais – 932657050) sempre que se pretenda entrar e sair do aeródromo, para que este possa ativar ou desativar o alarme',
+          '19. Contactar CA (CCSD) (509100) antes de entrar e após sair do aeródromo',
+          '20. Todos os assuntos relativos ao Hangar contactar presidente do Aeroclube de Mirandela (Sr. Edgar Vieira - 914170664)',
+          '21. Utilizar a aplicação “SALTO” para abertura de portas no aeródromo'
         ]
       },
       {
@@ -1453,17 +1518,6 @@ export const guideData: GuideSection[] = [
         type: 'image',
         content: ['/assets/gcs-internal-components.png']
       }
-    ]
-  },
-  {
-    id: 'MISSION_FOLDER',
-    label: 'MISSION FOLDER',
-    title: 'Mission Folder & ORM Matrix',
-    items: [
-      { id: 'mf-page1', title: '1. GENERAL INFO & ENDURANCE', type: 'text', content: '' },
-      { id: 'mf-page2', title: '2. CREW SHIFTS & QUALS', type: 'text', content: '' },
-      { id: 'mf-page3', title: '3. BRIEFING & DEBRIEFING', type: 'text', content: '' },
-      { id: 'mf-page4', title: '4. ORM RISK MATRIX', type: 'text', content: '' }
     ]
   },
   {
@@ -1595,6 +1649,251 @@ export const guideData: GuideSection[] = [
           '6. Preservar o local do incidente',
           '7. Reporte DIVOC no sistema SIPA'
         ]
+      }
+    ]
+  },
+  {
+    id: 'COMUNICATIONS',
+    label: 'COMUNICATIONS',
+    title: 'Comunications Script & Info',
+    items: [
+      {
+        id: 'c-aerodrome-info',
+        title: 'COMMS – AERODROME INFORMATION',
+        type: 'text',
+        content: `**Ota GND, TITAN01**, Request aerodrome information.
+
+**TITAN01, Ota GND**, RWY in use 35, WIND 330/15, temperature 19 degrees, QNH 1014, no traffic reported.
+
+**Ota GND, TITAN01**, RWY in use 35, WIND 330/15, QNH 1014, no traffic reported.`
+      },
+      {
+        id: 'c-start-up',
+        title: 'COMMS – START UP',
+        type: 'text',
+        content: `Antes de iniciar qualquer movimento com a aeronave devemos pedir para iniciar motores:
+• **Start up approved**
+• **Start up at (time)**
+• **Start up at own discretion**
+• **Standby for Start up**
+
+--- **Aeródromo Não Controlado** ---
+**All stations**, TITAN01 starting up APRON A.
+
+--- **Aeródromo Controlado** ---
+**Ota GND, TITAN01**, APRON A, request start up.
+**TITAN01, Ota GND**, start up approved.
+**Start up approved**, TITAN01.`
+      },
+      {
+        id: 'c-taxi',
+        title: 'COMMS – TAXI',
+        type: 'text',
+        content: `Opções de Pedido:
+• Request taxi
+• Request detailed taxi instructions
+• Request backtrack
+
+Respostas/Ações Comuns:
+• Giving way to...
+• Expediting
+• Slowing down
+• Holding position
+• Holding short
+
+--- **Aeródromo Não Controlado** ---
+**All stations**, TITAN01 taxiing to holding point F RWY 35 via B.
+
+--- **Aeródromo Controlado** ---
+**Ota GND, TITAN01**, Apron A, request taxi RWY 35.
+**TITAN01, Ota GND**, Taxi to holding point F RWY 35 via B, H and F.
+**Ota GND, TITAN01**, Taxi to holding point F RWY 35 via B, H and F.`
+      },
+      {
+        id: 'c-clearance',
+        title: 'COMMS – CLEARANCE',
+        type: 'text',
+        content: `Pedidos e Autorizações:
+• Request ATC clearance
+• Request ATC clearance with request
+• (name of unit) **CLEARS** (aircraft call sign)
+• (aircraft call sign) **CLEARED TO**
+
+**FROM** (location) **TO** (location), followed as necessary by:
+• **DIRECT**
+• **VIA** (route and/or significant points)
+• **VIA FLIGHT PLANNED ROUTE**
+
+--- **Aeródromo Não Controlado** ---
+**All stations**, TITAN01 taking off RWY 35, after departure climbing to 1500 feet before turning right inbound EP.
+
+--- **Aeródromo Controlado** ---
+**Ota GND, TITAN01**, Request ATC Clearance.
+**TITAN01**, CLEARED TO WORK AREA, VIA EP, 2000’, SQUAWK 5501, Ota APP 135.750.
+
+--- **Lx Control Example** ---
+**Lx CONTROL**, CLEARS TITAN01, FROM LPOT TO LPMR VIA FPR, FL050, SQUAWK 5501, Lx APP 119.4.
+**Lx CONTROL**, CLEARS TITAN01, FROM LPOT TO LPMR VIA FPR, FL050, SQUAWK 5501, Lx APP 119.4, TITAN01.`
+      },
+      {
+        id: 'c-departure',
+        title: 'COMMS – DEPARTURE',
+        type: 'text',
+        content: `Frases de Partida / Respostas:
+• Report when ready for departure
+• Are you ready for departure
+• Are you ready for immediate departure
+• Ready for departure
+• Take off immediately or vacate runway (instruções)
+• Take off immediately or hold short of runway
+
+--- **Instruções Após Descolagem** ---
+• After departure turn (right/left or climb)
+• Right (or left) turn approved
+• Continue runway heading (instruções)
+• Track extended centre line (instruções)
+• Climb straight ahead (instruções)
+
+--- **Abortar Descolagem** ---
+• Hold position, cancel take-off I say again cancel take off ("why")
+• **Holding**
+• Stop immediately (repeat callsign) stop immediately
+• **Stopping**
+
+--- **Exemplo de Comunicação de Partida** ---
+**Ota GND, TITAN01**, when ready for departure contact Ota TWR on 118.415.
+**TITAN01, Ota GND**, wilco, when ready for departure contact Ota TWR on 118.415.
+
+**TITAN01**, line up RWY 35.
+**Ota TWR**, lining up RWY 35, TITAN01.
+
+**Ota TWR, TITAN01**, ready for departure.
+**Ota GND, TITAN01**, holding short RWY 35.
+
+**TITAN01**, wind 330/15, Clear for take-off, RWY 35.
+---
+**TITAN01**, after departure climb straight ahead until 1500 feet before turning right, RWY 35, cleared for take-off.
+**Ota TWR**, Clear for take-off RWY 35, TITAN01.
+---
+**TITAN01**, cancel take-off I SAY AGAIN cancel take-off due to unknown vehicle on RWY.
+**Holding**, TITAN01.
+---
+**TITAN01**, Ota TWR, Stop immediately TITAN01 stop immediately.
+**Stopping**, TITAN01.`
+      },
+      {
+        id: 'c-enroute',
+        title: 'COMMS – ENROUTE',
+        type: 'text',
+        content: `--- **Subir, Descer & Reportes Ops Normais** ---
+• Climb / Descend
+• Avoid area
+• Report Normal Operations (every 30 minutes)
+
+--- **Alteração de Altitude** ---
+• Maintain (altitude/nível) until passing (ponto/hora)
+• Maintain (altitude/nível) until further advised
+• Maintain block (altitude/nível) to (altitude/nível)
+• Request traffic information (traffic is...) or (no reported traffic)
+• Stop climbing (or descending) at (altitude/nível)
+• Continue climb (or descent) until passing (altitude/nível)
+• Expedite climb (or descent) until passing (altitude/nível)
+
+--- **Exemplos de Comunicação** ---
+**Ota TWR**, EP 2000 feet.
+**TITAN01**, turn right inbound eco point 2000 feet, report EP.
+
+**TITAN01**, fly inbound working area, climb 3000 feet, contact Lisboa Information 123.755.
+**TITAN01**, fly inbound working area, climb 3000 feet, contact Ota APP 132.705.
+
+**Fly inbound working area, climb 3000 feet, contact Lisboa Information 123.755**, TITAN01.
+**Fly inbound working area, climb 3000 feet, contact Ota APP 132.705**, TITAN01.`
+      },
+      {
+        id: 'c-approach',
+        title: 'COMMS – APPROACH',
+        type: 'text',
+        content: `--- **Aeródromo Não Controlado** ---
+**All stations**, TITAN01 2NM north the field 2000 feet joining short right downwind RWY 35 for full stop landing.
+
+--- **Aeródromo Controlado** ---
+**Ota APP, TITAN01**, starting RTB.
+**TITAN01, Ota APP**, wilco, maintain 3000 feet inbound Ota airfield, I will coordinate with Ota TWR.
+**Maintain 3000 feet inbound Ota airfield**, TITAN01.
+
+**TITAN01**, descend 2000 feet inbound EP, contact Ota TWR 118.415.
+**Descend 2000 feet inbound EP, contact Ota TWR 118.415**, TITAN01.`
+      },
+      {
+        id: 'c-landing-circuit',
+        title: 'COMMS – LANDING & CIRCUIT POSITIONS',
+        type: 'text',
+        content: `--- **Comandos e Instruções Visuais** ---
+• Circle the aerodrome
+• Orbit (right or left)
+• Make another orbit / circuit
+• Hold visual over (posição/localidade)
+• Join/Report (posição no circuito) (pista em uso) (vento) (QNH) (informação de tráfego)
+• Make straight-in approach (pista em uso) (vento) (QNH) (informação de tráfego)
+
+--- **Posições no Circuito / Aproximação** ---
+• Make short approach
+• Make long approach (or Extend downwind)
+• Report base leg (or Final)
+• Continue approach (prepare for possible go around)
+• Go around (going around)
+
+--- **Operações SSR (Squawk)** ---
+• Squawk Ident (operate the special identification feature i.e. press the ident button)
+• Squawk Standby (switch to standby)
+• Squawk Mayday (select emergency code 7700)
+
+--- **Exemplos de Comunicação** ---
+**Ota TWR, TITAN01**, 2000 feet 1NM north of EP for full stop landing.
+**TITAN01, Ota TWR**, Number One, join right downwind RWY 35, wind 210/10, QNH 1013.
+**Number One, join right downwind RWY 35, QNH 1013**, TITAN01.
+
+**TITAN01, Ota TWR**, make one orbit by the right, traffic is UAV joining left base leg RWY 35, same altitude.
+**All stations**, TITAN01 RWY 35 vacated.
+**TITAN01**, wind 330/15, Clear to land RWY 35.
+
+**TITAN01, Ota TWR**, Go Around.
+**Ota TWR, TITAN01**, Going Around.
+
+**TITAN02, Ota TWR**, Number Two, Extend right downwind, traffic OGS42 on final RWY 35.
+**TITAN01, Ota TWR**, Report Base Leg / Final.
+**Ota TWR, TITAN01**, FINAL RWY 35.`
+      },
+      {
+        id: 'c-emergency',
+        title: 'COMMS – EMERGENCY',
+        type: 'text',
+        content: `--- **Declarar Emergência** ---
+• **Mayday Mayday Mayday** (Distress / Emergência)
+• **Pan-Pan Pan-Pan Pan-Pan** (Urgency / Urgência)
+• Declare Emergency
+• Request mother language (se necessário)
+
+--- **Códigos Transponder** ---
+• **7700** – Emergência (Mayday)
+• **7600** – Falha de Rádio (Comms Failure)
+• **7500** – Interferência Ilícita (Hijack)
+
+--- **Informação de Emergência (Estrutura do Reporte)** ---
+1. Name of the station addressed (se tempo e circunstâncias permitirem)
+2. Callsign of the aircraft
+3. The nature of the distress condition (tipo de emergência ou urgência)
+4. Intentions
+5. Present position, level (altitude/nível) and heading
+6. Persons on board (POB) and fuel available
+
+--- **Terminar Emergência** ---
+• **Traffic Distress ended**
+
+--- **Exemplo de Transmissão de Emergência** ---
+**MAYDAY MAYDAY MAYDAY, Ota TWR, TITAN01**, engine on fire making forced landing 20 miles south of the field, passing 2000 feet, heading 360.
+
+**TITAN01, Ota TWR**, roger MAYDAY, wind at Ota 350 degrees 10 knots, QNH 1012.`
       }
     ]
   }

@@ -85,7 +85,7 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
   <div className="checklist" style={{ maxWidth: '900px' }}>
     {content.map((check, idx) => {
       const isMemoryItem = check.startsWith('**') && check.endsWith('**');
-      const isSpecialLine = !check.trim() || check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---');
+      const isSpecialLine = !check.trim() || check.startsWith('WARNING:') || check.startsWith('CAUTION:') || check.startsWith('NOTE:') || check.startsWith('---') || check.startsWith('EXAMPLE:');
       
       if (isSpecialLine) {
         if (!check.trim()) return <div key={idx} style={{ height: '10px' }} />;
@@ -806,6 +806,7 @@ function App() {
           else if (section.id === 'EMERGENCY_CHECKLIST') { sectionColor = '#d32f2f'; activeBg = '#ff1744'; activeTextColor = 'white'; }
           else if (section.id === 'NORMAL_PROCEDURES') { sectionColor = '#0d47a1'; activeBg = '#2979ff'; activeTextColor = 'white'; }
           else if (section.id === 'SENSOR_OPERATOR') { sectionColor = '#1b5e20'; activeBg = '#00c853'; activeTextColor = 'white'; }
+          else if (section.id === 'COMUNICATIONS') { sectionColor = '#008080'; activeBg = '#40e0d0'; activeTextColor = 'black'; }
           else if (section.id === 'MISSION_PLANNING') { sectionColor = '#37474f'; activeBg = '#90a4ae'; activeTextColor = 'black'; }
           else if (section.id === 'HANDOVER_TAKEOVER') { sectionColor = '#f57f17'; activeBg = '#ffea00'; activeTextColor = 'black'; }
           else if (section.id === 'CRASH_RESPONSE') { sectionColor = '#4e342e'; activeBg = '#d84315'; activeTextColor = 'white'; }
