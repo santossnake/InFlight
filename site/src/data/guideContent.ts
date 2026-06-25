@@ -1658,6 +1658,16 @@ export const guideData: GuideSection[] = [
     title: 'Comunications Script & Info',
     items: [
       {
+        id: 'c-tables',
+        title: 'COMMUNICATIONS TABLES (C 3/16 - C 5/16)',
+        type: 'image',
+        content: [
+          '/assets/comms-table-page3.png',
+          '/assets/comms-table-page4.png',
+          '/assets/comms-table-page5.png'
+        ]
+      },
+      {
         id: 'c-aerodrome-info',
         title: 'COMMS – AERODROME INFORMATION',
         type: 'text',
