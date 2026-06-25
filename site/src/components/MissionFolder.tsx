@@ -516,6 +516,8 @@ export default function MissionFolder({
     crewOp.map(c => c.trig.trim().toUpperCase()).filter(t => t !== '')
   ).size;
 
+  const initialFuel = parseFloat(fuelInit || general.indFuel) || 16;
+
   return (
     <div className="mission-folder-container" style={{ padding: '20px 0' }}>
       {/* UI Controls */}
@@ -662,17 +664,17 @@ export default function MissionFolder({
               <line x1="40" y1={mapFuelToY(2.5)} x2="440" y2={mapFuelToY(2.5)} stroke="#d32f2f" strokeWidth="1.5" strokeDasharray="3,3" />
               <text x="445" y={mapFuelToY(2.5) + 3} fontSize="7" fill="#d32f2f" fontWeight="bold">BINGO 2.5L</text>
 
-              <line x1={mapTimeToX(0)} y1={mapFuelToY(16)} x2={mapTimeToX(16)} y2={mapFuelToY(0)} stroke="#1976d2" strokeWidth="1" />
-              <text x={mapTimeToX(12)} y={mapFuelToY(4) - 5} fontSize="6" fill="#1976d2">1 L/H</text>
+              <line x1={mapTimeToX(0)} y1={mapFuelToY(initialFuel)} x2={mapTimeToX(initialFuel)} y2={mapFuelToY(0)} stroke="#1976d2" strokeWidth="1" />
+              <text x={mapTimeToX(initialFuel * 0.75)} y={mapFuelToY(initialFuel * 0.25) - 5} fontSize="6" fill="#1976d2">1 L/H</text>
 
-              <line x1={mapTimeToX(0)} y1={mapFuelToY(16)} x2={mapTimeToX(12.8)} y2={mapFuelToY(0)} stroke="#388e3c" strokeWidth="1" />
-              <text x={mapTimeToX(10)} y={mapFuelToY(3.5) - 5} fontSize="6" fill="#388e3c">1.25 L/H</text>
+              <line x1={mapTimeToX(0)} y1={mapFuelToY(initialFuel)} x2={mapTimeToX(initialFuel / 1.25)} y2={mapFuelToY(0)} stroke="#388e3c" strokeWidth="1" />
+              <text x={mapTimeToX(initialFuel / 1.25 * 0.75)} y={mapFuelToY(initialFuel * 0.25) - 5} fontSize="6" fill="#388e3c">1.25 L/H</text>
 
-              <line x1={mapTimeToX(0)} y1={mapFuelToY(16)} x2={mapTimeToX(10.6)} y2={mapFuelToY(0)} stroke="#fbc02d" strokeWidth="1" />
-              <text x={mapTimeToX(8)} y={mapFuelToY(4) - 5} fontSize="6" fill="#fbc02d">1.5 L/H</text>
+              <line x1={mapTimeToX(0)} y1={mapFuelToY(initialFuel)} x2={mapTimeToX(initialFuel / 1.5)} y2={mapFuelToY(0)} stroke="#fbc02d" strokeWidth="1" />
+              <text x={mapTimeToX(initialFuel / 1.5 * 0.75)} y={mapFuelToY(initialFuel * 0.25) - 5} fontSize="6" fill="#fbc02d">1.5 L/H</text>
 
-              <line x1={mapTimeToX(0)} y1={mapFuelToY(16)} x2={mapTimeToX(8)} y2={mapFuelToY(0)} stroke="#d32f2f" strokeWidth="1" />
-              <text x={mapTimeToX(6)} y={mapFuelToY(4) - 5} fontSize="6" fill="#d32f2f">2 L/H</text>
+              <line x1={mapTimeToX(0)} y1={mapFuelToY(initialFuel)} x2={mapTimeToX(initialFuel / 2)} y2={mapFuelToY(0)} stroke="#d32f2f" strokeWidth="1" />
+              <text x={mapTimeToX(initialFuel / 2 * 0.75)} y={mapFuelToY(initialFuel * 0.25) - 5} fontSize="6" fill="#d32f2f">2 L/H</text>
 
               {fuelLogs && fuelLogs.length > 0 && (
                 <>
