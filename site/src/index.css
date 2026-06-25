@@ -183,6 +183,7 @@ th {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   padding: 20px;
+  width: 100%;
   max-width: 900px;
   margin: 0 auto;
   min-height: 1100px;
@@ -515,7 +516,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
     flex-direction: column !important;
     width: 210mm !important;
     height: 295.5mm !important;
-    padding: 10mm 12mm !important;
+    padding: 6mm 10mm !important;
     margin: 0 auto !important;
     page-break-after: always !important;
     break-after: page !important;
@@ -555,9 +556,6 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   }
 
   /* Page 1 Specific adjustments */
-  .print-page.page-1 {
-    padding: 6mm 10mm !important;
-  }
   .print-page.page-1 .grid-inputs-container .col {
     padding: 2px 4px !important;
     min-height: 24px !important;
@@ -580,13 +578,10 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
     padding: 4px !important;
   }
   .print-page.page-1 svg {
-    max-height: 140px !important;
+    max-height: 350px !important;
   }
 
   /* Page 2 Specific adjustments */
-  .print-page.page-2 {
-    padding: 6mm 10mm !important;
-  }
   .print-page.page-2 h3 {
     margin-top: 10px !important;
     margin-bottom: 5px !important;
@@ -619,9 +614,6 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   }
 
   /* Page 4 ORM adjustments */
-  .print-page.page-4 {
-    padding: 6mm 10mm !important;
-  }
   .print-page.page-4 .orm-grid-styled-table {
     font-size: 0.65em !important;
     margin-top: 5px !important;
@@ -705,9 +697,6 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
 }
 
 /* Page 1 print overrides for html2pdf screen render */
-.is-generating-pdf .print-page.page-1 {
-  padding: 6mm 10mm !important;
-}
 .is-generating-pdf .print-page.page-1 .grid-inputs-container .col {
   padding: 2px 4px !important;
   min-height: 24px !important;
@@ -730,13 +719,10 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   padding: 4px !important;
 }
 .is-generating-pdf .print-page.page-1 svg {
-  max-height: 140px !important;
+  max-height: 350px !important;
 }
 
 /* Page 2 print overrides for html2pdf screen render */
-.is-generating-pdf .print-page.page-2 {
-  padding: 6mm 10mm !important;
-}
 .is-generating-pdf .print-page.page-2 h3 {
   margin-top: 10px !important;
   margin-bottom: 5px !important;
@@ -770,9 +756,6 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
 }
 
 /* Page 4 ORM adjustments for html2pdf screen render */
-.is-generating-pdf .print-page.page-4 {
-  padding: 6mm 10mm !important;
-}
 .is-generating-pdf .print-page.page-4 .orm-grid-styled-table {
   font-size: 0.65em !important;
   margin-top: 5px !important;
