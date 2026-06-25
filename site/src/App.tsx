@@ -367,6 +367,7 @@ function App() {
     }
   };
 
+
   const resetAllChecklists = () => {
     if (window.confirm('Resetar TODOS os checklists, logs de missão e matriz ORM?')) {
       setChecklistProgress({});
@@ -851,31 +852,69 @@ function App() {
                 <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {item.title}
                   {(item.type === 'checklist' || item.type === 'mixed') && (
-                    <button 
-                      onClick={() => {
-                        if (window.confirm(`Resetar o checklist "${item.title}"?`)) {
-                          setChecklistProgress(prev => {
-                            const next = { ...prev };
-                            delete next[item.id];
-                            return next;
-                          });
-                        }
-                      }}
-                      className="no-print"
-                      style={{ 
-                        marginLeft: '15px', 
-                        fontSize: '0.45em', 
-                        padding: '4px 8px', 
-                        backgroundColor: 'var(--accent-color)', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '4px', 
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      🔄 Reset
-                    </button>
+                    <div className="no-print" style={{ display: 'inline-flex', gap: '5px', marginLeft: '15px' }}>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm(`Marcar todos os passos de "${item.title}" como feitos?`)) {
+                            setChecklistProgress(prev => {
+                              const next = { ...prev };
+                              let checklist: string[] | undefined;
+                              if (item.type === 'checklist') {
+                                checklist = item.content as string[];
+                              } else if (item.type === 'mixed') {
+                                checklist = (item.content as any).checklist;
+                              }
+                              if (checklist) {
+                                const itemProgress = { ...(next[item.id] || {}) };
+                                checklist.forEach((line, index) => {
+                                  const isSpecialLine = !line.trim() || line.startsWith('WARNING:') || line.startsWith('CAUTION:') || line.startsWith('NOTE:') || line.startsWith('---');
+                                  if (!isSpecialLine) {
+                                    itemProgress[index] = true;
+                                  }
+                                });
+                                next[item.id] = itemProgress;
+                              }
+                              return next;
+                            });
+                          }
+                        }}
+                        style={{ 
+                          fontSize: '0.45em', 
+                          padding: '4px 8px', 
+                          backgroundColor: '#2e7d32', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ✓ Check All
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm(`Resetar o checklist "${item.title}"?`)) {
+                            setChecklistProgress(prev => {
+                              const next = { ...prev };
+                              delete next[item.id];
+                              return next;
+                            });
+                          }
+                        }}
+                        style={{ 
+                          fontSize: '0.45em', 
+                          padding: '4px 8px', 
+                          backgroundColor: 'var(--accent-color)', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        🔄 Reset
+                      </button>
+                    </div>
                   )}
                 </h2>
                 <div className="content-render">{renderContent(item)}</div>
