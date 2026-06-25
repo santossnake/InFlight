@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateIts, getApprovalLevel } from '../data/ormConfig';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 interface FuelLog {
   zuluTime: string;
@@ -46,6 +48,8 @@ export default function MissionFolder({
   engOnTotal,
   flightTotal
 }: MissionFolderProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   // General Info State
   const [general, setGeneral] = useState(() => {
     const saved = localStorage.getItem('mf_general');
@@ -309,6 +313,34 @@ export default function MissionFolder({
     }
   }, [xwindResult]);
 
+  useEffect(() => {
+    if (isGeneratingPdf) {
+      setTimeout(() => {
+        const element = document.querySelector('.print-mission-folder');
+        if (element) {
+          const opt = {
+            margin:       0,
+            filename:     `Mission_Folder_${general.folderNum || 'OP'}_${general.date || ''}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+              scale: 2, 
+              useCORS: true,
+              logging: false
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+          html2pdf().from(element).set(opt).save().then(() => {
+            setIsGeneratingPdf(false);
+          }).catch(() => {
+            setIsGeneratingPdf(false);
+          });
+        } else {
+          setIsGeneratingPdf(false);
+        }
+      }, 300);
+    }
+  }, [isGeneratingPdf]);
+
   // ORM calculation
   const calculateOrmScore = () => {
     let score = 0;
@@ -428,7 +460,7 @@ export default function MissionFolder({
   };
 
   const handlePrint = () => {
-    window.print();
+    setIsGeneratingPdf(true);
   };
 
   const mapFuelToY = (f: number) => 220 - (f / 16) * 200;
@@ -444,17 +476,18 @@ export default function MissionFolder({
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', padding: '15px', backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
         <div>
           <h3 style={{ margin: 0, color: 'var(--primary-color)' }}>Mission Folder Interativo (ZULU Time)</h3>
-          <span style={{ fontSize: '0.85em', opacity: 0.8 }}>Preencha os campos abaixo e clique em Exportar para gerar o PDF A4 oficial.</span>
+          <span style={{ fontSize: '0.85em', opacity: 0.8 }}>Preencha os campos abaixo e clique em Gerar PDF para transferir o documento.</span>
         </div>
         <button 
           onClick={handlePrint}
-          style={{ padding: '10px 20px', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}
+          disabled={isGeneratingPdf}
+          style={{ padding: '10px 20px', backgroundColor: isGeneratingPdf ? '#aaa' : 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: isGeneratingPdf ? 'not-allowed' : 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}
         >
-          🖨️ Exportar em PDF / Imprimir
+          {isGeneratingPdf ? '⏳ A Gerar PDF...' : '📄 Gerar PDF (Download)'}
         </button>
       </div>
 
-      <div className="print-mission-folder">
+      <div className={`print-mission-folder ${isGeneratingPdf ? 'is-generating-pdf' : ''}`}>
         {/* PAGE 1 */}
         <div className="print-page page-1">
           <div className="mf-header">

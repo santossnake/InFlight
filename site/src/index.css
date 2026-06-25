@@ -468,12 +468,19 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
 
 /* Print CSS */
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
   /* Hide all non-printable elements */
   body, html {
     background: white !important;
     color: black !important;
     height: auto !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   body.dark-mode {
@@ -507,7 +514,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
     display: flex !important;
     flex-direction: column !important;
     width: 210mm !important;
-    height: 297mm !important;
+    height: 296mm !important;
     padding: 10mm 12mm !important;
     margin: 0 auto !important;
     page-break-after: always !important;
@@ -548,11 +555,52 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   }
 
   /* Page 1 Specific adjustments */
+  .print-page.page-1 {
+    padding: 6mm 10mm !important;
+  }
+  .print-page.page-1 .grid-inputs-container .col {
+    padding: 2px 4px !important;
+    min-height: 24px !important;
+    font-size: 0.7em !important;
+  }
+  .print-page.page-1 .grid-inputs-container input {
+    font-size: 0.85em !important;
+    padding: 0 !important;
+  }
+  .print-page.page-1 .time-shifts-table td {
+    padding: 3px 5px !important;
+    font-size: 0.7em !important;
+  }
+  .print-page.page-1 .time-shifts-table input {
+    font-size: 0.85em !important;
+    padding: 0 !important;
+  }
   .print-page.page-1 .endurance-chart-container {
-    margin-top: 10px !important;
+    margin-top: 5px !important;
+    padding: 4px !important;
   }
   .print-page.page-1 svg {
-    max-height: 170px !important;
+    max-height: 140px !important;
+  }
+
+  /* Page 2 Specific adjustments */
+  .print-page.page-2 {
+    padding: 6mm 10mm !important;
+  }
+  .print-page.page-2 h3 {
+    margin-top: 10px !important;
+    margin-bottom: 5px !important;
+  }
+  .print-page.page-2 .crew-table {
+    margin-top: 5px !important;
+  }
+  .print-page.page-2 .crew-table th, .print-page.page-2 .crew-table td {
+    padding: 3px 5px !important;
+    font-size: 0.72em !important;
+  }
+  .print-page.page-2 .crew-table input {
+    padding: 0 !important;
+    font-size: 0.85em !important;
   }
 
   /* Page 3 Textarea adjustments for print */
@@ -571,12 +619,44 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   }
 
   /* Page 4 ORM adjustments */
+  .print-page.page-4 {
+    padding: 6mm 10mm !important;
+  }
   .print-page.page-4 .orm-grid-styled-table {
-    font-size: 0.7em !important;
+    font-size: 0.65em !important;
     margin-top: 5px !important;
   }
   .print-page.page-4 .orm-grid-styled-table td {
-    padding: 3px 4px !important;
+    padding: 2px 3px !important;
+  }
+  .print-page.page-4 .its-calculator-box,
+  .print-page.page-4 .xwind-calculator-box {
+    padding: 6px !important;
+    font-size: 0.75em !important;
+  }
+  .print-page.page-4 .its-calculator-box h4,
+  .print-page.page-4 .xwind-calculator-box h4 {
+    margin-bottom: 5px !important;
+  }
+  .print-page.page-4 .its-calculator-box input,
+  .print-page.page-4 .xwind-calculator-box input {
+    padding: 2px 4px !important;
+    font-size: 0.9em !important;
+  }
+  .print-page.page-4 .its-calculator-box label,
+  .print-page.page-4 .xwind-calculator-box label {
+    font-size: 0.85em !important;
+    margin-bottom: 1px !important;
+  }
+  .print-page.page-4 .its-calculator-box div,
+  .print-page.page-4 .xwind-calculator-box div {
+    gap: 4px !important;
+  }
+  .print-page.page-4 table {
+    font-size: 0.75em !important;
+  }
+  .print-page.page-4 td {
+    padding: 3px !important;
   }
 
   /* Make inputs borderless for clean signature/reading */
@@ -593,4 +673,156 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
     appearance: auto !important;
     -webkit-appearance: checkbox !important;
   }
+}
+
+/* Helper styles applied during PDF generation on screen */
+.is-generating-pdf {
+  background: white !important;
+  color: black !important;
+  width: 210mm !important;
+  margin: 0 auto !important;
+}
+
+.is-generating-pdf .no-print {
+  display: none !important;
+}
+
+.is-generating-pdf .print-page {
+  width: 210mm !important;
+  height: 296mm !important;
+  padding: 6mm 10mm !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: white !important;
+  color: black !important;
+  page-break-after: always !important;
+  break-after: page !important;
+}
+
+/* Page 1 print overrides for html2pdf screen render */
+.is-generating-pdf .print-page.page-1 {
+  padding: 6mm 10mm !important;
+}
+.is-generating-pdf .print-page.page-1 .grid-inputs-container .col {
+  padding: 2px 4px !important;
+  min-height: 24px !important;
+  font-size: 0.7em !important;
+}
+.is-generating-pdf .print-page.page-1 .grid-inputs-container input {
+  font-size: 0.85em !important;
+  padding: 0 !important;
+}
+.is-generating-pdf .print-page.page-1 .time-shifts-table td {
+  padding: 3px 5px !important;
+  font-size: 0.7em !important;
+}
+.is-generating-pdf .print-page.page-1 .time-shifts-table input {
+  font-size: 0.85em !important;
+  padding: 0 !important;
+}
+.is-generating-pdf .print-page.page-1 .endurance-chart-container {
+  margin-top: 5px !important;
+  padding: 4px !important;
+}
+.is-generating-pdf .print-page.page-1 svg {
+  max-height: 140px !important;
+}
+
+/* Page 2 print overrides for html2pdf screen render */
+.is-generating-pdf .print-page.page-2 {
+  padding: 6mm 10mm !important;
+}
+.is-generating-pdf .print-page.page-2 h3 {
+  margin-top: 10px !important;
+  margin-bottom: 5px !important;
+}
+.is-generating-pdf .print-page.page-2 .crew-table {
+  margin-top: 5px !important;
+}
+.is-generating-pdf .print-page.page-2 .crew-table th, 
+.is-generating-pdf .print-page.page-2 .crew-table td {
+  padding: 3px 5px !important;
+  font-size: 0.72em !important;
+}
+.is-generating-pdf .print-page.page-2 .crew-table input {
+  padding: 0 !important;
+  font-size: 0.85em !important;
+}
+
+/* Page 3 Textarea adjustments for html2pdf screen render */
+.is-generating-pdf .print-page.page-3 .briefing-textarea {
+  min-height: 120px !important;
+  height: 120px !important;
+  padding: 8px !important;
+}
+.is-generating-pdf .print-page.page-3 .debriefing-box {
+  margin-bottom: 8px !important;
+}
+.is-generating-pdf .print-page.page-3 .debriefing-box textarea {
+  min-height: 52px !important;
+  height: 52px !important;
+  padding: 6px !important;
+}
+
+/* Page 4 ORM adjustments for html2pdf screen render */
+.is-generating-pdf .print-page.page-4 {
+  padding: 6mm 10mm !important;
+}
+.is-generating-pdf .print-page.page-4 .orm-grid-styled-table {
+  font-size: 0.65em !important;
+  margin-top: 5px !important;
+}
+.is-generating-pdf .print-page.page-4 .orm-grid-styled-table td {
+  padding: 2px 3px !important;
+}
+.is-generating-pdf .print-page.page-4 .its-calculator-box,
+.is-generating-pdf .print-page.page-4 .xwind-calculator-box {
+  padding: 6px !important;
+  font-size: 0.75em !important;
+}
+.is-generating-pdf .print-page.page-4 .its-calculator-box h4,
+.is-generating-pdf .print-page.page-4 .xwind-calculator-box h4 {
+  margin-bottom: 5px !important;
+}
+.is-generating-pdf .print-page.page-4 .its-calculator-box input,
+.is-generating-pdf .print-page.page-4 .xwind-calculator-box input {
+  padding: 2px 4px !important;
+  font-size: 0.9em !important;
+}
+.is-generating-pdf .print-page.page-4 .its-calculator-box label,
+.is-generating-pdf .print-page.page-4 .xwind-calculator-box label {
+  font-size: 0.85em !important;
+  margin-bottom: 1px !important;
+}
+.is-generating-pdf .print-page.page-4 .its-calculator-box div,
+.is-generating-pdf .print-page.page-4 .xwind-calculator-box div {
+  gap: 4px !important;
+}
+.is-generating-pdf .print-page.page-4 table {
+  font-size: 0.75em !important;
+}
+.is-generating-pdf .print-page.page-4 td {
+  padding: 3px !important;
+}
+
+.is-generating-pdf input, 
+.is-generating-pdf select, 
+.is-generating-pdf textarea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.is-generating-pdf .grid-inputs-container input {
+  border-bottom: none !important;
+}
+
+.is-generating-pdf input[type="checkbox"], 
+.is-generating-pdf input[type="radio"] {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
 }
