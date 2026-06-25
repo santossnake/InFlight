@@ -377,6 +377,7 @@ function App() {
       setFuelLogs([]);
       localStorage.removeItem('mf_orm_selections');
       localStorage.removeItem('mf_its_input');
+      localStorage.removeItem('mf_xwind_input');
       localStorage.removeItem('mf_general');
       localStorage.removeItem('mf_crew_op');
       localStorage.removeItem('mf_crew_uni');
@@ -389,15 +390,19 @@ function App() {
     if (!startStr) return null;
     const [h1, m1] = startStr.split(':').map(Number);
     const startDate = new Date();
-    startDate.setHours(h1, m1, 0, 0);
+    startDate.setUTCHours(h1, m1, 0, 0);
     
     const endDate = new Date();
     if (endStr) {
       const [h2, m2] = endStr.split(':').map(Number);
-      endDate.setHours(h2, m2, 0, 0);
+      endDate.setUTCHours(h2, m2, 0, 0);
+    } else {
+      endDate.setUTCSeconds(0, 0);
     }
     
-    if (endDate < startDate) endDate.setDate(endDate.getDate() + 1);
+    if (endDate.getTime() < startDate.getTime()) {
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+    }
     
     const diffMs = endDate.getTime() - startDate.getTime();
     const diffHrs = Math.floor(diffMs / 3600000);

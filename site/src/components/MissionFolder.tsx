@@ -133,6 +133,12 @@ export default function MissionFolder({
     return saved ? JSON.parse(saved) : { temp: '', humidity: '' };
   });
 
+  // XWind State
+  const [xwindInput, setXwindInput] = useState(() => {
+    const saved = localStorage.getItem('mf_xwind_input');
+    return saved ? JSON.parse(saved) : { rwy: '', windDir: '', windSpeed: '', gust: '', halfGust: false };
+  });
+
   // Sync general values on changes
   useEffect(() => {
     localStorage.setItem('mf_general', JSON.stringify(general));
@@ -157,6 +163,10 @@ export default function MissionFolder({
   useEffect(() => {
     localStorage.setItem('mf_its_input', JSON.stringify(itsInput));
   }, [itsInput]);
+
+  useEffect(() => {
+    localStorage.setItem('mf_xwind_input', JSON.stringify(xwindInput));
+  }, [xwindInput]);
 
   // Sync from parent state (missionLogs, fuel, etc.)
   useEffect(() => {
@@ -253,6 +263,51 @@ export default function MissionFolder({
       });
     }
   }, [itsResult.zone]);
+
+  // Auto-calculated Crosswind
+  const calculateCrosswindValue = () => {
+    const rwyRaw = parseFloat(xwindInput.rwy);
+    const windDir = parseFloat(xwindInput.windDir);
+    const windSpeed = parseFloat(xwindInput.windSpeed) || 0;
+    const gust = parseFloat(xwindInput.gust) || 0;
+
+    if (isNaN(rwyRaw) || isNaN(windDir)) return null;
+
+    let rwyAngle = rwyRaw;
+    if (rwyRaw <= 36) {
+      rwyAngle = rwyRaw * 10;
+    }
+
+    let effectiveWind = windSpeed;
+    if (gust > windSpeed) {
+      const gustFactor = gust - windSpeed;
+      effectiveWind = windSpeed + (xwindInput.halfGust ? 0.5 : 1.0) * gustFactor;
+    }
+
+    const angleDiff = Math.abs(windDir - rwyAngle);
+    const angleRad = (angleDiff * Math.PI) / 180;
+    const crosswind = effectiveWind * Math.abs(Math.sin(angleRad));
+
+    return Math.round(crosswind * 10) / 10;
+  };
+
+  const xwindResult = calculateCrosswindValue();
+
+  useEffect(() => {
+    if (xwindResult !== null) {
+      setOrmSelections(prev => {
+        const next = { ...prev };
+        if (xwindResult >= 7) {
+          next['xwind'] = 'xw_7';
+        } else if (xwindResult >= 5) {
+          next['xwind'] = 'xw_5';
+        } else {
+          delete next['xwind'];
+        }
+        return next;
+      });
+    }
+  }, [xwindResult]);
 
   // ORM calculation
   const calculateOrmScore = () => {
@@ -544,7 +599,9 @@ export default function MissionFolder({
                 <>
                   <path
                     d={fuelLogs.map((log, i) => {
-                      const x = mapTimeToX(log.elapsedMins / 60);
+                      const diff = calculateHoursTotal(computedEOn, log.zuluTime);
+                      const elapsedMins = diff !== null ? diff.totalMins : log.elapsedMins;
+                      const x = mapTimeToX(elapsedMins / 60);
                       const y = mapFuelToY(log.fuel);
                       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
                     }).join(' ')}
@@ -553,7 +610,9 @@ export default function MissionFolder({
                     strokeWidth="2"
                   />
                   {fuelLogs.map((log, i) => {
-                    const x = mapTimeToX(log.elapsedMins / 60);
+                    const diff = calculateHoursTotal(computedEOn, log.zuluTime);
+                    const elapsedMins = diff !== null ? diff.totalMins : log.elapsedMins;
+                    const x = mapTimeToX(elapsedMins / 60);
                     const y = mapFuelToY(log.fuel);
                     return (
                       <g key={i}>
@@ -1263,6 +1322,71 @@ export default function MissionFolder({
                     <span>Score 9 (D)</span>
                   </div>
                 </div>
+              </div>
+
+              {/* CROSSWIND CALCULATOR */}
+              <div className="xwind-calculator-box" style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: '4px', backgroundColor: 'var(--card-bg)' }}>
+                <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '3px' }}>Calculador de Crosswind</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.85em' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '3px' }}>Direção Pista:</label>
+                    <input 
+                      type="text" 
+                      placeholder="Ex: 09 ou 090"
+                      value={xwindInput.rwy} 
+                      onChange={e => setXwindInput({ ...xwindInput, rwy: e.target.value })} 
+                      style={{ width: '100%', padding: '5px' }} 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '3px' }}>Direção Vento (º):</label>
+                    <input 
+                      type="number" 
+                      placeholder="0-360"
+                      value={xwindInput.windDir} 
+                      onChange={e => setXwindInput({ ...xwindInput, windDir: e.target.value })} 
+                      style={{ width: '100%', padding: '5px' }} 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '3px' }}>Vento Médio (kt):</label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 10"
+                      value={xwindInput.windSpeed} 
+                      onChange={e => setXwindInput({ ...xwindInput, windSpeed: e.target.value })} 
+                      style={{ width: '100%', padding: '5px' }} 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '3px' }}>Rajada (kt):</label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 15"
+                      value={xwindInput.gust} 
+                      onChange={e => setXwindInput({ ...xwindInput, gust: e.target.value })} 
+                      style={{ width: '100%', padding: '5px' }} 
+                    />
+                  </div>
+                </div>
+                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85em' }}>
+                  <input 
+                    type="checkbox" 
+                    id="halfGustCheckbox"
+                    checked={xwindInput.halfGust} 
+                    onChange={e => setXwindInput({ ...xwindInput, halfGust: e.target.checked })} 
+                  />
+                  <label htmlFor="halfGustCheckbox" style={{ cursor: 'pointer', userSelect: 'none' }}>Só contabilizar 50% da rajada</label>
+                </div>
+                {xwindResult !== null && (
+                  <div style={{ marginTop: '10px', padding: '8px', borderRadius: '4px', backgroundColor: xwindResult < 5 ? '#e8f5e9' : xwindResult < 7 ? '#fffde7' : '#ffebee', border: '1px solid #ccc', textAlign: 'center' }}>
+                    <div style={{ fontWeight: 'bold' }}>Vento Cruzado: {xwindResult} kt</div>
+                    <div style={{ fontSize: '0.8em', fontWeight: 'bold', color: xwindResult < 5 ? 'green' : xwindResult < 7 ? 'orange' : 'red' }}>
+                      ORM: {xwindResult < 5 ? 'NORMAL' : xwindResult < 7 ? '≥ 5kts (Score 3)' : '≥ 7kts (Score 6)'}
+                    </div>
+                    <span style={{ fontSize: '0.7em', opacity: 0.8 }}>(O risco ORM correspondente foi marcado na tabela)</span>
+                  </div>
+                )}
               </div>
 
               {/* APPROVAL LEVEL LEGEND */}
