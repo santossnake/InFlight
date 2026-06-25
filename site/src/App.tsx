@@ -672,7 +672,7 @@ function App() {
           <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.8em', cursor: 'pointer' }}>☰</button>
           <div style={{ lineHeight: 1.2 }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '1px' }}>INFLIGHT GUIDE OGS42</div>
-            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>Last Update: 06 MAY 2026</div>
+            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>Last Update: 25 Junho 2026</div>
           </div>
         </div>
 
