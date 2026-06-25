@@ -208,6 +208,8 @@ function App() {
   const [engineOnManual, setEngineOnManual] = useState<string>('')
   const [editingTimer, setEditingTimer] = useState<{ id: string, label: string } | null>(null)
   const [modalValue, setModalValue] = useState('')
+  const [editingFuelLogIndex, setEditingFuelLogIndex] = useState<number | null>(null)
+  const [editingFuelLog, setEditingFuelLog] = useState<{ zuluTime: string; fuel: string; elapsedMins: string } | null>(null)
 
   const [missionLogs, setMissionLogs] = useState<{ [key: string]: string }>(() => {
     const saved = localStorage.getItem('missionLogs');
@@ -331,6 +333,32 @@ function App() {
     const timeData = getDiffTime(engOnStr || '');
     const elapsedMins = timeData ? timeData.totalMins : 0;
     setFuelLogs(prev => [...prev, { zuluTime, fuel, elapsedMins }]);
+  };
+
+  const saveFuelLogEdit = () => {
+    if (editingFuelLogIndex === null || !editingFuelLog) return;
+    const fuelVal = parseFloat(editingFuelLog.fuel) || 0;
+    const minsVal = parseFloat(editingFuelLog.elapsedMins) || 0;
+    setFuelLogs(prev => {
+      const next = [...prev];
+      next[editingFuelLogIndex] = {
+        zuluTime: editingFuelLog.zuluTime,
+        fuel: fuelVal,
+        elapsedMins: minsVal
+      };
+      return next;
+    });
+    setEditingFuelLogIndex(null);
+    setEditingFuelLog(null);
+  };
+
+  const deleteFuelLogEntry = () => {
+    if (editingFuelLogIndex === null) return;
+    if (window.confirm('Eliminar esta leitura de combustível?')) {
+      setFuelLogs(prev => prev.filter((_, idx) => idx !== editingFuelLogIndex));
+      setEditingFuelLogIndex(null);
+      setEditingFuelLog(null);
+    }
   };
 
   const lastTapRef = useRef<{ [key: string]: number }>({});
@@ -525,11 +553,34 @@ function App() {
 
           {fuelLogs.length > 0 && (
             <div style={{ marginBottom: '20px', fontSize: '0.8em', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.02)' }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Pontos Registados:</div>
+              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Pontos Registados (Clique para editar):</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {fuelLogs.map((log, i) => (
-                  <span key={i} style={{ backgroundColor: 'rgba(142, 36, 170, 0.1)', color: '#8e24aa', padding: '3px 8px', borderRadius: '12px', border: '1px solid rgba(142, 36, 170, 0.2)', fontWeight: 'bold' }}>
-                    {log.zuluTime}Z: {log.fuel}L ({Math.round(log.elapsedMins)} min)
+                  <span 
+                    key={i} 
+                    onClick={() => {
+                      setEditingFuelLogIndex(i);
+                      setEditingFuelLog({
+                        zuluTime: log.zuluTime,
+                        fuel: log.fuel.toString(),
+                        elapsedMins: log.elapsedMins.toString()
+                      });
+                    }}
+                    style={{ 
+                      backgroundColor: 'rgba(142, 36, 170, 0.1)', 
+                      color: '#8e24aa', 
+                      padding: '5px 10px', 
+                      borderRadius: '12px', 
+                      border: '1px solid rgba(142, 36, 170, 0.3)', 
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    {log.zuluTime}Z: {log.fuel}L ({Math.round(log.elapsedMins)} min) ✏️
                   </span>
                 ))}
               </div>
@@ -971,6 +1022,128 @@ function App() {
                 </button>
                 <button 
                   onClick={() => setEditingTimer(null)}
+                  style={{ padding: '12px', backgroundColor: '#546e7a', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FUEL LOG EDIT MODAL */}
+      {editingFuelLog && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{ 
+            backgroundColor: 'var(--card-bg)', padding: '25px', borderRadius: '12px', 
+            width: '100%', maxWidth: '350px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            border: '1px solid var(--border-color)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#8e24aa', textAlign: 'center' }}>
+              EDITAR LEITURA
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85em', marginBottom: '5px', opacity: 0.8 }}>HORA ZULU (HH:MM)</label>
+                <input 
+                  type="text" 
+                  value={editingFuelLog.zuluTime}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const nextLog = { ...editingFuelLog, zuluTime: val };
+                    const engOnStr = engineOnManual || missionLogs['eng-on'];
+                    if (engOnStr && val.includes(':')) {
+                      const [h1, m1] = engOnStr.split(':').map(Number);
+                      const [h2, m2] = val.split(':').map(Number);
+                      if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
+                        let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+                        if (diff < 0) diff += 24 * 60;
+                        nextLog.elapsedMins = diff.toString();
+                      }
+                    }
+                    setEditingFuelLog(nextLog);
+                  }}
+                  placeholder="HH:MM"
+                  style={{ 
+                    width: '100%', padding: '10px', fontSize: '1.2em', textAlign: 'center',
+                    borderRadius: '6px', border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85em', marginBottom: '5px', opacity: 0.8 }}>COMBUSTÍVEL (L)</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  value={editingFuelLog.fuel}
+                  onChange={(e) => setEditingFuelLog({ ...editingFuelLog, fuel: e.target.value })}
+                  placeholder="L"
+                  style={{ 
+                    width: '100%', padding: '10px', fontSize: '1.2em', textAlign: 'center',
+                    borderRadius: '6px', border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85em', marginBottom: '5px', opacity: 0.8 }}>MINUTOS DECORRIDOS (ENGINE ON)</label>
+                <input 
+                  type="number" 
+                  value={editingFuelLog.elapsedMins}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const nextLog = { ...editingFuelLog, elapsedMins: val };
+                    const engOnStr = engineOnManual || missionLogs['eng-on'];
+                    const mins = parseFloat(val);
+                    if (engOnStr && !isNaN(mins)) {
+                      const [h1, m1] = engOnStr.split(':').map(Number);
+                      if (!isNaN(h1) && !isNaN(m1)) {
+                        let totalMins = h1 * 60 + m1 + mins;
+                        if (totalMins < 0) totalMins += 24 * 60 * Math.ceil(Math.abs(totalMins) / 1440);
+                        const hours = Math.floor(totalMins / 60) % 24;
+                        const minutes = Math.round(totalMins % 60);
+                        nextLog.zuluTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                      }
+                    }
+                    setEditingFuelLog(nextLog);
+                  }}
+                  placeholder="minutos"
+                  style={{ 
+                    width: '100%', padding: '10px', fontSize: '1.2em', textAlign: 'center',
+                    borderRadius: '6px', border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+              <button 
+                onClick={saveFuelLogEdit}
+                style={{ padding: '12px', backgroundColor: '#8e24aa', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                GUARDAR
+              </button>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button 
+                  onClick={deleteFuelLogEntry}
+                  style={{ padding: '12px', backgroundColor: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  APAGAR
+                </button>
+                <button 
+                  onClick={() => {
+                    setEditingFuelLogIndex(null);
+                    setEditingFuelLog(null);
+                  }}
                   style={{ padding: '12px', backgroundColor: '#546e7a', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
                   CANCELAR
