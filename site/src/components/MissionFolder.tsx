@@ -318,6 +318,51 @@ export default function MissionFolder({
       setTimeout(() => {
         const element = document.querySelector('.print-mission-folder');
         if (element) {
+          // Sync checkbox/radio states
+          element.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((input: any) => {
+            if (input.checked) {
+              input.setAttribute('checked', 'true');
+            } else {
+              input.removeAttribute('checked');
+            }
+          });
+
+          // Replace text/date inputs with spans for perfect PDF rendering
+          element.querySelectorAll('input:not([type="checkbox"]):not([type="radio"])').forEach((input: any) => {
+            const span = document.createElement('span');
+            span.textContent = input.value;
+            span.className = input.className;
+            span.style.cssText = input.style.cssText;
+            span.style.color = 'black';
+            span.style.fontWeight = 'bold';
+            span.style.display = 'inline-block';
+            span.style.fontSize = '0.9em';
+            input.parentNode.replaceChild(span, input);
+          });
+
+          // Replace textareas with divs
+          element.querySelectorAll('textarea').forEach((textarea: any) => {
+            const div = document.createElement('div');
+            div.textContent = textarea.value;
+            div.className = textarea.className;
+            div.style.cssText = textarea.style.cssText;
+            div.style.whiteSpace = 'pre-wrap';
+            div.style.color = 'black';
+            div.style.minHeight = textarea.style.height || '50px';
+            textarea.parentNode.replaceChild(div, textarea);
+          });
+
+          // Replace selects with spans
+          element.querySelectorAll('select').forEach((select: any) => {
+            const span = document.createElement('span');
+            span.textContent = select.options[select.selectedIndex]?.text || '';
+            span.className = select.className;
+            span.style.cssText = select.style.cssText;
+            span.style.color = 'black';
+            span.style.fontWeight = 'bold';
+            select.parentNode.replaceChild(span, select);
+          });
+
           const opt = {
             margin:       0,
             filename:     `Mission_Folder_${general.folderNum || 'OP'}_${general.date || ''}.pdf`,

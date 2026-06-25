@@ -799,6 +799,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
+  color: black !important;
 }
 
 .is-generating-pdf .grid-inputs-container input {
