@@ -710,7 +710,7 @@ export default function MissionFolder({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>OP260201 – 10 de fevereiro de 2026 | OGS42N – Mission Folder</div>
+            <div></div>
             <div className="bold" style={{ borderBottom: '1px solid black', width: '150px', textAlign: 'center', fontSize: '0.9em' }}>
               MC: <input type="text" placeholder="Assinatura" style={{ border: 'none', width: '120px', padding: 0, textAlign: 'center' }} value={general.mcSignature} onChange={e => setGeneral({...general, mcSignature: e.target.value})} />
             </div>
@@ -968,7 +968,7 @@ export default function MissionFolder({
           <button className="no-print" onClick={addCrewUniRow} style={{ padding: '5px 10px', marginTop: '5px', cursor: 'pointer' }}>➕ Adicionar Uniformização</button>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', borderTop: '1px solid #ccc', paddingTop: '10px', position: 'absolute', bottom: '10mm', left: '10mm', right: '10mm' }}>
-            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>OP260201 – 10 de fevereiro de 2026 | OGS42N – Mission Folder</div>
+            <div></div>
             <div style={{ fontSize: '0.7em', opacity: 0.7 }}>MP 7/42</div>
           </div>
         </div>
@@ -1006,7 +1006,7 @@ export default function MissionFolder({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', borderTop: '1px solid #ccc', paddingTop: '10px', position: 'absolute', bottom: '10mm', left: '10mm', right: '10mm' }}>
-            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>OP260201 – 10 de fevereiro de 2026 | OGS42N – Mission Folder</div>
+            <div></div>
             <div style={{ fontSize: '0.7em', opacity: 0.7 }}>MP 8/42</div>
           </div>
         </div>
@@ -1335,11 +1335,11 @@ export default function MissionFolder({
                   <tr>
                     <td className="row-header">Over Populated</td>
                     <td className={`clickable ${isSelected('over_populated', 'low_density') ? 'selected-cell' : ''}`} onClick={() => selectRadio('over_populated', 'low_density')}>
-                      {isSelected('over_populated', 'low_density') && '✓ '}L. density
+                      {isSelected('over_populated', 'low_density') && '✓ '}{'<300H/km2'}
                     </td>
                     <td className={`clickable center bold ${isSelected('over_populated', 'low_density') ? 'selected-cell' : ''}`} onClick={() => selectRadio('over_populated', 'low_density')}>2</td>
                     <td className={`clickable ${isSelected('over_populated', 'high_density') ? 'selected-cell' : ''}`} onClick={() => selectRadio('over_populated', 'high_density')}>
-                      {isSelected('over_populated', 'high_density') && '✓ '}H. density
+                      {isSelected('over_populated', 'high_density') && '✓ '}{'>= 300H/km2'}
                     </td>
                     <td className={`clickable center bold ${isSelected('over_populated', 'high_density') ? 'selected-cell' : ''}`} onClick={() => selectRadio('over_populated', 'high_density')}>5</td>
                   </tr>
@@ -1499,7 +1499,7 @@ export default function MissionFolder({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', borderTop: '1px solid #ccc', paddingTop: '10px', position: 'absolute', bottom: '10mm', left: '10mm', right: '10mm' }}>
-            <div style={{ fontSize: '0.7em', opacity: 0.7 }}>OP260201 – 10 de fevereiro de 2026 | OGS42N – Mission Folder</div>
+            <div></div>
             <div style={{ fontSize: '0.7em', opacity: 0.7 }}>MP 9/42</div>
           </div>
         </div>

@@ -233,8 +233,8 @@ export const ormConfig: OrmGroup[] = [
         label: 'Over Populated Area',
         type: 'radio',
         options: [
-          { id: 'low_density', label: 'Low density', score: 2 },
-          { id: 'high_density', label: 'High density', score: 5 }
+          { id: 'low_density', label: '<300H/km2', score: 2 },
+          { id: 'high_density', label: '>= 300H/km2', score: 5 }
         ]
       }
     ]
