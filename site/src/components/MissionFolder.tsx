@@ -327,7 +327,8 @@ export default function MissionFolder({
               useCORS: true,
               logging: false
             },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css' }
           };
           html2pdf().from(element).set(opt).save().then(() => {
             setIsGeneratingPdf(false);

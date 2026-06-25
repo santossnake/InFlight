@@ -388,10 +388,23 @@ function App() {
   };
 
   const resetCurrentChecklists = () => {
-    if (window.confirm('Resetar todos os checklists da secção atual?')) {
-      const newProgress = { ...checklistProgress };
-      activeSection.items.forEach(item => { delete newProgress[item.id]; });
-      setChecklistProgress(newProgress);
+    if (activeSectionId === 'MISSION_FOLDER') {
+      if (window.confirm('Resetar todos os dados do Mission Folder?')) {
+        localStorage.removeItem('mf_orm_selections');
+        localStorage.removeItem('mf_its_input');
+        localStorage.removeItem('mf_xwind_input');
+        localStorage.removeItem('mf_general');
+        localStorage.removeItem('mf_crew_op');
+        localStorage.removeItem('mf_crew_uni');
+        localStorage.removeItem('mf_briefings');
+        window.location.reload();
+      }
+    } else {
+      if (window.confirm('Resetar todos os checklists da secção atual?')) {
+        const newProgress = { ...checklistProgress };
+        activeSection.items.forEach(item => { delete newProgress[item.id]; });
+        setChecklistProgress(newProgress);
+      }
     }
   };
 

@@ -514,7 +514,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
     display: flex !important;
     flex-direction: column !important;
     width: 210mm !important;
-    height: 296mm !important;
+    height: 295.5mm !important;
     padding: 10mm 12mm !important;
     margin: 0 auto !important;
     page-break-after: always !important;
@@ -677,6 +677,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
 
 /* Helper styles applied during PDF generation on screen */
 .is-generating-pdf {
+  display: block !important;
   background: white !important;
   color: black !important;
   width: 210mm !important;
@@ -689,7 +690,7 @@ body.dark-mode .orm-grid-styled-table .selected-cell {
 
 .is-generating-pdf .print-page {
   width: 210mm !important;
-  height: 296mm !important;
+  height: 295.5mm !important;
   padding: 6mm 10mm !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
