@@ -763,6 +763,7 @@ export default function MissionFolder({
                       <option value="PRI" />
                       <option value="PRE" />
                       <option value="OS" />
+                      <option value="TRIP" />
                       <option value="PRI-I" />
                       <option value="PRI-A" />
                       <option value="PRE-I" />
