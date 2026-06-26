@@ -944,6 +944,10 @@ function App() {
                           }
                         }}
                         style={{ 
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
                           fontSize: '0.45em', 
                           padding: '4px 8px', 
                           backgroundColor: '#2e7d32', 
@@ -951,10 +955,15 @@ function App() {
                           border: 'none', 
                           borderRadius: '4px', 
                           cursor: 'pointer',
-                          fontWeight: 'bold'
+                          fontWeight: 'bold',
+                          height: '22px',
+                          verticalAlign: 'middle'
                         }}
                       >
-                        ✓ Check All
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Check All
                       </button>
                       <button 
                         onClick={() => {
@@ -967,6 +976,10 @@ function App() {
                           }
                         }}
                         style={{ 
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
                           fontSize: '0.45em', 
                           padding: '4px 8px', 
                           backgroundColor: 'var(--accent-color)', 
@@ -974,10 +987,16 @@ function App() {
                           border: 'none', 
                           borderRadius: '4px', 
                           cursor: 'pointer',
-                          fontWeight: 'bold'
+                          fontWeight: 'bold',
+                          height: '22px',
+                          verticalAlign: 'middle'
                         }}
                       >
-                        🔄 Reset
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <polyline points="3 3 3 8 8 8" />
+                        </svg>
+                        Reset
                       </button>
                     </div>
                   )}
