@@ -1974,7 +1974,7 @@ Respostas/Ações Comuns:
         type: 'ar5_noc_checklist',
         content: [
           { num: '0', item: "Daily Briefing / I’M SAFE", action: "Conducting the Daily Briefing and the I'M SAFE Procedure", redRisk: false },
-          { num: '1', item: "UAS GEO ZONES (ANAC)", action: "Consult to check that there are no conflict areas https://dnt.anac.pt/mapa.html\nCopy.Json file name:", redRisk: true },
+          { num: '1', item: "UAS GEO ZONES (ANAC)", action: "Consult to check that there are no conflict areas https://dnt.anac.pt/mapa.html\nCopy.Json file name:", redRisk: false },
           { num: '2', item: "ProCiv (Civil Protection)", action: "Consult to check that there are no emergency response efforts ongoing inside flight areas", redRisk: true },
           { num: '3', item: "Consult NOTAM", action: "Consult active NOTAM’s from NAV.pt", redRisk: true },
           { num: '4', item: "Contact LISBOAMIL to request the activation of flight areas", action: "Active flight areas", redRisk: false },

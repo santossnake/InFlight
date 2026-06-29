@@ -152,7 +152,7 @@ const Ar5NocChecklistRenderer = ({
   progress, 
   inputs, 
   onToggle, 
-  onInputChange 
+  onInputChange
 }: { 
   itemId: string, 
   content: { num: string, item: string, action: string, redRisk: boolean }[], 
@@ -168,14 +168,15 @@ const Ar5NocChecklistRenderer = ({
           <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '50px', textAlign: 'center' }}>Nº</th>
           <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '200px', textAlign: 'left' }}>Item</th>
           <th style={{ padding: '10px', border: '1px solid var(--border-color)', textAlign: 'left' }}>Procedimento / Ação</th>
-          <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '180px', textAlign: 'center' }}>Estado / Valor</th>
+          <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '200px', textAlign: 'center' }}>Estado / Valor</th>
         </tr>
       </thead>
       <tbody>
         {content.map((row, idx) => {
           const isChecked = !!progress[idx];
           const textVal = inputs[idx] || '';
-          const isFilled = row.redRisk ? isChecked : (!!textVal.trim());
+          const isStep1 = itemId === 'ar5-noc-pre-flight' && row.num === '1';
+          const isFilled = isStep1 ? (isChecked && !!textVal.trim()) : (row.redRisk ? isChecked : (!!textVal.trim()));
           
           return (
             <tr key={idx} style={{ 
@@ -195,7 +196,7 @@ const Ar5NocChecklistRenderer = ({
               </td>
               <td style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'center', verticalAlign: 'middle' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'nowrap' }}>
-                  {row.redRisk && (
+                  {(row.redRisk || isStep1) && (
                     <input 
                       type="checkbox" 
                       checked={isChecked}
@@ -208,13 +209,13 @@ const Ar5NocChecklistRenderer = ({
                       }} 
                     />
                   )}
-                  {!row.redRisk && (
+                  {(!row.redRisk || isStep1) && (
                     <input 
                       type="text" 
                       value={textVal}
                       onChange={(e) => onInputChange(itemId, idx, e.target.value)}
-                      maxLength={15}
-                      placeholder="max 15 chars"
+                      maxLength={100}
+                      placeholder={isStep1 ? "Nome do ficheiro" : "max 15 chars"}
                       style={{
                         padding: '4px 6px',
                         fontSize: '0.85em',
@@ -533,6 +534,8 @@ function App() {
     };
   });
 
+  const [jsonFileName, setJsonFileName] = useState('AR5_NOC_Data');
+
   const [fuelLogs, setFuelLogs] = useState<{ zuluTime: string; fuel: number; elapsedMins: number }[]>(() => {
     const saved = localStorage.getItem('fuelLogs');
     return saved ? JSON.parse(saved) : [];
@@ -692,9 +695,14 @@ function App() {
             }
           });
 
+          const customFn = checklistInputs['ar5-noc-pre-flight']?.[1] || '';
+          const finalPdfName = customFn.trim() 
+            ? `${customFn.trim()}.pdf` 
+            : `AR5_NOC_Checklist_${ar5NocResume.aircraftId || 'AR5'}_${ar5NocResume.date || ''}.pdf`;
+
           const opt = {
             margin:       10,
-            filename:     `AR5_NOC_Checklist_${ar5NocResume.aircraftId || 'AR5'}_${ar5NocResume.date || ''}.pdf`,
+            filename:     finalPdfName,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
               scale: 2, 
@@ -952,6 +960,10 @@ function App() {
       const progress = checklistProgress[item.id] || {};
       const inputs = checklistInputs[item.id] || {};
       return list.every((row, index) => {
+        const isStep1 = item.id === 'ar5-noc-pre-flight' && row.num === '1';
+        if (isStep1) {
+          return !!progress[index] && !!inputs[index] && inputs[index].trim().length > 0;
+        }
         if (row.redRisk) {
           return !!progress[index];
         } else {
