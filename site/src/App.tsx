@@ -177,11 +177,11 @@ const Ar5NocChecklistRenderer = ({
           const textVal = inputs[idx] || '';
           const isStep1 = itemId === 'ar5-noc-pre-flight' && row.num === '1';
           const isFilled = isStep1 ? (isChecked && !!textVal.trim()) : (row.redRisk ? isChecked : (!!textVal.trim()));
+          const isTimeField = row.action.includes('Time:') || row.action.includes('__:__');
           
           return (
             <tr key={idx} style={{ 
               backgroundColor: isFilled ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
-              textDecoration: isFilled ? 'line-through' : 'none',
               color: isFilled ? '#888' : 'inherit',
               borderBottom: '1px solid var(--border-color)'
             }}>
@@ -211,11 +211,11 @@ const Ar5NocChecklistRenderer = ({
                   )}
                   {(!row.redRisk || isStep1) && (
                     <input 
-                      type="text" 
+                      type={isTimeField ? "time" : "text"}
                       value={textVal}
                       onChange={(e) => onInputChange(itemId, idx, e.target.value)}
                       maxLength={100}
-                      placeholder={isStep1 ? "Nome do ficheiro" : "max 15 chars"}
+                      placeholder={isStep1 ? "Nome do ficheiro" : (isTimeField ? "" : "max 15 chars")}
                       style={{
                         padding: '4px 6px',
                         fontSize: '0.85em',
@@ -262,7 +262,7 @@ const Ar5NocResumeForm = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '15px', marginBottom: '20px' }}>
         {[
           { label: 'Aircraft ID', field: 'aircraftId', maxLength: 50 },
-          { label: 'Date', field: 'date', maxLength: 50 },
+          { label: 'Date', field: 'date', maxLength: 50, type: 'date' },
           { label: 'fGCS ID/Version', field: 'fgcsId', maxLength: 50 },
           { label: 'Location', field: 'location', maxLength: 50 },
           { label: 'mGCS ID/Version', field: 'mgcsId', maxLength: 50 },
@@ -275,7 +275,7 @@ const Ar5NocResumeForm = ({
           <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
             <input
-              type="text"
+              type={item.type || "text"}
               value={data[item.field] || ''}
               onChange={(e) => updateField(item.field, e.target.value)}
               maxLength={item.maxLength}
@@ -410,15 +410,15 @@ const Ar5NocResumeForm = ({
       {/* Bottom section */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
         {[
-          { label: 'Bottom Date', field: 'bottomDate', maxLength: 50 },
-          { label: 'Bottom Time', field: 'bottomTime', maxLength: 50 },
+          { label: 'Bottom Date', field: 'bottomDate', maxLength: 50, type: 'date' },
+          { label: 'Bottom Time', field: 'bottomTime', maxLength: 50, type: 'time' },
           { label: 'RPIC Print', field: 'bottomRpicPrint', maxLength: 100 },
           { label: 'RPIC Sign', field: 'bottomRpicSign', maxLength: 100 },
         ].map((item) => (
           <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
             <input
-              type="text"
+              type={item.type || "text"}
               value={data[item.field] || ''}
               onChange={(e) => updateField(item.field, e.target.value)}
               maxLength={item.maxLength}
@@ -647,17 +647,22 @@ function App() {
           clone.appendChild(style);
 
           clone.querySelectorAll('.sidebar, .no-print').forEach(el => el.remove());
-          
-          clone.querySelectorAll('input[type="text"]').forEach((input: any) => {
-            const span = document.createElement('span');
-            span.textContent = input.value || ' ';
-            span.style.padding = '2px 4px';
-            span.style.borderBottom = '1px solid #333';
-            span.style.fontSize = '0.95em';
-            span.style.minWidth = '80px';
-            span.style.display = 'inline-block';
-            input.parentNode.replaceChild(span, input);
-          });
+          clone.querySelectorAll('input').forEach((input: any) => {
+             if (input.type === 'checkbox') return;
+             const span = document.createElement('span');
+             let val = input.value || ' ';
+             if (input.type === 'date' && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+               const [yyyy, mm, dd] = val.split('-');
+               val = `${dd}/${mm}/${yyyy}`;
+             }
+             span.textContent = val;
+             span.style.padding = '2px 4px';
+             span.style.borderBottom = '1px solid #333';
+             span.style.fontSize = '0.95em';
+             span.style.minWidth = '80px';
+             span.style.display = 'inline-block';
+             input.parentNode.replaceChild(span, input);
+           });
 
           clone.querySelectorAll('textarea').forEach((textarea: any) => {
             const div = document.createElement('div');
