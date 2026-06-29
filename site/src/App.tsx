@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { guideData, GuideItem } from './data/guideContent'
 import MissionFolder from './components/MissionFolder'
+import html2pdf from 'html2pdf.js'
 import './index.css'
 
 // Image component with Fullscreen and Zoom support
@@ -145,6 +146,296 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
   </div>
 );
 
+const Ar5NocChecklistRenderer = ({ 
+  itemId, 
+  content, 
+  progress, 
+  inputs, 
+  onToggle, 
+  onInputChange 
+}: { 
+  itemId: string, 
+  content: { num: string, item: string, action: string, redRisk: boolean }[], 
+  progress: { [index: number]: boolean },
+  inputs: { [index: number]: string },
+  onToggle: (itemId: string, index: number) => void,
+  onInputChange: (itemId: string, index: number, value: string) => void
+}) => (
+  <div style={{ overflowX: 'auto', margin: '15px 0', maxWidth: '900px' }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em', border: '1px solid var(--border-color)' }}>
+      <thead>
+        <tr style={{ backgroundColor: 'var(--primary-color)', color: 'white' }}>
+          <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '50px', textAlign: 'center' }}>Nº</th>
+          <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '200px', textAlign: 'left' }}>Item</th>
+          <th style={{ padding: '10px', border: '1px solid var(--border-color)', textAlign: 'left' }}>Procedimento / Ação</th>
+          <th style={{ padding: '10px', border: '1px solid var(--border-color)', width: '180px', textAlign: 'center' }}>Estado / Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {content.map((row, idx) => {
+          const isChecked = !!progress[idx];
+          const textVal = inputs[idx] || '';
+          const isFilled = row.redRisk ? isChecked : (!!textVal.trim());
+          
+          return (
+            <tr key={idx} style={{ 
+              backgroundColor: isFilled ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
+              textDecoration: isFilled ? 'line-through' : 'none',
+              color: isFilled ? '#888' : 'inherit',
+              borderBottom: '1px solid var(--border-color)'
+            }}>
+              <td style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'center', fontWeight: 'bold' }}>
+                {row.num}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid var(--border-color)', fontWeight: '500' }}>
+                {row.item}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid var(--border-color)', whiteSpace: 'pre-wrap' }}>
+                {row.action}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'center', verticalAlign: 'middle' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                  {row.redRisk && (
+                    <input 
+                      type="checkbox" 
+                      checked={isChecked}
+                      onChange={() => onToggle(itemId, idx)}
+                      style={{ 
+                        width: '20px', 
+                        height: '20px', 
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }} 
+                    />
+                  )}
+                  {!row.redRisk && (
+                    <input 
+                      type="text" 
+                      value={textVal}
+                      onChange={(e) => onInputChange(itemId, idx, e.target.value)}
+                      maxLength={15}
+                      placeholder="max 15 chars"
+                      style={{
+                        padding: '4px 6px',
+                        fontSize: '0.85em',
+                        width: '120px',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--input-bg, transparent)',
+                        color: 'inherit'
+                      }}
+                    />
+                  )}
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+);
+
+const Ar5NocResumeForm = ({
+  data,
+  onChange
+}: {
+  data: any,
+  onChange: (newData: any) => void
+}) => {
+  const updateField = (field: string, val: any) => {
+    onChange({ ...data, [field]: val });
+  };
+
+  const updateCrew = (idx: number, field: string, val: string) => {
+    const newCrew = [...(data.crew || [])];
+    if (!newCrew[idx]) newCrew[idx] = { name: '', role: '' };
+    newCrew[idx] = { ...newCrew[idx], [field]: val };
+    onChange({ ...data, crew: newCrew });
+  };
+
+  return (
+    <div className="ar5-noc-resume-form" style={{ maxWidth: '900px', margin: '0 auto', padding: '15px', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg, rgba(255,255,255,0.02))' }}>
+      {/* Top 5x2 Fields */}
+      <h3 style={{ color: 'var(--primary-color)', marginBottom: '15px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '5px' }}>Informação Geral</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+        {[
+          { label: 'Aircraft ID', field: 'aircraftId', maxLength: 50 },
+          { label: 'Date', field: 'date', maxLength: 50 },
+          { label: 'fGCS ID/Version', field: 'fgcsId', maxLength: 50 },
+          { label: 'Location', field: 'location', maxLength: 50 },
+          { label: 'mGCS ID/Version', field: 'mgcsId', maxLength: 50 },
+          { label: 'Mission type', field: 'missionType', maxLength: 100 },
+          { label: 'Tracker / DL ID', field: 'trackerId', maxLength: 50 },
+          { label: 'Night / Day', field: 'nightDay', maxLength: 50 },
+          { label: 'SP Control ID', field: 'spControlId', maxLength: 50 },
+          { label: 'RPIC', field: 'rpic', maxLength: 100 },
+        ].map((item) => (
+          <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
+            <input
+              type="text"
+              value={data[item.field] || ''}
+              onChange={(e) => updateField(item.field, e.target.value)}
+              maxLength={item.maxLength}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--input-bg, transparent)',
+                color: 'inherit'
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Crew Table */}
+      <h3 style={{ color: 'var(--primary-color)', marginBottom: '15px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '5px' }}>Flight Crew</h3>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '0.9em', border: '1px solid var(--border-color)' }}>
+        <thead>
+          <tr style={{ backgroundColor: 'var(--primary-color)', color: 'white' }}>
+            <th style={{ padding: '8px', border: '1px solid var(--border-color)', width: '50px', textAlign: 'center' }}>Tripulante</th>
+            <th style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'left' }}>Nome</th>
+            <th style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'left' }}>Função</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array(7).fill(null).map((_, idx) => (
+            <tr key={idx}>
+              <td style={{ padding: '6px', border: '1px solid var(--border-color)', textAlign: 'center', fontWeight: 'bold' }}>{idx + 1}</td>
+              <td style={{ padding: '6px', border: '1px solid var(--border-color)' }}>
+                <input
+                  type="text"
+                  value={data.crew?.[idx]?.name || ''}
+                  onChange={(e) => updateCrew(idx, 'name', e.target.value)}
+                  maxLength={100}
+                  placeholder="Nome do Tripulante"
+                  style={{
+                    width: '100%',
+                    padding: '6px',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: 'inherit'
+                  }}
+                />
+              </td>
+              <td style={{ padding: '6px', border: '1px solid var(--border-color)' }}>
+                <input
+                  type="text"
+                  value={data.crew?.[idx]?.role || ''}
+                  onChange={(e) => updateCrew(idx, 'role', e.target.value)}
+                  maxLength={100}
+                  placeholder="Função (ex: RPIC, OS, External Pilot)"
+                  style={{
+                    width: '100%',
+                    padding: '6px',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: 'inherit'
+                  }}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Flight Resume Parameters */}
+      <h3 style={{ color: 'var(--primary-color)', marginBottom: '15px', borderBottom: '2px solid var(--primary-color)', paddingBottom: '5px' }}>Flight Resume / Parâmetros</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+        {[
+          { label: 'Take-off Direction', field: 'takeoffDir', maxLength: 100 },
+          { label: 'Take-off Wind', field: 'takeoffWind', maxLength: 100 },
+          { label: 'Take-off Weather', field: 'takeoffWeather', maxLength: 200 },
+          { label: 'Take-off Weight', field: 'takeoffWeight', maxLength: 100 },
+          { label: 'Landing Direction', field: 'landingDir', maxLength: 100 },
+          { label: 'Landing Wind', field: 'landingWind', maxLength: 100 },
+          { label: 'Landing Weather', field: 'landingWeather', maxLength: 200 },
+          { label: 'Landing Weight/Fuel', field: 'landingWeightFuel', maxLength: 100 },
+        ].map((item) => (
+          <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
+            <input
+              type="text"
+              value={data[item.field] || ''}
+              onChange={(e) => updateField(item.field, e.target.value)}
+              maxLength={item.maxLength}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--input-bg, transparent)',
+                color: 'inherit'
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Textareas */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
+        {[
+          { label: 'System configuration', field: 'systemConfig', maxLength: 500, rows: 3 },
+          { label: 'Mission Description / Observations', field: 'missionDesc', maxLength: 500, rows: 3 },
+          { label: 'Aircraft Condition', field: 'aircraftCondition', maxLength: 200, rows: 2 },
+          { label: 'Faults Detected', field: 'faultsDetected', maxLength: 300, rows: 2 },
+          { label: 'Safety Occurrences', field: 'safetyOccurrences', maxLength: 300, rows: 2 },
+          { label: 'Bottom Observations', field: 'bottomObservations', maxLength: 500, rows: 3 },
+        ].map((item) => (
+          <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
+            <textarea
+              value={data[item.field] || ''}
+              onChange={(e) => updateField(item.field, e.target.value)}
+              maxLength={item.maxLength}
+              rows={item.rows}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--input-bg, transparent)',
+                color: 'inherit',
+                resize: 'vertical',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+        {[
+          { label: 'Bottom Date', field: 'bottomDate', maxLength: 50 },
+          { label: 'Bottom Time', field: 'bottomTime', maxLength: 50 },
+          { label: 'RPIC Print', field: 'bottomRpicPrint', maxLength: 100 },
+          { label: 'RPIC Sign', field: 'bottomRpicSign', maxLength: 100 },
+        ].map((item) => (
+          <div key={item.field} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{item.label}</label>
+            <input
+              type="text"
+              value={data[item.field] || ''}
+              onChange={(e) => updateField(item.field, e.target.value)}
+              maxLength={item.maxLength}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--input-bg, transparent)',
+                color: 'inherit'
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const TableRenderer = ({ tableData, keyPrefix }: { tableData: any, keyPrefix?: any }) => (
   <div key={keyPrefix} style={{ overflowX: 'auto', margin: '15px 0' }}>
     {tableData.title && <h4 style={{ margin: '10px 0', color: 'var(--primary-color)' }}>{tableData.title}</h4>}
@@ -199,6 +490,7 @@ function App() {
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768)
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('darkMode') === 'true')
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   
   // Endurance Calculator State
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '16')
@@ -221,6 +513,26 @@ function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
+  const [checklistInputs, setChecklistInputs] = useState<{ [itemId: string]: { [index: number]: string } }>(() => {
+    const saved = localStorage.getItem('checklistInputs');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [ar5NocResume, setAr5NocResume] = useState<{ [key: string]: any }>(() => {
+    const saved = localStorage.getItem('ar5NocResume');
+    return saved ? JSON.parse(saved) : {
+      aircraftId: '', date: '', fgcsId: '', location: '', mgcsId: '', missionType: '',
+      trackerId: '', nightDay: '', spControlId: '', rpic: '',
+      crew: Array(7).fill(null).map(() => ({ name: '', role: '' })),
+      takeoffDir: '', takeoffWind: '', takeoffWeather: '', takeoffWeight: '',
+      systemConfig: '', missionDesc: '', landingDir: '', landingWind: '',
+      landingWeather: '', landingWeightFuel: '', aircraftCondition: '',
+      faultsDetected: '', safetyOccurrences: '',
+      bottomObservations: '', bottomRpicPrint: '', bottomRpicSign: '',
+      bottomDate: '', bottomTime: ''
+    };
+  });
+
   const [fuelLogs, setFuelLogs] = useState<{ zuluTime: string; fuel: number; elapsedMins: number }[]>(() => {
     const saved = localStorage.getItem('fuelLogs');
     return saved ? JSON.parse(saved) : [];
@@ -240,6 +552,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem('checklistProgress', JSON.stringify(checklistProgress));
   }, [checklistProgress]);
+
+  useEffect(() => {
+    localStorage.setItem('checklistInputs', JSON.stringify(checklistInputs));
+  }, [checklistInputs]);
+
+  useEffect(() => {
+    localStorage.setItem('ar5NocResume', JSON.stringify(ar5NocResume));
+  }, [ar5NocResume]);
 
   useEffect(() => {
     localStorage.setItem('missionLogs', JSON.stringify(missionLogs));
@@ -269,6 +589,134 @@ function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const exportAr5NocPdf = () => {
+    setIsGeneratingPdf(true);
+  };
+
+  useEffect(() => {
+    if (isGeneratingPdf) {
+      setTimeout(() => {
+        const element = document.querySelector('.main-body');
+        if (element) {
+          const clone = element.cloneNode(true) as HTMLElement;
+          
+          // Copy live input values (text and check states) from page to the clone
+          const origInputs = element.querySelectorAll('input, textarea');
+          const cloneInputs = clone.querySelectorAll('input, textarea');
+          origInputs.forEach((orig: any, i) => {
+            const cloneInput = cloneInputs[i] as any;
+            if (cloneInput && orig) {
+              if (orig.type === 'checkbox') {
+                cloneInput.checked = orig.checked;
+              } else {
+                cloneInput.value = orig.value;
+              }
+            }
+          });
+
+          // Inject page break rules for clean PDF output
+          const style = document.createElement('style');
+          style.textContent = `
+            section {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+              margin-bottom: 25px !important;
+              display: block !important;
+            }
+            tr {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            .ar5-noc-resume-form {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            .tekever-header-box {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+              margin-bottom: 30px !important;
+            }
+            table {
+              page-break-inside: auto !important;
+            }
+          `;
+          clone.appendChild(style);
+
+          clone.querySelectorAll('.sidebar, .no-print').forEach(el => el.remove());
+          
+          clone.querySelectorAll('input[type="text"]').forEach((input: any) => {
+            const span = document.createElement('span');
+            span.textContent = input.value || ' ';
+            span.style.padding = '2px 4px';
+            span.style.borderBottom = '1px solid #333';
+            span.style.fontSize = '0.95em';
+            span.style.minWidth = '80px';
+            span.style.display = 'inline-block';
+            input.parentNode.replaceChild(span, input);
+          });
+
+          clone.querySelectorAll('textarea').forEach((textarea: any) => {
+            const div = document.createElement('div');
+            div.textContent = textarea.value || ' ';
+            div.style.padding = '6px';
+            div.style.border = '1px solid #ddd';
+            div.style.borderRadius = '4px';
+            div.style.minHeight = '40px';
+            div.style.whiteSpace = 'pre-wrap';
+            div.style.fontSize = '0.95em';
+            textarea.parentNode.replaceChild(div, textarea);
+          });
+
+          clone.querySelectorAll('input[type="checkbox"]').forEach((checkbox: any) => {
+            const span = document.createElement('span');
+            span.textContent = checkbox.checked ? ' [✓] ' : ' [ ] ';
+            span.style.fontFamily = 'monospace';
+            span.style.fontWeight = 'bold';
+            span.style.fontSize = '1.2em';
+            checkbox.parentNode.replaceChild(span, checkbox);
+          });
+
+          clone.style.width = '210mm';
+          clone.style.padding = '15mm';
+          clone.style.backgroundColor = 'white';
+          clone.style.color = 'black';
+          clone.style.overflow = 'visible';
+          clone.style.height = 'auto';
+
+          clone.querySelectorAll('*').forEach((el: any) => {
+            el.style.color = 'black';
+            el.style.backgroundColor = 'transparent';
+            if (el.tagName === 'TH') {
+              el.style.backgroundColor = '#f2f2f2';
+            }
+          });
+
+          const opt = {
+            margin:       10,
+            filename:     `AR5_NOC_Checklist_${ar5NocResume.aircraftId || 'AR5'}_${ar5NocResume.date || ''}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+              scale: 2, 
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff'
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['css', 'legacy'] }
+          };
+
+          html2pdf().from(clone).set(opt).save().then(() => {
+            setIsGeneratingPdf(false);
+          }).catch(() => {
+            setIsGeneratingPdf(false);
+          });
+        } else {
+          setIsGeneratingPdf(false);
+        }
+      }, 500);
+    }
+  }, [isGeneratingPdf]);
 
   const activeSection = guideData.find(s => s.id === activeSectionId) || guideData[0]
 
@@ -387,6 +835,16 @@ function App() {
     }
   };
 
+  const handleInputChange = (itemId: string, index: number, value: string) => {
+    setChecklistInputs(prev => ({
+      ...prev,
+      [itemId]: {
+        ...(prev[itemId] || {}),
+        [index]: value.slice(0, 15) // limit to 15 chars
+      }
+    }));
+  };
+
   const resetCurrentChecklists = () => {
     if (activeSectionId === 'MISSION_FOLDER') {
       if (window.confirm('Resetar todos os dados do Mission Folder?')) {
@@ -402,8 +860,26 @@ function App() {
     } else {
       if (window.confirm('Resetar todos os checklists da secção atual?')) {
         const newProgress = { ...checklistProgress };
-        activeSection.items.forEach(item => { delete newProgress[item.id]; });
+        const newInputs = { ...checklistInputs };
+        activeSection.items.forEach(item => { 
+          delete newProgress[item.id]; 
+          delete newInputs[item.id];
+        });
         setChecklistProgress(newProgress);
+        setChecklistInputs(newInputs);
+        if (activeSectionId === 'AR5_NOC') {
+          setAr5NocResume({
+            aircraftId: '', date: '', fgcsId: '', location: '', mgcsId: '', missionType: '',
+            trackerId: '', nightDay: '', spControlId: '', rpic: '',
+            crew: Array(7).fill(null).map(() => ({ name: '', role: '' })),
+            takeoffDir: '', takeoffWind: '', takeoffWeather: '', takeoffWeight: '',
+            systemConfig: '', missionDesc: '', landingDir: '', landingWind: '',
+            landingWeather: '', landingWeightFuel: '', aircraftCondition: '',
+            faultsDetected: '', safetyOccurrences: '',
+            bottomObservations: '', bottomRpicPrint: '', bottomRpicSign: '',
+            bottomDate: '', bottomTime: ''
+          });
+        }
       }
     }
   };
@@ -412,6 +888,18 @@ function App() {
   const resetAllChecklists = () => {
     if (window.confirm('Resetar TODOS os checklists, logs de missão e matriz ORM?')) {
       setChecklistProgress({});
+      setChecklistInputs({});
+      setAr5NocResume({
+        aircraftId: '', date: '', fgcsId: '', location: '', mgcsId: '', missionType: '',
+        trackerId: '', nightDay: '', spControlId: '', rpic: '',
+        crew: Array(7).fill(null).map(() => ({ name: '', role: '' })),
+        takeoffDir: '', takeoffWind: '', takeoffWeather: '', takeoffWeight: '',
+        systemConfig: '', missionDesc: '', landingDir: '', landingWind: '',
+        landingWeather: '', landingWeightFuel: '', aircraftCondition: '',
+        faultsDetected: '', safetyOccurrences: '',
+        bottomObservations: '', bottomRpicPrint: '', bottomRpicSign: '',
+        bottomDate: '', bottomTime: ''
+      });
       setMissionLogs({});
       setFuelInit('16');
       setFuelCurrent('16');
@@ -453,6 +941,24 @@ function App() {
   }
 
   const isItemComplete = (item: GuideItem) => {
+    if (item.type === 'ar5_noc_resume') {
+      const keys = ['aircraftId', 'date', 'fgcsId', 'location', 'mgcsId', 'missionType', 'trackerId', 'nightDay', 'spControlId', 'rpic', 'takeoffDir', 'takeoffWind', 'takeoffWeather', 'takeoffWeight', 'systemConfig', 'missionDesc', 'landingDir', 'landingWind', 'landingWeather', 'landingWeightFuel', 'aircraftCondition', 'faultsDetected', 'safetyOccurrences', 'bottomObservations', 'bottomRpicPrint', 'bottomRpicSign', 'bottomDate', 'bottomTime'];
+      const hasMainData = keys.some(k => !!ar5NocResume[k]?.trim());
+      const hasCrewData = ar5NocResume.crew?.some((c: any) => !!c.name?.trim() || !!c.role?.trim());
+      return hasMainData || hasCrewData;
+    }
+    if (item.type === 'ar5_noc_checklist') {
+      const list = item.content as { num: string, item: string, action: string, redRisk: boolean }[];
+      const progress = checklistProgress[item.id] || {};
+      const inputs = checklistInputs[item.id] || {};
+      return list.every((row, index) => {
+        if (row.redRisk) {
+          return !!progress[index];
+        } else {
+          return !!inputs[index] && inputs[index].trim().length > 0;
+        }
+      });
+    }
     let checklist: string[] | undefined;
     if (item.type === 'checklist') checklist = item.content as string[];
     else if (item.type === 'mixed') checklist = (item.content as any).checklist;
@@ -690,6 +1196,24 @@ function App() {
       />;
     }
 
+    if (item.type === 'ar5_noc_checklist') {
+      return <Ar5NocChecklistRenderer 
+        itemId={item.id} 
+        content={item.content} 
+        progress={checklistProgress[item.id] || {}}
+        inputs={checklistInputs[item.id] || {}}
+        onToggle={handleToggle}
+        onInputChange={handleInputChange}
+      />;
+    }
+
+    if (item.type === 'ar5_noc_resume') {
+      return <Ar5NocResumeForm 
+        data={ar5NocResume}
+        onChange={setAr5NocResume}
+      />;
+    }
+
     if (item.type === 'table') {
       return <TableRenderer tableData={item.content} />;
     }
@@ -811,6 +1335,7 @@ function App() {
           else if (section.id === 'HANDOVER_TAKEOVER') { sectionColor = '#f57f17'; activeBg = '#ffea00'; activeTextColor = 'black'; }
           else if (section.id === 'CRASH_RESPONSE') { sectionColor = '#4e342e'; activeBg = '#d84315'; activeTextColor = 'white'; }
           else if (section.id === 'MISSION_FOLDER') { sectionColor = '#6a1b9a'; activeBg = '#ba68c8'; activeTextColor = 'white'; }
+          else if (section.id === 'AR5_NOC') { sectionColor = '#1a237e'; activeBg = '#3f51b5'; activeTextColor = 'white'; }
 
           const isActive = activeSectionId === section.id;
           return (
@@ -912,11 +1437,104 @@ function App() {
               flightTotal={getDiffTime(missionLogs['atd'] || '', missionLogs['ata'])}
             />
           ) : (
-            activeSection.items.map((item) => (
+            <div>
+              {activeSectionId === 'AR5_NOC' && (
+                <div style={{ padding: '20px 0 10px 0' }}>
+                  {/* Export Button */}
+                  <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '15px' }}>
+                    <button 
+                      onClick={exportAr5NocPdf} 
+                      style={{ 
+                        padding: '8px 16px', 
+                        backgroundColor: '#1b5e20', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '4px', 
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: 'bold',
+                        fontSize: '0.95em',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Exportar Checklist AR5 NOC (PDF)
+                    </button>
+                  </div>
+
+                  {/* Tekever Header layout */}
+                  <div className="tekever-header-box" style={{ 
+                    display: 'flex', 
+                    border: '1.5px solid #000', 
+                    fontFamily: 'Arial, sans-serif',
+                    color: '#000',
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ 
+                      flex: '1', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      padding: '12px 15px',
+                      borderRight: '1.5px solid #000',
+                      minWidth: '120px',
+                      backgroundColor: '#fff'
+                    }}>
+                      <span style={{ fontSize: '1.8em', fontWeight: '900', color: '#d32f2f', letterSpacing: '1px' }}>TEKEVER</span>
+                    </div>
+                    <div style={{ 
+                      flex: '2.5', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      padding: '10px',
+                      borderRight: '1.5px solid #000',
+                      textAlign: 'center',
+                      backgroundColor: '#fff'
+                    }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '0.5px' }}>Normal Operations Checklist</div>
+                      <div style={{ fontSize: '0.9em', fontWeight: 'bold', marginTop: '2px' }}>TEKEVER AR5 (MK2.3)</div>
+                    </div>
+                    <div style={{ 
+                      flex: '1.5', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      fontSize: '0.85em',
+                      padding: '8px 12px',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      backgroundColor: '#fff'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ccc', paddingBottom: '2px' }}>
+                        <span style={{ fontWeight: 'bold' }}>Version:</span>
+                        <span>12</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ccc', paddingBottom: '2px' }}>
+                        <span style={{ fontWeight: 'bold' }}>Date:</span>
+                        <span>08-Oct-2024</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontWeight: 'bold' }}>Reference:</span>
+                        <span style={{ fontSize: '0.95em' }}>TAS-AR5-ETN-009_00</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeSection.items.map((item) => (
               <section key={item.id} id={item.id} ref={el => contentRefs.current[item.id] = el} style={{ padding: '30px 0', borderBottom: '1px solid var(--border-color)' }}>
                 <h2 style={{ color: 'var(--primary-color)', marginBottom: '15px', fontSize: '1.5em', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {item.title}
-                  {(item.type === 'checklist' || item.type === 'mixed') && (
+                  {(item.type === 'checklist' || item.type === 'mixed' || item.type === 'ar5_noc_checklist') && (
                     <div className="no-print" style={{ display: 'inline-flex', gap: '5px', marginLeft: '15px' }}>
                       <button 
                         onClick={() => {
@@ -929,13 +1547,20 @@ function App() {
                               } else if (item.type === 'mixed') {
                                 checklist = (item.content as any).checklist;
                               }
-                              if (checklist) {
+                              
+                              if (item.type === 'ar5_noc_checklist') {
+                                const itemProgress = { ...(next[item.id] || {}) };
+                                (item.content as any[]).forEach((_, index) => {
+                                  itemProgress[index] = true;
+                                });
+                                next[item.id] = itemProgress;
+                              } else if (checklist) {
                                 const itemProgress = { ...(next[item.id] || {}) };
                                 checklist.forEach((line, index) => {
-                                  const isSpecialLine = !line.trim() || line.startsWith('WARNING:') || line.startsWith('CAUTION:') || line.startsWith('NOTE:') || line.startsWith('---');
-                                  if (!isSpecialLine) {
-                                    itemProgress[index] = true;
-                                  }
+                                    const isSpecialLine = !line.trim() || line.startsWith('WARNING:') || line.startsWith('CAUTION:') || line.startsWith('NOTE:') || line.startsWith('---');
+                                    if (!isSpecialLine) {
+                                      itemProgress[index] = true;
+                                    }
                                 });
                                 next[item.id] = itemProgress;
                               }
@@ -973,6 +1598,11 @@ function App() {
                               delete next[item.id];
                               return next;
                             });
+                            setChecklistInputs(prev => {
+                              const next = { ...prev };
+                              delete next[item.id];
+                              return next;
+                            });
                           }
                         }}
                         style={{ 
@@ -1004,6 +1634,8 @@ function App() {
                 <div className="content-render">{renderContent(item)}</div>
               </section>
             ))
+            }
+            </div>
           )}
         </main>
       </div>
