@@ -1,4 +1,4 @@
-export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'MISSION_FOLDER' | 'COMUNICATIONS' | 'AR5_NOC';
+export type SectionId = 'ENDURANCE' | 'MISSION_PLANNING' | 'EMERGENCY_CHECKLIST' | 'NORMAL_PROCEDURES' | 'SENSOR_OPERATOR' | 'HANDOVER_TAKEOVER' | 'CRASH_RESPONSE' | 'MISSION_FOLDER' | 'COMUNICATIONS' | 'AR5_NOC' | 'BAROMETRIC_CALC';
 
 export interface GuideItem {
   id: string;
@@ -1974,11 +1974,11 @@ Respostas/Ações Comuns:
         type: 'ar5_noc_checklist',
         content: [
           { num: '0', item: "Daily Briefing / I’M SAFE", action: "Conducting the Daily Briefing and the I'M SAFE Procedure", redRisk: false },
-          { num: '1', item: "UAS GEO ZONES (ANAC)", action: "Consult to check that there are no conflict areas https://dnt.anac.pt/mapa.html\nCopy.Json file name:", redRisk: false },
+          { num: '1', item: "UAS GEO ZONES (ANAC)", action: "Consult to check that there are no conflict areas https://dnt.anac.pt/mapa.html\nCopy.Json file name:", redRisk: true },
           { num: '2', item: "ProCiv (Civil Protection)", action: "Consult to check that there are no emergency response efforts ongoing inside flight areas", redRisk: true },
           { num: '3', item: "Consult NOTAM", action: "Consult active NOTAM’s from NAV.pt", redRisk: true },
           { num: '4', item: "Contact LISBOAMIL to request the activation of flight areas", action: "Active flight areas", redRisk: false },
-          { num: '5', item: "When activating Areas or Corridors request the assignment of a specific transponder code", action: "Assigned transponder code", redRisk: false },
+          { num: '5', item: "When activating Areas or Corridors request the assignment of a specific transponder code", action: "Assigned transponder code", redRisk: true },
           { num: '6', item: "Pre-Delivery Inspection", action: "Complete\nObservations:", redRisk: true },
           { num: '7', item: "Remote ID", action: "Switch ON. Check that everything is OK.", redRisk: true },
           { num: '8', item: "Data Link & Tracker", action: "ON", redRisk: true },
@@ -1988,10 +1988,10 @@ Respostas/Ações Comuns:
           { num: '12', item: "Coms Check", action: "OK", redRisk: true },
           { num: '13', item: "EPU and Wheel Chocks", action: "Check EPU ON and Chocks fitted", redRisk: true },
           { num: '14a', item: "Technician Handover: Aircraft OK", action: "Aircraft OK", redRisk: true },
-          { num: '14b', item: "Technician Handover: Fuel Quantity", action: "Ask MT & Log (L)", redRisk: false },
-          { num: '14c', item: "Technician Handover: Take Off Weight", action: "Ask MT & Log (Kg)", redRisk: false },
+          { num: '14b', item: "Technician Handover: Fuel Quantity", action: "Ask MT & Log (L)", redRisk: true },
+          { num: '14c', item: "Technician Handover: Take Off Weight", action: "Ask MT & Log (Kg)", redRisk: true },
           { num: '15a', item: "SPC Checklist: Complete", action: "Complete", redRisk: true },
-          { num: '15b', item: "SPC Checklist: Configuration Check", action: "Correct Model, Trims, Screen locked, battery voltage (V)", redRisk: false },
+          { num: '15b', item: "SPC Checklist: Configuration Check", action: "Correct Model, Trims, Screen locked, battery voltage (V)", redRisk: true },
           { num: '16a', item: "Aircraft Level: Pitch", action: "+- 5 degrees pitch", redRisk: true },
           { num: '16b', item: "Aircraft Level: Roll", action: "+-5 degrees roll", redRisk: true },
           { num: '17', item: "Pitot Cover", action: "Fitted", redRisk: true },
@@ -2009,8 +2009,8 @@ Respostas/Ações Comuns:
           { num: '27a', item: "Gyro: Gyro X", action: "AR5imu1 Gyro X and AR5imu2 Gyro X (-100:100)", redRisk: true },
           { num: '27b', item: "Gyro: Gyro Y", action: "AR5imu1 Gyro Y and AR5imu2 Gyro Y (-100:100)", redRisk: true },
           { num: '27c', item: "Gyro: Gyro Z", action: "AR5imu1 Gyro Z and AR5imu2 Gyro Z (-100:100)", redRisk: true },
-          { num: '28a', item: "Battery Voltage: GPU Critical", action: "GPU Critical battery voltage > 24500 V (V)", redRisk: false },
-          { num: '28b', item: "Battery Voltage: GPU Non-Critical", action: "GPU NON critical battery voltage > 24500 V (V)", redRisk: false },
+          { num: '28a', item: "Battery Voltage: GPU Critical", action: "GPU Critical battery voltage > 24500 V (V)", redRisk: true },
+          { num: '28b', item: "Battery Voltage: GPU Non-Critical", action: "GPU NON critical battery voltage > 24500 V (V)", redRisk: true },
           { num: '29', item: "GPS1 (EMI check)", action: "Hdop<1, 3DFix & sat>14", redRisk: true },
           { num: '30', item: "GPS2 (EMI check)", action: "Hdop<1, 3DFix & sat>14", redRisk: true },
           { num: '31', item: "SPC Range Check", action: "Clear to perform range check", redRisk: true },
@@ -2030,15 +2030,15 @@ Respostas/Ações Comuns:
           { num: '42', item: "ATLAS", action: "Start mission exporter stream and create mission on ATLAS", redRisk: true },
           { num: '43', item: "Radar", action: "ON & Standby mode", redRisk: true },
           { num: '44', item: "SATCOM-B", action: "100%", redRisk: true },
-          { num: '45', item: "Remaining fuel (sensor)", action: "Check and Log value (L)", redRisk: false },
-          { num: '46', item: "Initial fuel level", action: "Input & Log value (L)", redRisk: false },
+          { num: '45', item: "Remaining fuel (sensor)", action: "Check and Log value (L)", redRisk: true },
+          { num: '46', item: "Initial fuel level", action: "Input & Log value (L)", redRisk: true },
           { num: '47', item: "Parameters", action: "Refresh", redRisk: true },
           { num: '48', item: "GROUND_STEER_ALT", action: "VALUE 5", redRisk: true },
           { num: '49', item: "ALT_HOLD_RTL", action: "VALUE -1", redRisk: true },
           { num: '50', item: "TRIM_ARSPD_CM", action: "VALUE: 2700 <150kg / 2800 >150kg / 2900 >165kg", redRisk: false },
           { num: '51', item: "ARSPD_PRIMARY", action: "VALUE 0", redRisk: true },
           { num: '52', item: "Airspeed", action: "0<VALUE<10", redRisk: true },
-          { num: '53', item: "Barometer", action: "Value= (mBar)", redRisk: false },
+          { num: '53', item: "Barometer", action: "Value= (mBar)", redRisk: true },
           { num: '54', item: "Lidar distance", action: "Start graph, Check value>0 and within ] 0 : 3 ]", redRisk: false },
           { num: '55', item: "Mode FBWA", action: "Change", redRisk: true },
           { num: '56', item: "Roll Left", action: "Check Left Aileron Down / Right Aileron Up / Lidar Increase / Instruments", redRisk: true },
@@ -2071,7 +2071,7 @@ Respostas/Ações Comuns:
           { num: '76', item: "Throttle", action: "Idle", redRisk: true },
           { num: '77', item: "Ignition", action: "ON", redRisk: true },
           { num: '78', item: "Brakes", action: "ON", redRisk: true },
-          { num: '79', item: "Startup #1 & #2", action: "Time: __:__", redRisk: false },
+          { num: '79', item: "Startup #1 & #2", action: "Time: __:__", redRisk: true },
           { num: '80', item: "Engine Warm Up", action: "Approx. 2000RPM", redRisk: true },
           { num: '81', item: "Engine Status", action: "Check Engine Sensors Alive and Plausible", redRisk: true },
           { num: '82', item: "Engine Temperature", action: "Check >=100°C #1 & #2", redRisk: false },
@@ -2104,7 +2104,7 @@ Respostas/Ações Comuns:
           { num: '101', item: "Request Take-off", action: "Permission Granted", redRisk: true },
           { num: '102', item: "Time info panel", action: "Start Mission", redRisk: true },
           { num: '103', item: "Engines", action: "Clear Engines", redRisk: true },
-          { num: '104', item: "Take-off", action: "Time: __:__", redRisk: false },
+          { num: '104', item: "Take-off", action: "Time: __:__", redRisk: true },
           { num: '105', item: "Take-off Complete", action: "General Status OK", redRisk: true },
           { num: '106', item: "Transit Corridor Payload SURVEY", action: "Use GIMBAL optical sensor to search for gatherings of people, along the transit corridor. Record and store the footage", redRisk: false },
           { num: '107', item: "Change THR_MIN", action: "Change THR_MIN to 30%", redRisk: true },
@@ -2117,8 +2117,14 @@ Respostas/Ações Comuns:
         ]
       },
       {
+        id: 'ar5-noc-hourly',
+        title: '2. FLIGHT CHECKS (HOURLY)',
+        type: 'ar5_noc_hourly',
+        content: {}
+      },
+      {
         id: 'ar5-noc-pre-landing',
-        title: '2. PRE-LANDING',
+        title: '3. PRE-LANDING',
         type: 'ar5_noc_checklist',
         content: [
           { num: '1', item: "ProCiv (Civil Protection)", action: "Consult to check that there are no emergency response efforts ongoing inside flight areas", redRisk: true },
@@ -2136,22 +2142,22 @@ Respostas/Ações Comuns:
           { num: '13', item: "Gimbal", action: "Check landing gear & protect", redRisk: true },
           { num: '14', item: "Clearance", action: "Permission to land", redRisk: true },
           { num: '15', item: "GCS Warnings", action: "Set Altitude Warning OFF", redRisk: true },
-          { num: '16', item: "Landing", action: "Time: __:__", redRisk: false },
+          { num: '16', item: "Landing", action: "Time: __:__", redRisk: true },
           { num: '17', item: "Vacate", action: "Runway vacated", redRisk: true },
           { num: '18', item: "Strobes", action: "OFF", redRisk: true },
           { num: '19', item: "Request taxi", action: "Permission granted", redRisk: true },
           { num: '20', item: "Satcom service", action: "OFF", redRisk: true },
           { num: '21', item: "Transponder", action: "Set Standby then switch OFF", redRisk: true },
-          { num: '22', item: "Engine Off", action: "Time: __:__", redRisk: false }
+          { num: '22', item: "Engine Off", action: "Time: __:__", redRisk: true }
         ]
       },
       {
         id: 'ar5-noc-post-flight',
-        title: '3. POST-FLIGHT',
+        title: '4. POST-FLIGHT',
         type: 'ar5_noc_checklist',
         content: [
-          { num: '23', item: "Remaining fuel (sensor)", action: "GCS front panel (L)", redRisk: false },
-          { num: '24', item: "Remaining fuel (integrated)", action: "Platform status (L)", redRisk: false },
+          { num: '23', item: "Remaining fuel (sensor)", action: "GCS front panel (L)", redRisk: true },
+          { num: '24', item: "Remaining fuel (integrated)", action: "Platform status (L)", redRisk: true },
           { num: '25', item: "EPU", action: "Connected", redRisk: true },
           { num: '26', item: "Battery status", action: "Check external and <27V", redRisk: true },
           { num: '27', item: "Lights", action: "Nav and land OFF", redRisk: true },
@@ -2168,6 +2174,21 @@ Respostas/Ações Comuns:
           { num: '37', item: "Remote ID", action: "OFF", redRisk: true },
           { num: '38', item: "Aircraft OFF", action: "Critical & Non-Critical", redRisk: true }
         ]
+      }
+    ]
+  },
+  {
+    id: 'BAROMETRIC_CALC',
+    label: 'BAROMETRIC CALC',
+    title: 'Calculador de Altitude Barométrica',
+    items: [
+      {
+        id: 'baro-calc',
+        title: 'BAROMETRIC CALCULATOR',
+        type: 'mixed',
+        content: {
+          text: 'Esta secção permite calcular a altitude GPS a voar com base nas leituras barométricas e QNH pretendido.'
+        }
       }
     ]
   }

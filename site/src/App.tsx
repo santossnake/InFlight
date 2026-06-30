@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { guideData, GuideItem } from './data/guideContent'
 import MissionFolder from './components/MissionFolder'
+import { BarometricCalculator } from './components/BarometricCalculator'
+import { FlightHourlyChecks } from './components/FlightHourlyChecks'
 import html2pdf from 'html2pdf.js'
 import './index.css'
 
@@ -146,6 +148,24 @@ const ChecklistRenderer = ({ itemId, content, progress, onToggle }: {
   </div>
 );
 
+const rowHasTextField = (row: { item: string, action: string }) => {
+  const act = row.action.toLowerCase();
+  const itm = row.item.toLowerCase();
+  return itm.includes('observations') ||
+         act.includes('observations:') ||
+         act.includes('log') ||
+         act.includes('value') ||
+         act.includes('time') ||
+         act.includes('rpm') ||
+         act.includes('__') ||
+         act.includes('code') ||
+         act.includes('(l)') ||
+         act.includes('(kg)') ||
+         act.includes('(v)') ||
+         act.includes('(mbar)') ||
+         act.includes('>>');
+};
+
 const Ar5NocChecklistRenderer = ({ 
   itemId, 
   content, 
@@ -175,8 +195,10 @@ const Ar5NocChecklistRenderer = ({
         {content.map((row, idx) => {
           const isChecked = !!progress[idx];
           const textVal = inputs[idx] || '';
-          const isStep1 = itemId === 'ar5-noc-pre-flight' && row.num === '1';
-          const isFilled = isStep1 ? (isChecked && !!textVal.trim()) : (row.redRisk ? isChecked : (!!textVal.trim()));
+          const hasText = rowHasTextField(row);
+          const isFilled = (row.redRisk && hasText)
+            ? (isChecked && !!textVal.trim())
+            : (row.redRisk ? isChecked : !!textVal.trim());
           const isTimeField = row.action.includes('Time:') || row.action.includes('__:__');
           
           return (
@@ -196,7 +218,7 @@ const Ar5NocChecklistRenderer = ({
               </td>
               <td style={{ padding: '8px', border: '1px solid var(--border-color)', textAlign: 'center', verticalAlign: 'middle' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'nowrap' }}>
-                  {(row.redRisk || isStep1) && (
+                  {row.redRisk && (
                     <input 
                       type="checkbox" 
                       checked={isChecked}
@@ -209,13 +231,13 @@ const Ar5NocChecklistRenderer = ({
                       }} 
                     />
                   )}
-                  {(!row.redRisk || isStep1) && (
+                  {(!row.redRisk || hasText) && (
                     <input 
                       type={isTimeField ? "time" : "text"}
                       value={textVal}
                       onChange={(e) => onInputChange(itemId, idx, e.target.value)}
                       maxLength={100}
-                      placeholder={isStep1 ? "Nome do ficheiro" : (isTimeField ? "" : "max 15 chars")}
+                      placeholder={isTimeField ? "" : "max 15 chars"}
                       style={{
                         padding: '4px 6px',
                         fontSize: '0.85em',
@@ -494,11 +516,18 @@ function App() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   
   // Endurance Calculator State
+  const [enduranceTab, setEnduranceTab] = useState<'ogs42' | 'ar5'>((localStorage.getItem('enduranceTab') as 'ogs42' | 'ar5') || 'ogs42')
   const [fuelInit, setFuelInit] = useState<string>(localStorage.getItem('fuelInit') || '16')
   const [fuelCurrent, setFuelCurrent] = useState<string>(localStorage.getItem('fuelCurrent') || '16')
   const [gs, setGs] = useState<string>(localStorage.getItem('gs') || '50')
   const [distHome, setDistHome] = useState<string>(localStorage.getItem('distHome') || '10')
   const [engineOnManual, setEngineOnManual] = useState<string>('')
+  
+  // Barometric Calculator State
+  const [baroGpsAlt, setBaroGpsAlt] = useState<string>(localStorage.getItem('baroGpsAlt') || '3000')
+  const [baroAirPress, setBaroAirPress] = useState<string>(localStorage.getItem('baroAirPress') || '1013')
+  const [baroTargetQnh, setBaroTargetQnh] = useState<string>(localStorage.getItem('baroTargetQnh') || '1013')
+  const [baroTargetBaroAlt, setBaroTargetBaroAlt] = useState<string>(localStorage.getItem('baroTargetBaroAlt') || '3000')
   const [editingTimer, setEditingTimer] = useState<{ id: string, label: string } | null>(null)
   const [modalValue, setModalValue] = useState('')
   const [editingFuelLogIndex, setEditingFuelLogIndex] = useState<number | null>(null)
@@ -535,6 +564,25 @@ function App() {
   });
 
   const [jsonFileName, setJsonFileName] = useState('AR5_NOC_Data');
+
+  const [hourlyColumns, setHourlyColumns] = useState<string[]>(() => {
+    const saved = localStorage.getItem('hourlyColumns');
+    return saved ? JSON.parse(saved) : ['Engine Start', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'Land'];
+  });
+
+  const [hourlyGrid, setHourlyGrid] = useState<{ [col: string]: { [row: string]: any } }>(() => {
+    const saved = localStorage.getItem('hourlyGrid');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [hourlyActiveOverride, setHourlyActiveOverride] = useState<string | null>(() => {
+    return localStorage.getItem('hourlyActiveOverride');
+  });
+
+  const [pilotHandoverEntries, setPilotHandoverEntries] = useState<any[]>(() => {
+    const saved = localStorage.getItem('pilotHandoverEntries');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const [fuelLogs, setFuelLogs] = useState<{ zuluTime: string; fuel: number; elapsedMins: number }[]>(() => {
     const saved = localStorage.getItem('fuelLogs');
@@ -577,6 +625,87 @@ function App() {
     localStorage.setItem('gs', gs);
     localStorage.setItem('distHome', distHome);
   }, [fuelInit, fuelCurrent, gs, distHome]);
+
+  useEffect(() => {
+    localStorage.setItem('baroGpsAlt', baroGpsAlt);
+    localStorage.setItem('baroAirPress', baroAirPress);
+    localStorage.setItem('baroTargetQnh', baroTargetQnh);
+    localStorage.setItem('baroTargetBaroAlt', baroTargetBaroAlt);
+  }, [baroGpsAlt, baroAirPress, baroTargetQnh, baroTargetBaroAlt]);
+
+  useEffect(() => {
+    localStorage.setItem('hourlyColumns', JSON.stringify(hourlyColumns));
+  }, [hourlyColumns]);
+
+  useEffect(() => {
+    localStorage.setItem('hourlyGrid', JSON.stringify(hourlyGrid));
+  }, [hourlyGrid]);
+
+  useEffect(() => {
+    if (hourlyActiveOverride) {
+      localStorage.setItem('hourlyActiveOverride', hourlyActiveOverride);
+    } else {
+      localStorage.removeItem('hourlyActiveOverride');
+    }
+  }, [hourlyActiveOverride]);
+
+  useEffect(() => {
+    localStorage.setItem('pilotHandoverEntries', JSON.stringify(pilotHandoverEntries));
+  }, [pilotHandoverEntries]);
+
+  useEffect(() => {
+    setHourlyGrid(prev => {
+      const next = { ...prev };
+      let changed = false;
+
+      // Sync Engine Start schedule
+      if (missionLogs['eng-on']) {
+        if (!next['Engine Start']) next['Engine Start'] = {};
+        if (next['Engine Start']['schedule'] !== missionLogs['eng-on']) {
+          next['Engine Start'] = { ...next['Engine Start'], schedule: missionLogs['eng-on'] };
+          changed = true;
+        }
+      }
+
+      // Sync ATD to Hour 1 schedule
+      if (missionLogs['atd']) {
+        if (!next['1']) next['1'] = {};
+        if (next['1']['schedule'] !== missionLogs['atd']) {
+          next['1'] = { ...next['1'], schedule: missionLogs['atd'] };
+          changed = true;
+        }
+
+        // Calculate Hour 2 to 12 automatically based on ATD + (N-1) hours
+        const [atdHrs, atdMins] = missionLogs['atd'].split(':').map(Number);
+        if (!isNaN(atdHrs) && !isNaN(atdMins)) {
+          hourlyColumns.forEach(col => {
+            const hourNum = parseInt(col);
+            if (!isNaN(hourNum) && hourNum > 1) {
+              const dateObj = new Date();
+              dateObj.setHours(atdHrs + (hourNum - 1), atdMins, 0, 0);
+              const calculatedTime = dateObj.getHours().toString().padStart(2, '0') + ':' + dateObj.getMinutes().toString().padStart(2, '0');
+              if (!next[col]) next[col] = {};
+              if (next[col]['schedule'] !== calculatedTime) {
+                next[col] = { ...next[col], schedule: calculatedTime };
+                changed = true;
+              }
+            }
+          });
+        }
+      }
+
+      // Sync ATA to Land schedule
+      if (missionLogs['ata']) {
+        if (!next['Land']) next['Land'] = {};
+        if (next['Land']['schedule'] !== missionLogs['ata']) {
+          next['Land'] = { ...next['Land'], schedule: missionLogs['ata'] };
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [missionLogs, hourlyColumns]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -685,12 +814,16 @@ function App() {
             checkbox.parentNode.replaceChild(span, checkbox);
           });
 
+          clone.style.position = 'absolute';
+          clone.style.top = '-9999px';
+          clone.style.left = '-9999px';
           clone.style.width = '210mm';
           clone.style.padding = '15mm';
           clone.style.backgroundColor = 'white';
           clone.style.color = 'black';
           clone.style.overflow = 'visible';
           clone.style.height = 'auto';
+          document.body.appendChild(clone);
 
           clone.querySelectorAll('*').forEach((el: any) => {
             el.style.color = 'black';
@@ -720,8 +853,10 @@ function App() {
           };
 
           html2pdf().from(clone).set(opt).save().then(() => {
+            if (clone.parentNode) document.body.removeChild(clone);
             setIsGeneratingPdf(false);
           }).catch(() => {
+            if (clone.parentNode) document.body.removeChild(clone);
             setIsGeneratingPdf(false);
           });
         } else {
@@ -960,16 +1095,20 @@ function App() {
       const hasCrewData = ar5NocResume.crew?.some((c: any) => !!c.name?.trim() || !!c.role?.trim());
       return hasMainData || hasCrewData;
     }
+    if (item.type === 'ar5_noc_hourly') {
+      return Object.values(hourlyGrid).some(colData => 
+        Object.values(colData).some(val => val === true || (typeof val === 'string' && val.trim().length > 0))
+      );
+    }
     if (item.type === 'ar5_noc_checklist') {
       const list = item.content as { num: string, item: string, action: string, redRisk: boolean }[];
       const progress = checklistProgress[item.id] || {};
       const inputs = checklistInputs[item.id] || {};
       return list.every((row, index) => {
-        const isStep1 = item.id === 'ar5-noc-pre-flight' && row.num === '1';
-        if (isStep1) {
+        const hasText = rowHasTextField(row);
+        if (row.redRisk && hasText) {
           return !!progress[index] && !!inputs[index] && inputs[index].trim().length > 0;
-        }
-        if (row.redRisk) {
+        } else if (row.redRisk) {
           return !!progress[index];
         } else {
           return !!inputs[index] && inputs[index].trim().length > 0;
@@ -989,7 +1128,24 @@ function App() {
   };
 
   const renderContent = (item: GuideItem) => {
+    if (item.type === 'ar5_noc_hourly') {
+      return (
+        <FlightHourlyChecks 
+          hourlyColumns={hourlyColumns}
+          setHourlyColumns={setHourlyColumns}
+          hourlyGrid={hourlyGrid}
+          setHourlyGrid={setHourlyGrid}
+          hourlyActiveOverride={hourlyActiveOverride}
+          setHourlyActiveOverride={setHourlyActiveOverride}
+          pilotHandoverEntries={pilotHandoverEntries}
+          setPilotHandoverEntries={setPilotHandoverEntries}
+          atdTime={missionLogs['atd']}
+          ataTime={missionLogs['ata']}
+        />
+      );
+    }
     if (item.id === 'endurance-calc') {
+      const reserve = enduranceTab === 'ogs42' ? 2.5 : 8.0;
       const fInit = parseFloat(fuelInit) || 0;
       const fCurr = parseFloat(fuelCurrent) || 0;
       const groundSpeed = parseFloat(gs) || 0;
@@ -1011,7 +1167,7 @@ function App() {
         burnRateCalculated = (fuelUsed / timeData.totalMins) * 60;
         
         if (burnRateCalculated > 0.1) {
-          const fuelAvailableForBingo = Math.max(0, fCurr - 2.5);
+          const fuelAvailableForBingo = Math.max(0, fCurr - reserve);
           const totalEnduranceMins = (fuelAvailableForBingo / burnRateCalculated) * 60;
           hours = Math.floor(totalEnduranceMins / 60);
           mins = Math.round(totalEnduranceMins % 60);
@@ -1022,7 +1178,7 @@ function App() {
             fuelAtHome = fCurr - ((timeToHomeMins / 60) * burnRateCalculated);
             
             const fuelNeededForTrip = (timeToHomeMins / 60) * burnRateCalculated;
-            const fuelAvailableOnStation = fCurr - 2.5 - fuelNeededForTrip;
+            const fuelAvailableOnStation = fCurr - reserve - fuelNeededForTrip;
             
             // Allow negative value to show how much time has passed since bingo
             timeRemainingOnStationMins = (fuelAvailableOnStation / burnRateCalculated) * 60;
@@ -1046,6 +1202,46 @@ function App() {
 
       return (
         <div style={{ backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          {/* TAB BAR FOR AIRCRAFT MODEL */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+            <button 
+              onClick={() => {
+                setEnduranceTab('ogs42');
+                localStorage.setItem('enduranceTab', 'ogs42');
+                if (fuelInit === '80' || fuelInit === '80.0' || fuelInit === '80L') {
+                  setFuelInit('16');
+                  setFuelCurrent('16');
+                }
+              }}
+              style={{
+                flex: 1, padding: '8px', borderRadius: '4px', border: 'none',
+                backgroundColor: enduranceTab === 'ogs42' ? 'var(--primary-color)' : 'rgba(0,0,0,0.05)',
+                color: enduranceTab === 'ogs42' ? 'white' : 'inherit',
+                fontWeight: 'bold', cursor: 'pointer'
+              }}
+            >
+              OGS42 (16L, 2.5L Res)
+            </button>
+            <button 
+              onClick={() => {
+                setEnduranceTab('ar5');
+                localStorage.setItem('enduranceTab', 'ar5');
+                if (fuelInit === '16' || fuelInit === '16.0') {
+                  setFuelInit('80');
+                  setFuelCurrent('80');
+                }
+              }}
+              style={{
+                flex: 1, padding: '8px', borderRadius: '4px', border: 'none',
+                backgroundColor: enduranceTab === 'ar5' ? 'var(--primary-color)' : 'rgba(0,0,0,0.05)',
+                color: enduranceTab === 'ar5' ? 'white' : 'inherit',
+                fontWeight: 'bold', cursor: 'pointer'
+              }}
+            >
+              AR5 (80L, 8.0L Res)
+            </button>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.75em', marginBottom: '5px', opacity: 0.8 }}>INITIAL FUEL (L)</label>
@@ -1141,7 +1337,7 @@ function App() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
             <div style={{ padding: '20px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>TOTAL ENDURANCE (TO 2.5L)</div>
+              <div style={{ fontSize: '0.85em', opacity: 0.9, letterSpacing: '1px', marginBottom: '5px' }}>TOTAL ENDURANCE (TO {reserve}L)</div>
               <div style={{ fontSize: '3em', fontWeight: 'bold' }}>{burnRateCalculated > 0.1 ? `${hours}h ${mins}m` : '--:--'}</div>
             </div>
             
@@ -1150,7 +1346,7 @@ function App() {
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>TOTAL RANGE (GS)</div>
                 <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{range > 0 ? `${range.toFixed(0)} NM` : '---'}</div>
               </div>
-              <div style={{ padding: '15px', backgroundColor: fuelAtHome < 2.5 ? 'var(--accent-color)' : '#2e7d32', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ padding: '15px', backgroundColor: fuelAtHome < reserve ? 'var(--accent-color)' : '#2e7d32', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>FUEL AT HOME</div>
                 <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>{fuelAtHome !== 0 ? `${fuelAtHome.toFixed(1)} L` : '---'}</div>
               </div>
@@ -1174,7 +1370,7 @@ function App() {
               </div>
             </div>
 
-            <div style={{ padding: '15px', backgroundColor: timeRemainingOnStationMins < 5 ? 'var(--accent-color)' : '#546e7a', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+            <div style={{ padding: '15px', backgroundColor: timeRemainingOnStationMins < 15 ? 'var(--accent-color)' : '#546e7a', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontSize: '0.7em', opacity: 0.9, marginBottom: '5px' }}>REMAINING ON STATION</div>
               <div style={{ fontSize: '1.8em', fontWeight: 'bold' }}>
                 {burnRateCalculated > 0.1 ? formatDuration(timeRemainingOnStationMins) : '00:00'}
@@ -1276,7 +1472,7 @@ function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.8em', cursor: 'pointer' }}>☰</button>
           <div style={{ lineHeight: 1.2 }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '1px' }}>INFLIGHT GUIDE OGS42</div>
+            <div style={{ fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '1px' }}>ESQ991 INFLIGHT GUIDE</div>
             <div style={{ fontSize: '0.7em', opacity: 0.7 }}>Last Update: 25 Junho 2026</div>
           </div>
         </div>
@@ -1452,6 +1648,17 @@ function App() {
               fuelLogs={fuelLogs}
               engOnTotal={getDiffTime(missionLogs['eng-on'] || '', missionLogs['eng-off'])}
               flightTotal={getDiffTime(missionLogs['atd'] || '', missionLogs['ata'])}
+            />
+          ) : activeSectionId === 'BAROMETRIC_CALC' ? (
+            <BarometricCalculator 
+              gpsAlt={baroGpsAlt}
+              setGpsAlt={setBaroGpsAlt}
+              airPress={baroAirPress}
+              setAirPress={setBaroAirPress}
+              targetQnh={baroTargetQnh}
+              setTargetQnh={setBaroTargetQnh}
+              targetBaroAlt={baroTargetBaroAlt}
+              setTargetBaroAlt={setBaroTargetBaroAlt}
             />
           ) : (
             <div>
